@@ -4,3 +4,7 @@
 kant-roadmap-tracker.html
 .kant-tracker/
 
+
+target/
+dist/
+
