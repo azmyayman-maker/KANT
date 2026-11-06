@@ -1,0 +1,42 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# Top-most EditorConfig file
+root = true
+
+# Universal defaults for all files
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Rust sources
+[*.rs]
+indent_style = space
+indent_size = 4
+
+# Python sources
+[*.py]
+indent_style = space
+indent_size = 4
+
+# Markdown documentation
+[*.md]
+indent_style = space
+indent_size = 2
+trim_trailing_whitespace = false
+
+# YAML, TOML, JSON configuration and data files
+[*.{yml,yaml,toml,json}]
+indent_style = space
+indent_size = 2
+
+# Shell scripts
+[*.{sh,bash,zsh}]
+indent_style = space
+indent_size = 2
+
+# Web frontend assets (HTML, CSS, JS)
+[*.{html,css,js}]
+indent_style = space
+indent_size = 2
