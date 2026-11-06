@@ -125,7 +125,7 @@
     .brand-group {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
     }
 
     .brand-logo-img {
@@ -138,18 +138,28 @@
       flex-shrink: 0;
     }
 
+    .brand-text-col {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .brand-title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
     .brand-title {
       font-size: 16px;
       font-weight: 800;
       letter-spacing: -0.2px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
       color: var(--text-primary);
+      white-space: nowrap;
     }
 
     .brand-badge {
-      font-size: 11px;
+      font-size: 10.5px;
       font-family: var(--font-mono);
       font-weight: 700;
       background: var(--brand-gold-surface);
@@ -158,6 +168,13 @@
       border-radius: 9999px;
       color: var(--brand-gold-dark);
       letter-spacing: 0.3px;
+      white-space: nowrap;
+    }
+
+    .brand-subtitle {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      white-space: nowrap;
     }
 
     .nav-tabs {
@@ -318,17 +335,21 @@
     }
 
     .metric-card-val {
-      font-size: 17px;
+      font-size: 16.5px;
       font-weight: 800;
       color: var(--text-primary);
       letter-spacing: -0.2px;
       line-height: 1.2;
+      direction: ltr;
+      text-align: right;
+      unicode-bidi: isolate;
     }
 
     .metric-card-caption {
       font-size: 11.5px;
       color: var(--text-secondary);
       font-weight: 500;
+      direction: rtl;
     }
 
     .progress-bar-track {
@@ -854,14 +875,12 @@
   <header>
     <div class="brand-group">
       <img src="assets/kant-icon.svg" class="brand-logo-img" alt="Kant Compiler Observatory Logo">
-      <div>
-        <div class="brand-title">
-          مرصد هندسة مترجم Kant
+      <div class="brand-text-col">
+        <div class="brand-title-row">
+          <span class="brand-title">مرصد هندسة مترجم Kant</span>
           <span class="brand-badge">v0.1.0-alpha • 17-Crate Architecture</span>
         </div>
-        <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;">
-          Kant Compiler Engineering Observatory — Real-Time Systems Telemetry &amp; Formal Pipeline Tracking
-        </div>
+        <div class="brand-subtitle">Kant Compiler Engineering Observatory — Real-Time Systems Telemetry</div>
       </div>
     </div>
 
@@ -3188,13 +3207,13 @@
 
     // الإحداثيات الهندسية للعقد من C0 إلى C6 (مسافات واسعة ومريحة >= 190px)
     const NODE_COORDINATES = {
-      C0: { x: 120, y: 380 },
-      C1: { x: 320, y: 380 },
-      C2: { x: 530, y: 380 },
-      C3: { x: 740, y: 380 },
-      C4: { x: 950, y: 380 },
-      C5: { x: 1150, y: 280 },
-      C6: { x: 1300, y: 480 } // المحطة النهائية
+      C0: { x: 100, y: 350 },
+      C1: { x: 300, y: 350 },
+      C2: { x: 500, y: 350 },
+      C3: { x: 700, y: 350 },
+      C4: { x: 900, y: 350 },
+      C5: { x: 1100, y: 260 },
+      C6: { x: 1260, y: 440 }
     };
 
     function setupSvgEvents() {
@@ -3307,6 +3326,16 @@
         svg.appendChild(path56);
       }
 
+      const stageDisplayNames = {
+        "C0": { en: "Bootstrap & Scaffolding", ar: "إقلاع مساحة العمل والثوابت" },
+        "C1": { en: "Aesthetic (Lexer & AST)", ar: "الجمالياء والمعجم والـ AST" },
+        "C2": { en: "Analytic (Types & IR)", ar: "التحليلياء وشيم KANT-IR" },
+        "C3": { en: "Dialectic & Noumena", ar: "الجدلياء ونطاق النومان" },
+        "C4": { en: "Method (VM & JIT)", ar: "مبحث المنهج والمفسر" },
+        "C5": { en: "Foundational Proofs", ar: "براهين الجودة الأربعة" },
+        "C6": { en: "Official Release v0.1", ar: "حزم التوزيع والإطلاق" },
+      };
+
       // Draw Macro-Circle Nodes (72px diameter, pure white and light porcelain)
       state.circles.forEach(circle => {
         const coord = NODE_COORDINATES[circle.id] || { x: 700, y: 600 };
@@ -3380,14 +3409,14 @@
           <text y="-4" text-anchor="middle" fill="${isSelected ? '#936E22' : '#0F172A'}" font-weight="800" font-family="var(--font-mono)" font-size="16">${circle.id}</text>
           <text y="14" text-anchor="middle" fill="${statusBadgeText}" font-weight="700" font-family="var(--font-mono)" font-size="11">${Math.round(pct * 100)}%</text>
 
-          <!-- Text Labels Below Node -->
-          <text y="${radius + 20}" text-anchor="middle" fill="#0F172A" font-weight="700" font-family="var(--font-sans)" font-size="12.5">${circle.short_title || circle.name}</text>
-          <text y="${radius + 36}" text-anchor="middle" fill="#334155" font-weight="500" font-family="var(--font-sans)" font-size="11.5">${circle.arabic_short_title || circle.arabic_title || ''}</text>
+          <!-- Concise & Elegantly Spaced Stage Labels -->
+          <text y="${radius + 19}" text-anchor="middle" fill="#0F172A" font-weight="700" font-family="var(--font-sans)" font-size="11.5">${stageDisplayNames[circle.id] ? stageDisplayNames[circle.id].en : circle.id}</text>
+          <text y="${radius + 33}" text-anchor="middle" fill="#334155" font-weight="500" font-family="var(--font-sans)" font-size="10.5">${stageDisplayNames[circle.id] ? stageDisplayNames[circle.id].ar : ''}</text>
 
           <!-- Status Badge Pill -->
-          <g transform="translate(0, ${radius + 48})">
-            <rect x="-42" y="0" width="84" height="18" rx="4" fill="${statusBadgeBg}" stroke="${statusBadgeBorder}" stroke-width="1" />
-            <text x="0" y="13" text-anchor="middle" fill="${statusBadgeText}" font-weight="700" font-family="var(--font-mono)" font-size="10">${circle.gate_status || 'LOCKED'}</text>
+          <g transform="translate(0, ${radius + 44})">
+            <rect x="-36" y="0" width="72" height="17" rx="4" fill="${statusBadgeBg}" stroke="${statusBadgeBorder}" stroke-width="1" />
+            <text x="0" y="12" text-anchor="middle" fill="${statusBadgeText}" font-weight="700" font-family="var(--font-mono)" font-size="9.5">${circle.gate_status || 'LOCKED'}</text>
           </g>
         `;
 
@@ -3436,35 +3465,35 @@
           <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.spec_pinning ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'spec_pinning')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] Invariant I_1: Canonical Content-Addressing Hash Pinned</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] Invariant I_1: Canonical Content-Addressing Hash Pinned</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">تثبيت الوثائق المرجعية الثمانية (.md) وتأمين تطابق بصمات BLAKE3/SHA-256</div>
             </div>
           </label>
           <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.lexicon_mapping ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'lexicon_mapping')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] Wehbe Epistemic Lexicon Mapped to Constructive MLTT Types</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] Wehbe Epistemic Lexicon Mapped to Constructive MLTT Types</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">مواءمة معجم موسى وهبه الفلسفي مع نظرية الأنماط البنائية (Martin-Löf)</div>
             </div>
           </label>
           <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.clarification_triage ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'clarification_triage')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] ADR Engine: 24 Pragmatic Deferrals Triaged &amp; Pinned</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] ADR Engine: 24 Pragmatic Deferrals Triaged &amp; Pinned</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">فرز وتوثيق 24 قراراً معمارياً وحسم الخيارات الأساسية (P0 Baselines)</div>
             </div>
           </label>
           <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.toolchain_hashes ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'toolchain_hashes')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] Toolchain Manifest: SHA-256 Pinning in kant-toolchain.toml</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] Toolchain Manifest: SHA-256 Pinning in kant-toolchain.toml</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">تثبيت بصمات حزمة الأدوات والتحقق التام من نزاهة المستودع</div>
             </div>
           </label>
           <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.git_lane_hygiene ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'git_lane_hygiene')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] Git Lane Hygiene: 16 Subagent Concurrency Domains Isolated</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] Git Lane Hygiene: 16 Subagent Concurrency Domains Isolated</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">انضباط ونظافة 16 مسار عمل معزول في AGENTS.md دون أي تداخل بالملفات</div>
             </div>
           </label>`;
@@ -3473,35 +3502,35 @@
           <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.differential_proof ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'differential_proof')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] Proof 1: Differential Oracle (Evaluator == Codegen, 100% Match)</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] Proof 1: Differential Oracle (Evaluator == Codegen, 100% Match)</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">البرهان الأول: أوراكل التفاضل بين المفسر ومولد الكود عبر 50 برنامجاً مرجعياً</div>
             </div>
           </label>
           <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.byte_determinism_proof ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'byte_determinism_proof')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] Proof 2: Byte-for-Byte Determinism (0 Jitter Across Compilations)</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] Proof 2: Byte-for-Byte Determinism (0 Jitter Across Compilations)</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">البرهان الثاني: الحتمية الثنائية وتطابق البايتات التام بين عمليتي بناء مستقلتين</div>
             </div>
           </label>
           <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.repair_convergence_proof ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'repair_convergence_proof')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] Proof 3: Auto-Repair Convergence Loop (kantc fix --apply)</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] Proof 3: Auto-Repair Convergence Loop (kantc fix --apply)</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">البرهان الثالث: تقارب الإصلاح التلقائي المستقل عبر 30 برنامجاً به عيوب مدروسة</div>
             </div>
           </label>
           <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.zero_escape_security_proof ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'zero_escape_security_proof')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] Proof 4: Noumena Zero-Escape Containment (100% Rejection)</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] Proof 4: Noumena Zero-Escape Containment (100% Rejection)</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">البرهان الرابع: أمان النومان وانعدام أي هروب أو تزوير للقدرات في الاختبارات الهجومية</div>
             </div>
           </label>
           <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.git_status_clean ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'git_status_clean')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] Clean Workspace State: git status --porcelain Clean</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] Clean Workspace State: git status --porcelain Clean</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">نظافة بيئة الإيداع والتحقق التام من متجهات الفحص دون شوائب</div>
             </div>
           </label>`;
@@ -3510,35 +3539,35 @@
           <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.clean_git_tree ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'clean_git_tree')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] Pre-Release Git Hygiene Gate (git check-ignore)</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] Pre-Release Git Hygiene Gate (git check-ignore)</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">نظافة شجرة Git واستبعاد ملفات التتبع بالكامل من الفحص والإيداع</div>
             </div>
           </label>
           <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.tarballs_generated ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'tarballs_generated')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] Multi-Platform Release Tarballs (x86_64, darwin-arm64, windows)</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] Multi-Platform Release Tarballs (x86_64, darwin-arm64, windows)</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">بناء وتوليد حزم التوزيع للمنصات الثلاث ومطابقة الحزم المجردة</div>
             </div>
           </label>
           <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.checksums_verified ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'checksums_verified')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] SHA256SUMS Cryptographic Distribution Manifest Verified</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] SHA256SUMS Cryptographic Distribution Manifest Verified</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">التحقق المشفر من بيان بصمات التوزيع SHA256SUMS ومطابقتها الآلية</div>
             </div>
           </label>
           <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.installer_smoke_tested ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'installer_smoke_tested')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] Universal Installer Script Smoke-Tested (install.sh)</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] Universal Installer Script Smoke-Tested (install.sh)</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">الاختبار الدخاني لسكربت التثبيت الشامل install.sh والتحقق من المسارات</div>
             </div>
           </label>
           <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.agent_portal_ready ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'agent_portal_ready')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] Agent Discovery Endpoints: /llms.txt (&lt;3,200 tok) &amp; 10 MCP Tools</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] Agent Discovery Endpoints: /llms.txt (&lt;3,200 tok) &amp; 10 MCP Tools</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">جاهزية بوابة الوكلاء الآلية /llms.txt ومنافذ الاستكشاف الموحدة</div>
             </div>
           </label>`;
@@ -3547,35 +3576,35 @@
           <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.cargo_fmt ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'cargo_fmt')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] cargo fmt -p &lt;crate&gt; -- --check (Formatting Compliance)</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] cargo fmt -p &lt;crate&gt; -- --check (Formatting Compliance)</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">فحص التنسيق الصارم لقواعد الشيفرة القياسية في Rust</div>
             </div>
           </label>
           <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.cargo_clippy ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'cargo_clippy')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] cargo clippy -p &lt;crate&gt; -- -D warnings (Zero-Warning Linter)</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] cargo clippy -p &lt;crate&gt; -- -D warnings (Zero-Warning Linter)</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">فحص المدقق الصارم بانعدام أي تحذيرات أو تجاوزات نمطية</div>
             </div>
           </label>
           <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.cargo_test ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'cargo_test')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] cargo test -p &lt;crate&gt; -- --nocapture (100% Tests Pass)</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] cargo test -p &lt;crate&gt; -- --nocapture (100% Tests Pass)</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">حزمة الاختبارات الوحدوية والاندماجية الممررة بالكامل دون إخفاق</div>
             </div>
           </label>
           <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.conformance_tests ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'conformance_tests')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] cargo test -p &lt;crate&gt; conformance -- --exact (Formal Gate Vectors)</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] cargo test -p &lt;crate&gt; conformance -- --exact (Formal Gate Vectors)</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">متجهات مطابقة المعايير الصارمة لثوابت المرحلة وبوابتها الإبستمولوجية</div>
             </div>
           </label>
           <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.git_status_clean ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'git_status_clean')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] git status --porcelain (Pristine Clean Working Tree)</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] git status --porcelain (Pristine Clean Working Tree)</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">نظافة مسار Git وخلوه من أي شوائب أو ملفات غير متتبعة</div>
             </div>
           </label>`;
