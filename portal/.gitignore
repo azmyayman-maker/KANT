@@ -1,7 +1,0 @@
-# Portal Local Runtime Exclusions
-.kant-tracker/
-*.db
-*.db-journal
-*.log
-__pycache__/
-*.pyc
