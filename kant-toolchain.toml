@@ -1,0 +1,27 @@
+# kant-toolchain.toml: Cryptographic Pinning of Reference Specifications
+[toolchain]
+name = "kantc"
+version = "0.1.0"
+magic_header = "#![kant(v0.1)]"
+source_extension = ".kant"
+sidecar_extension = ".kantd"
+lockfile_name = "module.kant.lock"
+spec_extension = ".spec"
+
+[specifications.hashes]
+agents_constitution = "A228074907678F9785260904457C1621B689DD0ED633DB005917F73C9BBF4AE5"
+epistemology_lexicon = "B87A567913AD279EBB6C6CD79C87935CD0A0ADBE64D43847554761DD6B95E426"
+aesthetics_grammar = "9E79694BCDA6AA519038C10E184D3E867177957C8CA6C3E2D6A2F007EF5D5480"
+analytic_categories = "91DD0F70B392226B97F442F8E292A96D442E068BB51CA2230095EDB8AA80EA9E"
+schematism_ir = "F9CC3D507B706559450C1A15F2D63027DF5D24962AEAE860F1BC16B24A163F61"
+dialectic_verification = "E3557A754887114CD0D9F3C9B4DCC9BACBC9BDC70D846DB67C00D8A466DAE245"
+method_evidence = "59D26741630D4088357B98547CDB6D5AC56D448430D2835352019094D1BA892C"
+agent_surface_mcp = "DF731D67ABF72B22F8C875160A47E5FE571CBB7DC00BFD55258C91056F52F7AF"
+decisions_roadmap = "01AA86195760175EDE6F2B866C7BB404D8E9663DA5EBEEED978D48A28481E88F"
+
+[subagents]
+total_count = 16
+waves = 4
+agents_per_wave = 4
+minimum_prompt_lines = 400
+verification_gate = "five_step_iron_law"
