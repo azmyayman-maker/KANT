@@ -1,5 +1,7 @@
 /* ==========================================================================
    Kant Compiler Toolchain - Telemetry Portal Layout Stylesheet
+   Executive Light Design System Architecture
+   Pure White & Light Porcelain Surfaces, High-Contrast Typography
    ========================================================================== */
 
 *, *::before, *::after {
@@ -17,8 +19,8 @@ html, body {
 body {
   font-family: var(--font-sans);
   font-size: var(--font-size-base);
-  color: var(--color-text-primary);
-  background-color: var(--color-bg-deep);
+  color: var(--text-primary);
+  background-color: var(--bg-canvas);
   display: flex;
   flex-direction: column;
   line-height: 1.5;
@@ -27,12 +29,12 @@ body {
 }
 
 /* ==========================================================================
-   Header Shell
+   Header Shell (Clean Executive Bar)
    ========================================================================== */
 .portal-header {
   height: var(--header-height);
-  background-color: var(--color-bg-elevated);
-  border-bottom: 1px solid var(--color-border-subtle);
+  background-color: var(--bg-surface);
+  border-bottom: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -40,6 +42,7 @@ body {
   flex-shrink: 0;
   z-index: 100;
   position: relative;
+  box-shadow: var(--shadow-xs);
 }
 
 .brand-section {
@@ -49,23 +52,21 @@ body {
 }
 
 .brand-logo-wrap {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-md);
-  background: var(--color-bg-deep);
-  border: 1px solid var(--color-border-base);
+  width: 42px;
+  height: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
-  box-shadow: 0 0 14px var(--color-gold-glow);
   flex-shrink: 0;
+  background: transparent;
+  border: none;
 }
 
 .brand-logo-img {
-  width: 32px;
-  height: 32px;
+  width: 42px;
+  height: 42px;
   object-fit: contain;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.08));
 }
 
 .brand-text-wrap {
@@ -82,64 +83,67 @@ body {
 
 .brand-title {
   font-size: var(--font-size-md);
-  font-weight: 700;
-  color: var(--color-text-primary);
-  letter-spacing: -0.3px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.2px;
 }
 
 .brand-badge {
   font-family: var(--font-mono);
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-  color: var(--color-gold-light);
-  background: rgba(184, 145, 63, 0.15);
-  border: 1px solid var(--color-gold-dark);
-  padding: 1px 6px;
-  border-radius: var(--radius-xs);
+  font-size: var(--font-size-2xs);
+  font-weight: 700;
+  color: var(--brand-gold-dark);
+  background: var(--brand-gold-surface);
+  border: 1px solid var(--brand-gold-border);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.3px;
 }
 
 .brand-subtitle {
   font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
+  color: var(--text-muted);
+  font-weight: 500;
 }
 
-/* Navigation Tabs */
+/* Navigation Tabs (Refined Pill Group) */
 .nav-tab-group {
   display: flex;
   align-items: center;
-  gap: var(--space-xs);
-  background: var(--color-bg-deep);
+  gap: 2px;
+  background: var(--bg-muted);
   padding: 3px;
   border-radius: var(--radius-md);
-  border: 1px solid var(--color-border-subtle);
+  border: 1px solid var(--border-subtle);
 }
 
 .nav-tab-btn {
   background: transparent;
   border: none;
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   font-family: var(--font-sans);
   font-size: var(--font-size-sm);
   font-weight: 600;
-  padding: var(--space-xs) var(--space-lg);
+  padding: 6px var(--space-lg);
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all var(--transition-fast);
   display: flex;
   align-items: center;
   gap: var(--space-xs);
+  white-space: nowrap;
 }
 
 .nav-tab-btn:hover {
-  color: var(--color-text-primary);
-  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.6);
 }
 
 .nav-tab-btn.active {
-  background: var(--color-gold-primary);
-  color: #0F141C;
+  background: var(--bg-surface);
+  color: var(--brand-gold-dark);
   font-weight: 700;
-  box-shadow: 0 0 12px var(--color-gold-glow);
+  box-shadow: var(--shadow-xs);
 }
 
 /* Header Utilities */
@@ -154,34 +158,35 @@ body {
   align-items: center;
   gap: var(--space-xs);
   font-family: var(--font-mono);
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-2xs);
+  font-weight: 600;
   padding: 4px 10px;
   border-radius: var(--radius-full);
-  background: var(--color-bg-deep);
-  border: 1px solid var(--color-border-subtle);
-  color: var(--color-text-muted);
+  background: var(--bg-muted);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
 }
 
 .connection-dot {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  background-color: var(--status-pending);
+  background-color: var(--status-locked-text);
   transition: background-color var(--transition-normal);
 }
 
 .connection-pill.connected .connection-dot {
-  background-color: var(--color-success);
-  box-shadow: 0 0 8px var(--color-success);
+  background-color: #059669;
+  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2);
 }
 
 .connection-pill.disconnected .connection-dot {
-  background-color: var(--color-danger);
-  box-shadow: 0 0 8px var(--color-danger);
+  background-color: #E11D48;
+  box-shadow: 0 0 0 2px rgba(225, 29, 72, 0.2);
 }
 
 .connection-pill.reconnecting .connection-dot {
-  background-color: var(--color-warning);
+  background-color: #D97706;
   animation: pulse-warn 1s infinite;
 }
 
@@ -191,9 +196,9 @@ body {
 }
 
 .theme-toggle-btn {
-  background: var(--color-bg-deep);
-  border: 1px solid var(--color-border-subtle);
-  color: var(--color-text-secondary);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-base);
+  color: var(--text-secondary);
   width: 34px;
   height: 34px;
   border-radius: var(--radius-md);
@@ -205,106 +210,98 @@ body {
 }
 
 .theme-toggle-btn:hover {
-  border-color: var(--color-border-active);
-  color: var(--color-gold-light);
+  border-color: var(--brand-gold-primary);
+  color: var(--brand-gold-dark);
+  background: var(--brand-gold-surface);
 }
 
 /* ==========================================================================
-   Metrics Overview Bar
+   Executive Systems Metrics Toolbar (6-Card Grid)
    ========================================================================== */
 .metrics-bar {
-  background: var(--color-bg-base);
-  border-bottom: 1px solid var(--color-border-subtle);
-  padding: var(--space-sm) var(--space-2xl);
+  background: var(--bg-canvas);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 14px var(--space-2xl);
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--space-md);
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.metric-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 12px 14px;
+  box-shadow: var(--shadow-xs);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 6px;
+  transition: all var(--transition-fast);
+}
+
+.metric-card:hover {
+  border-color: var(--border-base);
+  box-shadow: var(--shadow-sm);
+}
+
+.metric-card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-shrink: 0;
-  gap: var(--space-md);
-  overflow-x: auto;
 }
 
-.metrics-left-cluster {
-  display: flex;
-  align-items: center;
-  gap: var(--space-lg);
-}
-
-.metric-pill {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border-subtle);
-  padding: 4px var(--space-md);
-  border-radius: var(--radius-md);
-}
-
-.metric-pill-label {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
+.metric-card-label {
+  font-size: 11px;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  font-weight: 600;
+  color: var(--text-muted);
 }
 
-.metric-pill-val {
+.metric-card-badge {
   font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
+  font-size: 10px;
   font-weight: 700;
-  color: var(--color-text-primary);
+  padding: 1px 6px;
+  border-radius: var(--radius-xs);
+  background: var(--bg-muted);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
 }
 
-.metric-pill-val.gold { color: var(--color-gold-light); }
-.metric-pill-val.cyan { color: var(--color-cyan); }
-.metric-pill-val.emerald { color: var(--color-success-light); }
-.metric-pill-val.rose { color: var(--color-danger); }
-
-.metrics-right-cluster {
-  display: flex;
-  align-items: center;
-  gap: var(--space-lg);
+.metric-card-val {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.3px;
+  line-height: 1.2;
 }
 
-.progress-counter-wrap {
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
+.metric-card-sub {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  font-weight: 500;
 }
 
+/* Progress Bar Component inside Card 1 */
 .progress-bar-container {
-  width: 140px;
-  height: 8px;
-  background: var(--color-bg-deep);
+  width: 100%;
+  height: 5px;
+  background: var(--bg-muted);
   border-radius: var(--radius-full);
   overflow: hidden;
-  border: 1px solid var(--color-border-subtle);
+  margin-top: 4px;
 }
 
 .progress-bar-fill {
   height: 100%;
   width: 0.0%;
-  background: linear-gradient(90deg, var(--color-gold-dark), var(--color-gold-light));
+  background: var(--brand-gold-primary);
+  border-radius: var(--radius-full);
   transition: width var(--transition-slow);
-}
-
-.progress-pct-label {
-  font-family: var(--font-mono);
-  font-size: var(--font-size-base);
-  font-weight: 800;
-  color: var(--color-gold-light);
-  min-width: 48px;
-}
-
-.invariant-chip {
-  font-family: var(--font-mono);
-  font-size: var(--font-size-xs);
-  padding: 3px 8px;
-  border-radius: var(--radius-xs);
-  background: rgba(35, 134, 54, 0.15);
-  color: var(--color-success-light);
-  border: 1px solid rgba(35, 134, 54, 0.4);
-  font-weight: 600;
 }
 
 /* ==========================================================================
@@ -341,13 +338,17 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border-right: 1px solid var(--color-border-subtle);
+  border-right: 1px solid var(--border-subtle);
+  background: var(--bg-canvas);
 }
 
+/* Central Topological DAG Canvas */
 .graph-canvas-container {
-  height: 280px;
-  background: var(--color-bg-deep);
-  border-bottom: 1px solid var(--color-border-subtle);
+  height: 310px;
+  background-color: var(--bg-canvas);
+  background-image: radial-gradient(#CBD5E1 1.2px, transparent 1.2px);
+  background-size: 24px 24px;
+  border-bottom: 1px solid var(--border-subtle);
   position: relative;
   overflow: hidden;
   flex-shrink: 0;
@@ -363,33 +364,41 @@ body {
   cursor: grabbing;
 }
 
+/* Floating Map Controls */
 .graph-toolbar {
   position: absolute;
   bottom: var(--space-md);
-  left: var(--space-md);
+  right: var(--space-md);
   display: flex;
   gap: var(--space-xs);
   z-index: 10;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 3px;
+  box-shadow: var(--shadow-md);
 }
 
 .graph-tool-btn {
-  background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border-base);
-  color: var(--color-text-secondary);
-  padding: 4px 10px;
+  background: var(--bg-surface);
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  padding: 5px 10px;
   border-radius: var(--radius-sm);
   font-size: var(--font-size-xs);
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
+  font-weight: 600;
   cursor: pointer;
   transition: all var(--transition-fast);
 }
 
 .graph-tool-btn:hover {
-  background: var(--color-bg-surface);
-  border-color: var(--color-gold-primary);
-  color: var(--color-gold-light);
+  background: var(--bg-muted);
+  border-color: var(--border-subtle);
+  color: var(--text-primary);
 }
 
+/* Stage Board & Filter Toolbar */
 .stages-cards-wrapper {
   flex: 1;
   overflow-y: auto;
@@ -406,7 +415,7 @@ body {
   flex-wrap: wrap;
   gap: var(--space-md);
   padding-bottom: var(--space-md);
-  border-bottom: 1px solid var(--color-border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .filter-pills-row {
@@ -417,12 +426,12 @@ body {
 }
 
 .filter-btn {
-  background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border-subtle);
-  color: var(--color-text-muted);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-base);
+  color: var(--text-secondary);
   font-family: var(--font-sans);
   font-size: var(--font-size-xs);
-  padding: 5px 12px;
+  padding: 6px 14px;
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -430,56 +439,63 @@ body {
 }
 
 .filter-btn:hover {
-  color: var(--color-text-primary);
-  border-color: var(--color-border-base);
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+  background: var(--bg-muted);
 }
 
 .filter-btn.active {
-  background: rgba(184, 145, 63, 0.2);
-  border-color: var(--color-gold-primary);
-  color: var(--color-gold-light);
+  background: var(--brand-gold-surface);
+  border-color: var(--brand-gold-primary);
+  color: var(--brand-gold-dark);
+  font-weight: 700;
 }
 
 .search-input-wrap {
   position: relative;
-  min-width: 240px;
+  min-width: 260px;
 }
 
 .search-input {
   width: 100%;
-  background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border-subtle);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-base);
   border-radius: var(--radius-md);
-  color: var(--color-text-primary);
+  color: var(--text-primary);
   font-family: var(--font-sans);
   font-size: var(--font-size-sm);
-  padding: 6px 12px;
+  padding: 7px 14px;
   outline: none;
-  transition: border-color var(--transition-fast);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow: var(--shadow-xs);
 }
 
 .search-input:focus {
-  border-color: var(--color-border-focus);
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12);
 }
 
-/* Right Detail Drawer / Split Pane */
+/* Stage Detail Drawer / Split Pane */
 .stage-detail-drawer {
-  width: 440px;
+  width: 460px;
   flex-shrink: 0;
-  background: var(--color-bg-elevated);
+  background: var(--bg-surface);
   display: flex;
   flex-direction: column;
   overflow: hidden;
   transition: width var(--transition-normal);
+  box-shadow: var(--shadow-lg);
+  z-index: 20;
 }
 
 .drawer-header {
   padding: var(--space-lg) var(--space-xl);
-  border-bottom: 1px solid var(--color-border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-md);
+  background: var(--bg-surface);
 }
 
 .drawer-body {
@@ -489,6 +505,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: var(--space-xl);
+  background: var(--bg-surface);
 }
 
 /* View 2: Telemetry Audit View */
@@ -497,17 +514,19 @@ body {
   flex-direction: column;
   width: 100%;
   height: 100%;
-  padding: var(--space-xl);
+  padding: var(--space-2xl);
   overflow: hidden;
   gap: var(--space-lg);
+  background: var(--bg-canvas);
 }
 
 .audit-table-container {
   flex: 1;
   overflow-y: auto;
-  background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
 }
 
 /* View 3: Distribution View */
@@ -516,30 +535,39 @@ body {
   flex-direction: column;
   width: 100%;
   height: 100%;
-  padding: var(--space-xl);
+  padding: var(--space-2xl);
   overflow-y: auto;
   gap: var(--space-xl);
-  max-width: 1000px;
+  max-width: 1040px;
   margin: 0 auto;
 }
 
 /* ==========================================================================
    Responsive Breakpoints
    ========================================================================== */
-@media (max-width: 1100px) {
+@media (max-width: 1300px) {
+  .metrics-bar {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 1024px) {
   .stage-detail-drawer {
-    width: 360px;
+    width: 380px;
   }
 }
 
 @media (max-width: 860px) {
+  .metrics-bar {
+    grid-template-columns: repeat(2, 1fr);
+  }
   .pipeline-view-layout {
     flex-direction: column;
   }
   .stage-detail-drawer {
     width: 100%;
-    height: 380px;
-    border-top: 1px solid var(--color-border-subtle);
+    height: 420px;
+    border-top: 1px solid var(--border-subtle);
     border-right: none;
   }
   .pipeline-main-pane {

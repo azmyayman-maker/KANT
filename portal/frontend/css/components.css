@@ -1,36 +1,40 @@
 /* ==========================================================================
    Kant Compiler Toolchain - Telemetry Portal Components Stylesheet
+   Executive Light Design System Components
+   Pure White & Light Porcelain Surfaces, High-Contrast Typography
    ========================================================================== */
 
 /* ==========================================================================
    Stage Cards (Pipeline Stages C0 to C6)
    ========================================================================== */
 .stage-card {
-  background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border-subtle);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   padding: var(--space-lg);
-  transition: all var(--transition-normal);
+  transition: all var(--transition-fast);
   cursor: pointer;
   position: relative;
   overflow: hidden;
+  box-shadow: var(--shadow-xs);
 }
 
 .stage-card:hover {
-  border-color: var(--color-border-base);
-  box-shadow: var(--shadow-md);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-sm);
   transform: translateY(-1px);
 }
 
 .stage-card.active {
-  border-color: var(--color-gold-primary);
-  background: linear-gradient(180deg, var(--color-bg-elevated) 0%, rgba(184, 145, 63, 0.05) 100%);
-  box-shadow: 0 0 20px var(--color-gold-glow);
+  border: 2px solid var(--brand-gold-primary);
+  background: var(--brand-gold-surface);
+  box-shadow: var(--shadow-md);
 }
 
 .stage-card.locked {
-  opacity: 0.75;
+  opacity: 0.85;
   border-style: dashed;
+  background: var(--bg-canvas);
 }
 
 .stage-card-header {
@@ -52,54 +56,56 @@
   font-weight: 800;
   padding: 3px 8px;
   border-radius: var(--radius-sm);
-  background: var(--color-bg-surface);
-  color: var(--color-gold-light);
-  border: 1px solid var(--color-border-base);
+  background: var(--brand-gold-surface);
+  color: var(--brand-gold-dark);
+  border: 1px solid var(--brand-gold-border);
 }
 
 .stage-card-name {
   font-size: var(--font-size-md);
   font-weight: 700;
-  color: var(--color-text-primary);
+  color: var(--text-primary);
 }
 
 .stage-card-wave {
   font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   margin-top: 2px;
 }
 
 .stage-status-badge {
   font-family: var(--font-mono);
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-2xs);
   font-weight: 700;
-  padding: 2px 8px;
+  padding: 3px 8px;
   border-radius: var(--radius-xs);
   text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 
 .stage-status-badge.pending {
-  background: rgba(139, 148, 158, 0.15);
-  color: var(--status-pending);
-  border: 1px solid rgba(139, 148, 158, 0.3);
+  background: var(--status-pending-bg);
+  color: var(--status-pending-text);
+  border: 1px solid var(--status-pending-border);
 }
 
 .stage-status-badge.active {
-  background: rgba(56, 189, 248, 0.15);
-  color: var(--status-active);
-  border: 1px solid rgba(56, 189, 248, 0.4);
+  background: var(--status-active-bg);
+  color: var(--status-active-text);
+  border: 1px solid var(--status-active-border);
 }
 
 .stage-status-badge.locked {
-  background: rgba(71, 85, 105, 0.2);
-  color: var(--status-locked);
-  border: 1px solid var(--color-border-subtle);
+  background: var(--status-locked-bg);
+  color: var(--status-locked-text);
+  border: 1px solid var(--status-locked-border);
 }
 
-.stage-status-badge.passed {
-  background: rgba(35, 134, 54, 0.15);
-  color: var(--color-success-light);
-  border: 1px solid rgba(35, 134, 54, 0.4);
+.stage-status-badge.passed,
+.stage-status-badge.verified {
+  background: var(--status-verified-bg);
+  color: var(--status-verified-text);
+  border: 1px solid var(--status-verified-border);
 }
 
 /* Stage Progress Summary Bar */
@@ -114,23 +120,25 @@
 .stage-progress-track {
   flex: 1;
   height: 6px;
-  background: var(--color-bg-deep);
+  background: var(--bg-muted);
   border-radius: var(--radius-full);
   overflow: hidden;
-  border: 1px solid var(--color-border-subtle);
+  border: 1px solid var(--border-subtle);
 }
 
 .stage-progress-fill {
   height: 100%;
   width: 0%;
-  background: var(--color-gold-primary);
+  background: var(--brand-gold-primary);
+  border-radius: var(--radius-full);
   transition: width var(--transition-normal);
 }
 
 .stage-progress-num {
   font-family: var(--font-mono);
   font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
+  color: var(--text-muted);
+  font-weight: 600;
 }
 
 /* ==========================================================================
@@ -143,24 +151,25 @@
 .task-group-heading {
   font-size: var(--font-size-sm);
   font-weight: 700;
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
   margin-bottom: var(--space-sm);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid var(--color-border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
   padding-bottom: var(--space-xs);
 }
 
 .task-group-lane {
   font-family: var(--font-mono);
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
+  font-size: var(--font-size-2xs);
+  color: var(--text-muted);
+  font-weight: 600;
 }
 
 .task-item {
-  background: var(--color-bg-surface);
-  border: 1px solid var(--color-border-subtle);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: var(--space-md);
   margin-bottom: var(--space-sm);
@@ -168,16 +177,17 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-xs);
+  box-shadow: var(--shadow-xs);
 }
 
 .task-item:hover {
-  border-color: var(--color-border-base);
-  background: var(--color-bg-elevated);
+  border-color: var(--border-base);
+  box-shadow: var(--shadow-sm);
 }
 
 .task-item.done {
-  border-color: rgba(35, 134, 54, 0.4);
-  background: rgba(35, 134, 54, 0.04);
+  border-color: var(--status-verified-border);
+  background: var(--status-verified-bg);
 }
 
 .task-item-top {
@@ -197,11 +207,11 @@
 .task-checkbox {
   appearance: none;
   -webkit-appearance: none;
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   border-radius: var(--radius-xs);
-  background: var(--color-bg-deep);
-  border: 1px solid var(--color-border-base);
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border-strong);
   cursor: pointer;
   margin-top: 2px;
   position: relative;
@@ -209,16 +219,20 @@
   flex-shrink: 0;
 }
 
+.task-checkbox:hover {
+  border-color: var(--brand-gold-primary);
+}
+
 .task-checkbox:checked {
-  background: var(--color-success);
-  border-color: var(--color-success-light);
+  background: var(--brand-gold-primary);
+  border-color: var(--brand-gold-dark);
 }
 
 .task-checkbox:checked::after {
   content: "";
   position: absolute;
-  left: 5px;
-  top: 2px;
+  left: 4px;
+  top: 1px;
   width: 5px;
   height: 9px;
   border: solid white;
@@ -228,68 +242,70 @@
 
 .task-id-tag {
   font-family: var(--font-mono);
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-2xs);
   font-weight: 700;
-  color: var(--color-cyan);
-  background: rgba(56, 189, 248, 0.1);
-  padding: 1px 5px;
+  color: var(--brand-gold-dark);
+  background: var(--brand-gold-surface);
+  border: 1px solid var(--brand-gold-border);
+  padding: 1px 6px;
   border-radius: var(--radius-xs);
   flex-shrink: 0;
 }
 
 .task-title-text {
   font-size: var(--font-size-sm);
-  color: var(--color-text-primary);
-  font-weight: 500;
-  line-height: 1.4;
+  color: var(--text-primary);
+  font-weight: 600;
+  line-height: 1.45;
 }
 
 .task-status-pill {
   font-family: var(--font-mono);
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-2xs);
   font-weight: 700;
-  padding: 2px 7px;
+  padding: 2px 8px;
   border-radius: var(--radius-xs);
   flex-shrink: 0;
 }
 
 .task-status-pill.todo {
-  background: rgba(100, 116, 139, 0.2);
-  color: var(--status-todo);
-  border: 1px solid rgba(100, 116, 139, 0.3);
+  background: var(--status-locked-bg);
+  color: var(--status-locked-text);
+  border: 1px solid var(--status-locked-border);
 }
 
 .task-status-pill.wip {
-  background: rgba(210, 153, 34, 0.2);
-  color: var(--status-wip);
-  border: 1px solid rgba(210, 153, 34, 0.4);
+  background: var(--status-pending-bg);
+  color: var(--status-pending-text);
+  border: 1px solid var(--status-pending-border);
 }
 
 .task-status-pill.done {
-  background: rgba(35, 134, 54, 0.2);
-  color: var(--color-success-light);
-  border: 1px solid rgba(35, 134, 54, 0.4);
+  background: var(--status-verified-bg);
+  color: var(--status-verified-text);
+  border: 1px solid var(--status-verified-border);
 }
 
 .task-cmd-block {
   font-family: var(--font-mono);
-  font-size: var(--font-size-xs);
-  background: var(--color-bg-deep);
-  border: 1px solid var(--color-border-subtle);
-  padding: 4px 8px;
+  font-size: var(--font-size-2xs);
+  background: var(--bg-muted);
+  border: 1px solid var(--border-base);
+  padding: 6px 10px;
   border-radius: var(--radius-xs);
-  color: var(--color-text-muted);
+  color: var(--text-primary);
   overflow-x: auto;
   white-space: nowrap;
 }
 
 .task-cmd-block code {
-  color: var(--color-gold-light);
+  color: var(--brand-gold-dark);
+  font-weight: 600;
 }
 
 .task-notes {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
+  font-size: var(--font-size-2xs);
+  color: var(--text-muted);
   font-style: italic;
   padding-left: 2px;
 }
@@ -298,10 +314,10 @@
    Gate Checklist Card
    ========================================================================== */
 .gate-card {
-  background: var(--color-bg-surface);
-  border: 1px solid var(--color-border-base);
-  border-radius: var(--radius-md);
-  padding: var(--space-md);
+  background: var(--bg-muted);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md) var(--space-lg);
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
@@ -310,7 +326,7 @@
 .gate-card-title {
   font-size: var(--font-size-sm);
   font-weight: 700;
-  color: var(--color-gold-light);
+  color: var(--brand-gold-dark);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -321,11 +337,13 @@
   align-items: center;
   gap: var(--space-sm);
   font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
+  font-weight: 500;
+  cursor: pointer;
 }
 
 /* ==========================================================================
-   Audit Table
+   Audit Table (Clean Light Architecture)
    ========================================================================== */
 .audit-table {
   width: 100%;
@@ -334,88 +352,96 @@
 }
 
 .audit-table th {
-  background: var(--color-bg-surface);
-  color: var(--color-text-muted);
+  background: var(--bg-muted);
+  color: var(--text-muted);
   text-align: left;
-  padding: 10px 14px;
-  font-weight: 600;
-  border-bottom: 1px solid var(--color-border-subtle);
+  padding: 12px 16px;
+  font-weight: 700;
+  border-bottom: 1px solid var(--border-subtle);
   position: sticky;
   top: 0;
   z-index: 5;
+  letter-spacing: 0.3px;
 }
 
 .audit-table td {
-  padding: 8px 14px;
-  border-bottom: 1px solid var(--color-border-subtle);
-  color: var(--color-text-secondary);
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
   font-family: var(--font-sans);
 }
 
 .audit-table tr:hover td {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--bg-canvas);
 }
 
 .audit-table td.mono {
   font-family: var(--font-mono);
+  font-size: var(--font-size-2xs);
 }
 
 .severity-pill {
   font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 800;
-  padding: 1px 5px;
+  padding: 2px 6px;
   border-radius: var(--radius-xs);
   text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 
 .severity-pill.info {
-  background: rgba(56, 189, 248, 0.15);
-  color: var(--color-cyan);
+  background: var(--status-active-bg);
+  color: var(--status-active-text);
+  border: 1px solid var(--status-active-border);
 }
 
 .severity-pill.warn {
-  background: rgba(210, 153, 34, 0.2);
-  color: var(--color-warning-light);
+  background: var(--status-pending-bg);
+  color: var(--status-pending-text);
+  border: 1px solid var(--status-pending-border);
 }
 
 .severity-pill.error {
-  background: rgba(248, 81, 73, 0.2);
-  color: var(--color-danger);
+  background: var(--status-blocked-bg);
+  color: var(--status-blocked-text);
+  border: 1px solid var(--status-blocked-border);
 }
 
 .severity-pill.audit {
-  background: rgba(184, 145, 63, 0.2);
-  color: var(--color-gold-light);
+  background: var(--brand-gold-surface);
+  color: var(--brand-gold-dark);
+  border: 1px solid var(--brand-gold-border);
 }
 
 /* ==========================================================================
    Distribution & Terminal Boxes
    ========================================================================== */
 .dist-card {
-  background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border-subtle);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   padding: var(--space-xl);
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
+  box-shadow: var(--shadow-xs);
 }
 
 .dist-card-title {
   font-size: var(--font-size-md);
   font-weight: 700;
-  color: var(--color-gold-light);
+  color: var(--text-primary);
 }
 
 .code-box {
-  background: var(--color-bg-deep);
-  border: 1px solid var(--color-border-subtle);
+  background: var(--bg-muted);
+  border: 1px solid var(--border-base);
   border-radius: var(--radius-md);
   padding: var(--space-md);
   font-family: var(--font-mono);
   font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
+  color: var(--text-primary);
   position: relative;
   display: flex;
   align-items: center;
@@ -423,19 +449,21 @@
 }
 
 .copy-btn {
-  background: var(--color-bg-surface);
-  border: 1px solid var(--color-border-base);
-  color: var(--color-text-muted);
-  padding: 4px 10px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-base);
+  color: var(--text-secondary);
+  padding: 5px 12px;
   border-radius: var(--radius-xs);
   font-size: 11px;
+  font-weight: 600;
   cursor: pointer;
   transition: all var(--transition-fast);
 }
 
 .copy-btn:hover {
-  color: var(--color-gold-light);
-  border-color: var(--color-gold-primary);
+  color: var(--brand-gold-dark);
+  border-color: var(--brand-gold-primary);
+  background: var(--brand-gold-surface);
 }
 
 /* ==========================================================================
@@ -444,7 +472,7 @@
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.75);
+  background: var(--bg-overlay);
   display: none;
   align-items: center;
   justify-content: center;
@@ -459,8 +487,8 @@
 .modal-card {
   width: 90%;
   max-width: 550px;
-  background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border-base);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-base);
   border-radius: var(--radius-xl);
   padding: var(--space-2xl);
   display: flex;
@@ -478,15 +506,20 @@
 .modal-title {
   font-size: var(--font-size-lg);
   font-weight: 700;
-  color: var(--color-gold-light);
+  color: var(--text-primary);
 }
 
 .modal-close-btn {
   background: transparent;
   border: none;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-lg);
+  color: var(--text-muted);
+  font-size: var(--font-size-xl);
   cursor: pointer;
+  line-height: 1;
+}
+
+.modal-close-btn:hover {
+  color: var(--text-primary);
 }
 
 .modal-body {
@@ -503,29 +536,31 @@
 
 .form-label {
   font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   font-weight: 600;
 }
 
 .form-control {
-  background: var(--color-bg-deep);
-  border: 1px solid var(--color-border-subtle);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-base);
   border-radius: var(--radius-md);
   padding: 8px 12px;
-  color: var(--color-text-primary);
+  color: var(--text-primary);
   font-family: var(--font-sans);
   font-size: var(--font-size-sm);
   outline: none;
+  box-shadow: var(--shadow-xs);
+  transition: border-color var(--transition-fast);
 }
 
 .form-control:focus {
-  border-color: var(--color-border-focus);
+  border-color: var(--border-focus);
 }
 
 .btn-primary {
-  background: var(--color-gold-primary);
-  border: 1px solid var(--color-gold-light);
-  color: #0F141C;
+  background: var(--brand-gold-primary);
+  border: 1px solid var(--brand-gold-dark);
+  color: #FFFFFF;
   font-weight: 700;
   padding: 8px 16px;
   border-radius: var(--radius-md);
@@ -534,6 +569,5 @@
 }
 
 .btn-primary:hover {
-  background: var(--color-gold-light);
-  box-shadow: 0 0 12px var(--color-gold-glow);
+  background: var(--brand-gold-dark);
 }

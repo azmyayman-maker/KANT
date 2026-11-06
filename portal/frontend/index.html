@@ -12,34 +12,34 @@
 </head>
 <body>
 
-  <!-- Top Page Header -->
+  <!-- Top Executive Page Header -->
   <header class="portal-header">
     <div class="brand-section">
       <div class="brand-logo-wrap">
-        <img class="brand-logo-img" src="assets/kant-icon.svg" alt="Kant Language Official Silhouette Logo">
+        <img class="brand-logo-img" src="assets/kant-icon.svg" alt="Kant Language Official Vector Logo">
       </div>
       <div class="brand-text-wrap">
         <div class="brand-title-row">
           <span class="brand-title">KANT OBSERVATORY</span>
-          <span class="brand-badge">v0.1.0-alpha</span>
+          <span class="brand-badge">v0.1.0-alpha • 17-Crate Architecture</span>
         </div>
         <span class="brand-subtitle">Topological Roadmap &amp; Epistemological Gate Inspector</span>
       </div>
     </div>
 
-    <!-- View Navigation Tabs -->
+    <!-- Center Navigation Tabs -->
     <nav class="nav-tab-group" aria-label="Portal Navigation">
       <button class="nav-tab-btn active" data-tab="tab-pipeline">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-        Topological Pipeline
+        Pipeline Stages (مسار المراحل)
       </button>
       <button class="nav-tab-btn" data-tab="tab-audit">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-        Telemetry Audit
+        Live Telemetry (سجل التيليميتري)
       </button>
       <button class="nav-tab-btn" data-tab="tab-dist">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/><polyline points="16 16 12 12 8 16"/></svg>
-        Distribution v0.1
+        Distribution v0.1 (حزم التوزيع)
       </button>
     </nav>
 
@@ -47,52 +47,83 @@
     <div class="header-actions">
       <div class="connection-pill" id="connection-pill" title="Live Server-Sent Events (SSE) telemetry connection status">
         <span class="connection-dot"></span>
-        <span id="connection-pill-text">CONNECTING</span>
+        <span id="connection-pill-text">CONNECTED</span>
       </div>
 
-      <button class="theme-toggle-btn" id="theme-toggle-btn" title="Toggle light/dark theme" aria-label="Toggle theme">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-      </button>
+      <button class="graph-tool-btn" id="btn-export-state" title="Export roadmap JSON snapshot">Export JSON</button>
+      <label class="graph-tool-btn" style="cursor: pointer;" title="Import roadmap JSON file">
+        Import JSON
+        <input type="file" id="import-file-input" accept=".json" style="display: none;">
+      </label>
     </div>
   </header>
 
-  <!-- Metrics Overview Bar -->
-  <section class="metrics-bar" aria-label="Toolchain Metrics Overview">
-    <div class="metrics-left-cluster">
-      <div class="metric-pill">
-        <span class="metric-pill-label">Total Tasks</span>
-        <span class="metric-pill-val gold" id="stat-total-tasks">75</span>
+  <!-- Executive Systems Metrics Toolbar (6-Card Grid) -->
+  <section class="metrics-bar" aria-label="Executive Systems Metrics Toolbar">
+    <!-- Card 1: Pipeline Progress -->
+    <div class="metric-card">
+      <div class="metric-card-header">
+        <span class="metric-card-label">Pipeline Progress (نسبة الإنجاز)</span>
+        <span class="metric-card-badge">Zero-State</span>
       </div>
-      <div class="metric-pill">
-        <span class="metric-pill-label">Completed</span>
-        <span class="metric-pill-val emerald" id="stat-completed-tasks">0</span>
+      <div class="metric-card-val" id="stat-progress-pct">0.0%</div>
+      <div class="progress-bar-container" title="Overall Roadmap Progress">
+        <div class="progress-bar-fill" id="progress-bar-fill"></div>
       </div>
-      <div class="metric-pill">
-        <span class="metric-pill-label">Blocked</span>
-        <span class="metric-pill-val rose" id="stat-blocked-tasks">0</span>
+      <div class="metric-card-sub">
+        <span id="stat-completed-tasks">0</span> / <span id="stat-total-tasks">75</span> Verified Tasks (0 Blocked)
+        <span id="stat-blocked-tasks" style="display: none;">0</span>
       </div>
-      <div class="metric-pill">
-        <span class="metric-pill-label">System Health</span>
-        <span class="metric-pill-val cyan">100%</span>
-      </div>
-      <span class="invariant-chip">Strict Invariant: 0.0% Zero-State</span>
     </div>
 
-    <div class="metrics-right-cluster">
-      <div class="progress-counter-wrap">
-        <div class="progress-bar-container" title="Overall Roadmap Progress">
-          <div class="progress-bar-fill" id="progress-bar-fill"></div>
-        </div>
-        <span class="progress-pct-label" id="stat-progress-pct">0.0%</span>
+    <!-- Card 2: Active Stage -->
+    <div class="metric-card">
+      <div class="metric-card-header">
+        <span class="metric-card-label">Active Stage (المرحلة النشطة)</span>
+        <span class="metric-card-badge" style="color: var(--brand-gold-dark); background: var(--brand-gold-surface); border-color: var(--brand-gold-border);">C0</span>
       </div>
+      <div class="metric-card-val" style="color: var(--brand-gold-dark);">Stage C0: Bootstrap</div>
+      <div class="metric-card-sub">إقلاع مساحة العمل والثوابت الإبستمولوجية</div>
+    </div>
 
-      <div style="display: flex; gap: var(--space-xs);">
-        <button class="graph-tool-btn" id="btn-export-state" title="Export roadmap JSON snapshot">Export JSON</button>
-        <label class="graph-tool-btn" style="cursor: pointer;" title="Import roadmap JSON file">
-          Import JSON
-          <input type="file" id="import-file-input" accept=".json" style="display: none;">
-        </label>
+    <!-- Card 3: Verification Gate -->
+    <div class="metric-card">
+      <div class="metric-card-header">
+        <span class="metric-card-label">Gate Status (بوابة التحقق)</span>
+        <span class="metric-card-badge" style="color: var(--status-pending-text); background: var(--status-pending-bg); border-color: var(--status-pending-border);">PENDING</span>
       </div>
+      <div class="metric-card-val" style="color: var(--status-pending-text);">Pre-Implementation</div>
+      <div class="metric-card-sub">Strict Invariant: 0.0% Zero-State Baseline</div>
+    </div>
+
+    <!-- Card 4: Memory Model Guarantee -->
+    <div class="metric-card">
+      <div class="metric-card-header">
+        <span class="metric-card-label">Memory Model (نموذج الذاكرة)</span>
+        <span class="metric-card-badge" style="color: var(--status-verified-text); background: var(--status-verified-bg); border-color: var(--status-verified-border);">I₃ Pin</span>
+      </div>
+      <div class="metric-card-val" style="color: var(--status-verified-text);">Perceus Zero-GC</div>
+      <div class="metric-card-sub">إعادة استخدام الذاكرة Drop-Guided Reuse</div>
+    </div>
+
+    <!-- Card 5: Effect Boundary -->
+    <div class="metric-card">
+      <div class="metric-card-header">
+        <span class="metric-card-label">Effect Boundary (حدود التأثيرات)</span>
+        <span class="metric-card-badge" style="color: var(--status-active-text); background: var(--status-active-bg); border-color: var(--status-active-border);">I₂ Pin</span>
+      </div>
+      <div class="metric-card-val" style="color: var(--status-active-text);">Exact Matching</div>
+      <div class="metric-card-sub">حتمية الاستنتاج: E_decl = E_inf</div>
+    </div>
+
+    <!-- Card 6: Capability Security -->
+    <div class="metric-card">
+      <div class="metric-card-header">
+        <span class="metric-card-label">Capability Security (صندوق الأمان)</span>
+        <span class="metric-card-badge" style="color: var(--status-blocked-text); background: var(--status-blocked-bg); border-color: var(--status-blocked-border);">I₄ Pin</span>
+      </div>
+      <div class="metric-card-val" style="color: var(--status-blocked-text);">Noumena Sandbox</div>
+      <div class="metric-card-sub">Linear Token Isolation &amp; Affine Types</div>
     </div>
   </section>
 
@@ -119,11 +150,11 @@
           <div class="stages-cards-wrapper">
             <div class="pipeline-filter-toolbar">
               <div class="filter-pills-row">
-                <button class="filter-btn active" data-filter-status="ALL">All Tasks</button>
+                <button class="filter-btn active" data-filter-status="ALL">All Tasks (75)</button>
                 <button class="filter-btn" data-filter-status="INCOMPLETE">Incomplete Only</button>
                 <button class="filter-btn" data-filter-status="DONE">Verified Done</button>
                 
-                <select class="form-control" id="agent-filter-select" style="font-size: 11px; padding: 4px 8px;" title="Filter by assigned sub-agent lane">
+                <select class="form-control" id="agent-filter-select" style="font-size: 11.5px; padding: 5px 10px;" title="Filter by assigned sub-agent lane">
                   <option value="ALL">All Sub-Agents (SA-01 to SA-16)</option>
                   <option value="SA-01">SA-01 (Architecture &amp; Spec)</option>
                   <option value="SA-02">SA-02 (Lexicon &amp; Grammar)</option>
@@ -169,8 +200,8 @@
       <div class="audit-view-layout">
         <div style="display: flex; align-items: center; justify-content: space-between;">
           <div>
-            <h2 style="font-size: var(--font-size-lg); font-weight: 700; color: var(--color-gold-light);">Telemetry Audit Log &amp; Event Stream</h2>
-            <p style="font-size: var(--font-size-xs); color: var(--color-text-muted);">Real-time verifiable telemetry stream backed by SQLite database</p>
+            <h2 style="font-size: var(--font-size-lg); font-weight: 700; color: var(--text-primary);">Telemetry Audit Log &amp; Event Stream</h2>
+            <p style="font-size: var(--font-size-xs); color: var(--text-muted);">Real-time verifiable telemetry stream backed by SQLite database (WAL Mode)</p>
           </div>
           <button class="btn-primary" id="btn-export-audit-logs" style="font-size: 12px; padding: 6px 14px;">Export Logs (JSON)</button>
         </div>
@@ -198,13 +229,13 @@
     <div class="app-view" id="view-dist">
       <div class="distribution-view-layout">
         <div>
-          <h2 style="font-size: var(--font-size-xl); font-weight: 700; color: var(--color-gold-light); margin-bottom: 4px;">Kant Compiler (kantc) Release Distribution</h2>
-          <p style="font-size: var(--font-size-sm); color: var(--color-text-muted);">Canonical distribution manifests, cryptographic signatures, and reproducible deployment scripts.</p>
+          <h2 style="font-size: var(--font-size-xl); font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">Kant Compiler (kantc) Release Distribution</h2>
+          <p style="font-size: var(--font-size-sm); color: var(--text-muted);">Canonical distribution manifests, cryptographic signatures, and reproducible deployment scripts.</p>
         </div>
 
         <div class="dist-card">
           <div class="dist-card-title">Distribution Build Script (scripts/distribute_v0_1.sh)</div>
-          <p style="font-size: var(--font-size-xs); color: var(--color-text-secondary);">
+          <p style="font-size: var(--font-size-xs); color: var(--text-secondary);">
             Automated packaging script that validates the 17-crate workspace, generates multi-target release archives (Linux x86_64/aarch64, macOS Apple Silicon/Intel, Windows x86_64), and computes SHA-256 integrity checksums.
           </p>
           <div class="code-box">
@@ -215,7 +246,7 @@
 
         <div class="dist-card">
           <div class="dist-card-title">One-Line Toolchain Installation</div>
-          <p style="font-size: var(--font-size-xs); color: var(--color-text-secondary);">
+          <p style="font-size: var(--font-size-xs); color: var(--text-secondary);">
             Installs the standalone <code>kantc</code> compiler driver, language standard library, and man pages into <code>~/.kant/bin</code> with verification of detached GPG/cosign signatures.
           </p>
           <div class="code-box">
@@ -226,7 +257,7 @@
 
         <div class="dist-card">
           <div class="dist-card-title">Zero-State Scaffolding Status</div>
-          <p style="font-size: var(--font-size-xs); color: var(--color-text-secondary);">
+          <p style="font-size: var(--font-size-xs); color: var(--text-secondary);">
             All crates in <code>crates/*/src/lib.rs</code> remain in their pure zero-state configuration with <code>#![kant(v0.1)]</code>. The 0.0% completion baseline is strictly enforced until core compiler sub-agents complete their respective verification gates.
           </p>
         </div>

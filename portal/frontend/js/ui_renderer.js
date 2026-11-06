@@ -1,6 +1,6 @@
 /**
  * Kant Compiler Toolchain - UI Rendering Engine
- * Modular DOM rendering for stage cards, task checklists, and metrics.
+ * Executive Light Design System: Modular DOM rendering for stage cards, task checklists, and metrics.
  */
 
 export class UIRenderer {
@@ -129,7 +129,7 @@ export class UIRenderer {
     const circle = this.store.getActiveCircle();
     if (!circle) {
       drawer.innerHTML = `
-        <div class="drawer-body" style="justify-content: center; align-items: center; color: var(--color-text-muted);">
+        <div class="drawer-body" style="justify-content: center; align-items: center; color: var(--text-muted);">
           Select a pipeline stage to inspect task checklist and formal gates.
         </div>
       `;
@@ -142,45 +142,52 @@ export class UIRenderer {
     let html = `
       <div class="drawer-header">
         <div>
-          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
             <span class="stage-id-badge">${circle.id}</span>
             <span class="stage-status-badge ${gateStatus.toLowerCase()}">${gateStatus}</span>
           </div>
-          <h2 style="font-size: var(--font-size-md); font-weight: 700; color: var(--color-text-primary); margin-bottom: 2px;">
+          <h2 style="font-size: var(--font-size-md); font-weight: 700; color: var(--text-primary); margin-bottom: 2px;">
             ${escapeHtml(circle.name)}
           </h2>
-          <div style="font-size: var(--font-size-xs); color: var(--color-gold-light);">
+          <div style="font-size: var(--font-size-xs); color: var(--brand-gold-dark); font-weight: 600;">
             ${escapeHtml(circle.wave || '')}
+          </div>
+          <div style="font-size: 11px; font-family: var(--font-mono); color: var(--text-muted); margin-top: 3px;">
+            Invariant: ${escapeHtml(circle.gate_invariant || 'Content-Addressing Invariant')}
           </div>
         </div>
       </div>
 
       <div class="drawer-body">
-        <!-- Verification Gate Checklist Card -->
+        <!-- Verification Gate Checklist Card (The Iron Law) -->
         <div class="gate-card">
           <div class="gate-card-title">
-            <span>Epistemological Gate Checklist</span>
-            <select class="form-control" id="gate-status-select" style="font-size: 11px; padding: 2px 6px;">
+            <span>Epistemological Gate Checklist (بوابة الفحص)</span>
+            <select class="form-control" id="gate-status-select" style="font-size: 11px; padding: 2px 8px; height: 26px;">
               <option value="PENDING" ${gateStatus === 'PENDING' ? 'selected' : ''}>PENDING</option>
               <option value="ACTIVE" ${gateStatus === 'ACTIVE' ? 'selected' : ''}>ACTIVE</option>
               <option value="PASSED" ${gateStatus === 'PASSED' ? 'selected' : ''}>PASSED</option>
               <option value="LOCKED" ${gateStatus === 'LOCKED' ? 'selected' : ''}>LOCKED</option>
             </select>
           </div>
-          <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 4px;">
+          <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px;">
     `;
 
     for (const [key, val] of Object.entries(checklist)) {
       const label = key.replace(/_/g, ' ').toUpperCase();
       html += `
         <label class="gate-checklist-item">
-          <input type="checkbox" class="task-checkbox" data-gate-key="${key}" ${val ? 'checked' : ''} style="width: 14px; height: 14px;">
+          <input type="checkbox" class="task-checkbox" data-gate-key="${key}" ${val ? 'checked' : ''} style="width: 15px; height: 15px;">
           <span>${label}</span>
         </label>
       `;
     }
 
     html += `
+          </div>
+          <div style="margin-top: 8px; background: var(--bg-surface); border: 1px solid var(--border-base); border-radius: 6px; padding: 6px 10px; font-family: var(--font-mono); font-size: 11px; color: var(--text-primary); display: flex; align-items: center; justify-content: space-between;">
+            <code>$ cargo test -p ${circle.id === 'C0' ? 'kant-core' : 'kant-' + circle.id.toLowerCase()}</code>
+            <button class="copy-btn" id="btn-copy-gate-cmd" style="padding: 2px 6px; font-size: 10.5px;">Copy</button>
           </div>
         </div>
 
@@ -261,7 +268,7 @@ export class UIRenderer {
 
     if (totalRenderedTasks === 0) {
       html += `
-        <div style="text-align: center; color: var(--color-text-muted); padding: var(--space-xl);">
+        <div style="text-align: center; color: var(--text-muted); padding: var(--space-xl);">
           No tasks match the active filters.
         </div>
       `;
@@ -308,6 +315,19 @@ export class UIRenderer {
         this.renderMetrics();
         this.renderStageCards();
         this.renderDrawer();
+      });
+    }
+
+    // Gate command copy button
+    const copyBtn = drawer.querySelector('#btn-copy-gate-cmd');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', () => {
+        const cmdCode = drawer.querySelector('.gate-card code');
+        if (cmdCode) {
+          navigator.clipboard.writeText(cmdCode.textContent.replace(/^\$\s*/, ''));
+          copyBtn.textContent = 'Copied!';
+          setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1500);
+        }
       });
     }
   }
