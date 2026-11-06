@@ -92,4 +92,4 @@ refactor(workspace): establish pristine zero-state scaffolding and portal isolat
 Upon every successful commit, the local git hook executes `scripts/kant_tracker_sync.py`, recording:
 - Commit SHA and author identity.
 - Modified files and line insertions/deletions.
-- Milestone advancement markers visible on the telemetry portal (`http://localhost:8080`).
+- Milestone advancement markers visible on the local roadmap observatory.

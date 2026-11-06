@@ -34,7 +34,7 @@ docs/
 │   ├── README.md                  # RFC process lifecycle, states & approval gates
 │   └── 0000-template.md           # Standard RFC specification template
 ├── guides/                        # Engineering and contributor onboarding guides
-│   ├── DEVELOPER_ONBOARDING.md   # Prerequisites, building, running tests & portal
+│   ├── DEVELOPER_ONBOARDING.md   # Prerequisites, building, running tests & observatory
 │   ├── MULTI_AGENT_PROTOCOL.md   # Multi-agent coordination constitution & 16 lanes
 │   └── VERIFICATION_HARNESS.md   # The Five-Step Verification Harness execution manual
 ├── spec/                          # Epistemic foundation & language specifications

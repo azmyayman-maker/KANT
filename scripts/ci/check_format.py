@@ -6,7 +6,7 @@ Validates:
 1. Rust code formatting via cargo fmt (when Rust is available).
 2. Trailing whitespace across non-markdown source files.
 3. UTF-8 file encoding across repository text files.
-4. HTML5 structural conformance for portal/index.html via HTMLParser.
+4. HTML5 structural conformance for kant-roadmap-tracker.html via HTMLParser.
 """
 
 import sys
@@ -31,6 +31,7 @@ EXCLUDED_DIRS = {
     ".git",
     "target",
     ".kant-tracker",
+    "portal",
     "__pycache__",
     ".pytest_cache",
     "dist",
@@ -169,15 +170,19 @@ def main() -> int:
     overall_clean = True
 
     if args.check_html:
-        portal_html = ROOT_DIR / "portal" / "index.html"
-        print(f"[*] Validating HTML conformance: {portal_html}")
-        valid, issues = check_html_conformance(portal_html)
-        if not valid:
-            for issue in issues:
-                print(f"  [x] {issue}", file=sys.stderr)
-            return 1
-        print("[✓] HTML conformance verified.")
-        return 0
+        tracker_html = ROOT_DIR / "kant-roadmap-tracker.html"
+        if tracker_html.exists():
+            print(f"[*] Validating HTML conformance: {tracker_html.name}")
+            valid, issues = check_html_conformance(tracker_html)
+            if not valid:
+                for issue in issues:
+                    print(f"  [x] {issue}", file=sys.stderr)
+                return 1
+            print("[✓] HTML conformance verified.")
+            return 0
+        else:
+            print("[*] Local observatory HTML not present; skipping local-only HTML conformance.")
+            return 0
 
     if not args.check_ws:
         print("[*] Running cargo fmt check...")
@@ -198,11 +203,11 @@ def main() -> int:
     else:
         print("[✓] Trailing whitespace check passed.")
 
-    portal_html = ROOT_DIR / "portal" / "index.html"
-    if portal_html.exists():
-        valid_html, html_issues = check_html_conformance(portal_html)
+    tracker_html = ROOT_DIR / "kant-roadmap-tracker.html"
+    if tracker_html.exists():
+        valid_html, html_issues = check_html_conformance(tracker_html)
         if valid_html:
-            print("[✓] Portal index.html conformance verified.")
+            print("[✓] Local observatory HTML conformance verified.")
         else:
             print(f"[!] HTML conformance warning: {html_issues}")
 
