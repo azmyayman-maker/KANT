@@ -1,14 +1,19 @@
-pub mod span;
-pub mod symbol;
-pub mod hash;
+//! # kant-core
+//!
+//! Epistemic Role: SA-01: Epistemic & Workspace Bootstrapper
+//! Description: Core primitives, spans, interned symbols, and SHA-256 identity hashing
+//!
+//! Status: Zero-state scaffold. Implementation begins tomorrow.
+//! Disambiguation Header: `#![kant(v0.1)]`
 
-pub use span::ByteSpan;
-pub use symbol::SymbolId;
-pub use hash::DefHash;
+#![doc = "Kant programming language - kant-core pristine scaffold"]
+#![allow(unused)]
 
-/// The standard language identity constants
+/// Language specification version.
+pub const KANT_VERSION: &str = "0.1.0";
+
+/// Disambiguation header tag required in all .kant source units.
 pub const KANT_MAGIC_HEADER: &str = "#![kant(v0.1)]";
-pub const KANT_SOURCE_EXT: &str = ".kant";
-pub const KANT_SIDECAR_EXT: &str = ".kantd";
-pub const KANT_LOCKFILE_NAME: &str = "module.kant.lock";
-pub const KANT_SPEC_EXT: &str = ".spec";
+
+/// Crate metadata description.
+pub const CRATE_ROLE: &str = "SA-01: Epistemic & Workspace Bootstrapper";

@@ -1,0 +1,11 @@
+[package]
+name = "kant-eval"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Kant programming language: Deterministic KANT-IR tree-walk evaluator and Merkle evidence recorder"
+
+[dependencies]

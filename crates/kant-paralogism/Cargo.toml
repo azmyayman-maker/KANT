@@ -1,0 +1,11 @@
+[package]
+name = "kant-paralogism"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Kant programming language: Paralogism linear ownership checker and secret taint isolation guard"
+
+[dependencies]

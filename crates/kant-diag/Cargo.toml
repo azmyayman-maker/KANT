@@ -1,0 +1,11 @@
+[package]
+name = "kant-diag"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Kant programming language: Structured JSON diagnostics engine with RFC 6902 auto-fix patches"
+
+[dependencies]

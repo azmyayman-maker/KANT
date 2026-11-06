@@ -3,15 +3,9 @@ name = "kant-canonical"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
-description = "Spatial Canonicalizer, De Bruijn Indexer, and Sidecar Lockfile Engine for Kant (.kant)"
+authors.workspace = true
 license.workspace = true
+repository.workspace = true
+description = "Kant programming language: Spatial canonicalization, De Bruijn indexing, and .kantd sidecar engine"
 
 [dependencies]
-kant-core = { path = "../kant-core" }
-kant-parser = { path = "../kant-parser" }
-serde = { workspace = true }
-serde_json = { workspace = true }
-sha2 = { workspace = true }
-
-[dev-dependencies]
-pretty_assertions = { workspace = true }

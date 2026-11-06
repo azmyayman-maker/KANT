@@ -1,8 +1,14 @@
-# Local-Only Kant Roadmap Tracker & Telemetry (Strict Isolation)
-kant-roadmap-tracker.html
+# Local-Only Kant Telemetry & Runtime Exclusions (Strict Isolation)
 .kant-tracker/
+*.db
+*.db-journal
+*.log
+kant-roadmap-tracker.html
 
+# Rust Target & Builds
 target/
 dist/
+
+# Python Cache
 __pycache__/
 *.pyc

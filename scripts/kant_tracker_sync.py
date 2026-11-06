@@ -34,12 +34,12 @@ DB_FILE = TRACKER_DIR / "kant_telemetry.db"
 DEFAULT_ROADMAP = {
     "version": "0.1.0",
     "last_updated": "2026-11-06T14:30:00Z",
-    "current_circle_focus": "C1",
+    "current_circle_focus": "C0",
     "global_stats": {
-        "total_tasks": 54,
-        "completed_tasks": 12,
+        "total_tasks": 75,
+        "completed_tasks": 0,
         "blocked_tasks": 0,
-        "progress_percent": 22.2
+        "progress_percent": 0.0
     },
     "circles": [
         {
@@ -47,24 +47,17 @@ DEFAULT_ROADMAP = {
             "name": "Epistemological Pinning & Clarification Gate",
             "short_title": "Epistemic Foundation",
             "wave": "Pre-Wave Foundation",
-            "gate_status": "VERIFIED_PASSED",
-            "iteration": 1,
+            "gate_status": "PENDING",
+            "iteration": 0,
             "dependencies": [],
             "gate_checklist": {
-                "spec_pinning": True,
-                "lexicon_mapping": True,
-                "clarification_triage": True,
-                "toolchain_hashes": True,
-                "git_lane_hygiene": True
+                "spec_pinning": False,
+                "lexicon_mapping": False,
+                "clarification_triage": False,
+                "toolchain_hashes": False,
+                "git_lane_hygiene": False
             },
-            "iterations": [
-                {
-                    "number": 1,
-                    "timestamp": "2026-11-06T14:17:00Z",
-                    "status": "VERIFIED_PASSED",
-                    "summary": "Pinned 8 reference .md documents and toolchain SHA-256 hashes. Triaged 32 questions with pragmatic deferrals."
-                }
-            ],
+            "iterations": [],
             "main_headings": [
                 {
                     "id": "C0.H1",

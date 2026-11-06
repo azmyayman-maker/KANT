@@ -1,0 +1,11 @@
+[package]
+name = "kant-spec"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Kant programming language: Amthoul contract specification extractor and dependency graph generator"
+
+[dependencies]

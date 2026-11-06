@@ -5,6 +5,19 @@ members = [
     "crates/kant-lexer",
     "crates/kant-parser",
     "crates/kant-canonical",
+    "crates/kant-types",
+    "crates/kant-effects",
+    "crates/kant-ir",
+    "crates/kant-perceus",
+    "crates/kant-paralogism",
+    "crates/kant-antinomy",
+    "crates/kant-noumena",
+    "crates/kant-spec",
+    "crates/kant-eval",
+    "crates/kant-codegen",
+    "crates/kant-diag",
+    "crates/kant-cli",
+    "crates/kant-mcp",
 ]
 
 [workspace.package]
@@ -13,7 +26,7 @@ edition = "2021"
 rust-version = "1.80"
 authors = ["The Kant Project Architects"]
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/kant-lang/kant"
+repository = "https://github.com/azmyayman-maker/KANT.git"
 
 [workspace.dependencies]
 serde = { version = "1.0", features = ["derive"] }
