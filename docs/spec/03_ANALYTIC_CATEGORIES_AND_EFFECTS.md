@@ -1,114 +1,113 @@
-# 03_ANALYTIC_CATEGORIES_AND_EFFECTS.md: Transcendental Analytic, 12 Categories & Exact Effects
+# 03_ANALYTIC_CATEGORIES_AND_EFFECTS.md: Transcendental Analytic: Constructive 12-Categorical Type System & Algebraic Effect Quarantine
 
-The **Transcendental Analytic** is Kant's "Logic of Truth." It deduces the pure concepts of the understanding (*Afahim*) from the logical table of judgments into four fundamental triads (Quantity, Quality, Relation, Modality), establishing the rules that allow sensibility to yield objective knowledge.
-
-In `kantc`, the Analytic governs the **12-Categories Type System**, **Exact Effect Matching**, and **Quarantined Dynamism**.
+The **Transcendental Analytic** formalizes the logic of constructive judgment in `kantc`. It organizes the type system across the twelve categorical judgment forms of Martin-Löf type theory, enforces the Sigil Law of Exact Algebraic Effect Matching ($E_{\text{decl}} = E_{\text{inf}}$), and guarantees sound call-graph bounds via Quarantined Dynamism.
 
 ---
 
-## 1. The 12 Categories of the Understanding in Type Theory
+## 1. The 12 Categorical Judgment Forms in Type Theory
 
-Each Kantian category corresponds to an exact structural concept in the `kant-types` type system:
+In constructive type theory, computational expressions are verified via judgments of the form $\Gamma \vdash e : \tau$, where typing context $\Gamma$ binds variables to types, $e$ is an expression term, and $\tau$ is a type. Types in Kant are structured into four triads:
 
 ```
-                              THE 12 CATEGORIES
+                           THE 12 CATEGORICAL JUDGMENTS
                      ┌────────────────────────────────┐
                      │          1. QUANTITY           │
-                     │  • Unity (Primitives)          │
-                     │  • Plurality (Collections)     │
-                     │  • Totality (Exhaustive Sums)  │
+                     │  • Unity (Primitive Scalars)   │
+                     │  • Plurality (Linear Slices)   │
+                     │  • Totality (Exhaustive ADTs)  │
                      └────────────────┬───────────────┘
                                       │
      ┌────────────────────────────────┼────────────────────────────────┐
      │                                │                                │
 ┌────┴───────────────────────────┐    │    ┌───────────────────────────┴────┐
 │          2. QUALITY            │    │    │          3. RELATION           │
-│  • Reality (Inhabited Types)   │    │    │  • Substance (Struct Values)   │
-│  • Negation (Never / !)        │    │    │  • Causality (Effectful Arrows)│
-│  • Limitation (Refinements)    │    │    │  • Community (Stream Channels) │
+│  • Reality (Inhabited Proofs)  │    │    │  • Substance (Product Records) │
+│  • Negation (Bottom / Never !) │    │    │  • Causality (Effectful Arrows)│
+│  • Limitation (Taint / Secrets)│    │    │  • Community (Stream Channels) │
 └────────────────────────────────┘    │    └────────────────────────────────┘
                                       │
                      ┌────────────────┴───────────────┐
                      │          4. MODALITY           │
                      │  • Possibility (Option/Result) │
-                     │  • Actuality (Live Cap Handles)│
-                     │  • Necessity (Proved Consts)   │
+                     │  • Actuality (Live Cap Tokens) │
+                     │  • Necessity (Verified Consts) │
                      └────────────────────────────────┘
 ```
 
-### 1.1. Triad of Quantity (مقولات الكم)
-1. **Unity (الوحدة):** Indivisible atomic values.
-   * Represented by `Unit`, `Bool`, `Int64`, `Float64`, `String`.
-2. **Plurality (الكثرة):** Ordered or aggregated repetitions of items.
-   * Represented by `Slice<T>`, `Vec<T>`, and fixed arrays `[T; N]`.
-3. **Totality (الجملة):** The complete universe of forms bounded as a whole.
-   * Represented by **Exhaustive Sum Types (ADTs)** where every case is known, and **Bounded Refinement Types** (`Int64 where value >= 0 && value < 1024`).
+### 1.1. Triad of Quantity
+1. **Unity (`unity`):** Indivisible atomic scalar primitives.
+   $$\Gamma \vdash c : \text{Int64}, \quad \Gamma \vdash b : \text{Bool}, \quad \Gamma \vdash f : \text{Float64}, \quad \Gamma \vdash () : \text{Unit}$$
+2. **Plurality (`plurality`):** Homogeneous linear sequences and contiguous memory slices.
+   $$\frac{\Gamma \vdash e_i : \tau \quad (0 \le i < N)}{\Gamma \vdash [e_0, \dots, e_{N-1}] : [ \tau ; N ]}, \quad \Gamma \vdash \text{slice} : \text{Slice}\langle \tau \rangle$$
+3. **Totality (`totality`):** Exhaustive finite sum types and bounded refinement intervals.
+   $$\tau = \sum_{k=1}^{M} C_k(\tau_k) \quad \text{where all variants are statically enumerated and matchable.}$$
 
-### 1.2. Triad of Quality (مقولات الكيف)
-1. **Reality (الواقع):** Affirmative, inhabited types containing valid constructive proofs.
-   * Any inhabited type `T` where values can be soundly constructed.
-2. **Negation (النفي):** The uninstantiable bottom type.
-   * Represented by `Never` (`!`). A function returning `!` never returns normally (aborts or diverges).
-3. **Limitation (الحصر):** Attenuation and restriction of a domain.
-   * Represented by `Refined<T, P>` and **Attenuated Capabilities** (e.g., restricting a `FsCapability` to a read-only subdirectory `cap.attenuate_subpath("/tmp")`).
+### 1.2. Triad of Quality
+1. **Reality (`reality`):** Inhabited types containing constructive proof witnesses.
+   $$\Gamma \vdash e : \tau \quad \text{witnesses that type } \tau \text{ is non-empty.}$$
+2. **Negation (`negation`):** The uninhabited bottom type $\bot$ (`!`).
+   $$\frac{\Gamma \vdash e : !}{\Gamma \vdash \text{abort}(e) : \tau} \quad (\text{Principle of Explosion / Ex Falso Quodlibet})$$
+3. **Limitation (`limitation`):** Information-flow taint wrappers and domain attenuations.
+   $$\Gamma \vdash s : \text{Secret}\langle \tau \rangle \implies \text{Prohibits secret-dependent branches and index expressions.}$$
 
-### 1.3. Triad of Relation (مقولات الإضافة)
-1. **Substance and Inherence (الجوهر والعَرَض):** The persistent entity and its dependent attributes.
-   * Represented by immutable value structs (`afhoum Point { x: Int64, y: Int64 }`). Value identity is structural.
-2. **Causality and Dependence (العلية والمعلولية):** Action and deterministic transition.
-   * Represented by function arrow signatures with explicit effect sets:
-     $$f : A \xrightarrow{!E} B$$
-3. **Community and Reciprocity (المفاعلة والتفاعل المتبادل):** Mutual simultaneous interaction.
-   * Represented by **Typed Stream Channels** (`!Stream<T>`) supporting category-theoretic morphisms: `copy`, `discard`, `merge`, and `barrier`.
+### 1.3. Triad of Relation
+1. **Substance (`substance`):** Persistent product records (`afhoum`) with structural equality.
+   $$\tau = \prod_{i=1}^{K} f_i : \tau_i, \quad \text{with deterministic alphabetical field layout.}$$
+2. **Causality (`causality`):** Directed function arrows annotated with exact algebraic effects:
+   $$\Gamma \vdash f : \tau_1 \xrightarrow{!E} \tau_2$$
+3. **Community (`community`):** Synchronous typed stream channels (`!Stream<T>`) governing bidirectional message transmission under strict conservation laws.
 
-### 1.4. Triad of Modality (مقولات الجهة)
-1. **Possibility / Impossibility (الإمكان والامتناع):** Logical consistency without guaranteed physical presence.
-   * Represented by `Option<T>` (`Some(T) | None`) and `Result<T, E>`.
-2. **Actuality / Non-existence (التحقق واللاتحقق):** Physical existence in the current execution session.
-   * Represented by **Linear Capability Tokens** (`cap &Cap`). A capability handle cannot be forged or duplicated; its runtime presence certifies empirical authorization.
-3. **Necessity / Contingency (الضرورة والاتفاق):** Universal invariance under all possible executions.
-   * Represented by compile-time evaluated constants (`const N: Int64`), statically verified theorems, and immutable invariants verified by Z3 SMT solving.
+### 1.4. Triad of Modality
+1. **Possibility (`possible`):** Monadic failure envelopes for partial computable functions:
+   $$\text{Option}\langle \tau \rangle \cong \tau + \text{Unit}, \quad \text{Result}\langle \tau, \epsilon \rangle \cong \tau + \epsilon$$
+2. **Actuality (`actual`):** Unforgeable, linear hardware capability tokens certifying runtime authorization:
+   $$\Gamma, c : \text{Cap}\langle \kappa \rangle \vdash \text{invoke}(c, \text{args}) : \tau \quad (\text{affine consumption: } c \text{ is moved}).$$
+3. **Necessity (`necessary`):** Statically proven compile-time constants, invariant propositions, and SMT theorems verified prior to code emission:
+   $$\Gamma \vdash \text{const } C : \tau = v, \quad \text{satisfying } \models_{\text{Z3}} \text{Invariant}(C).$$
 
 ---
 
-## 2. Exact Effect Matching (The Sigil Law)
+## 2. Exact Algebraic Effect Matching (The Sigil Law)
 
-Traditional languages treat effect systems via subtyping (effect subsumption), allowing pure functions to be silently coerced into effectful contexts or ignoring unused effect declarations. In `kantc`, we enforce **Exact Effect Matching**:
+Conventional languages treat side effects implicitly or through effect subtyping (subsumption), which permits pure functions to be silently coerced into effectful contexts and allows dead effects to accumulate undetected. Kant enforces **Exact Algebraic Effect Matching**:
 
-$$\text{Function } f \text{ is valid} \iff E_{\text{decl}}(f) = E_{\text{inf}}(f)$$
+$$\text{A function declaration } f \text{ is well-typed} \iff E_{\text{decl}}(f) = E_{\text{inf}}(f)$$
 
-### Two Invariant Violations:
+### 2.1. Invariant Violations and Machine Diagnostics
 1. **Undeclared Effect Escape (`KANT-E301`):**
    * Condition: $E_{\text{inf}}(f) \setminus E_{\text{decl}}(f) \neq \emptyset$.
-   * Action: The compiler halts. Emits a structured diagnostic with `FixSafety: SAFE` and an RFC 6902 JSON Patch adding the missing effect.
+   * Semantic: An operation within $f$'s body invokes an effect not present in its declared signature.
+   * Diagnostic: Halts compilation; generates RFC 6902 JSON patch with `FixSafety: SAFE` inserting the missing effect.
 2. **Unused Declared Effect Drift (`KANT-E302`):**
    * Condition: $E_{\text{decl}}(f) \setminus E_{\text{inf}}(f) \neq \emptyset$.
-   * Action: The compiler halts. Emits a structured diagnostic with `FixSafety: SAFE` and an RFC 6902 JSON Patch removing the dead effect annotation.
+   * Semantic: A declared effect is never triggered by $f$ or any of its transitive callees.
+   * Diagnostic: Halts compilation; generates RFC 6902 JSON patch with `FixSafety: SAFE` stripping the superfluous effect.
 
-### The Primitive Effect Lattice
+### 2.2. The Core Primitive Effect Lattice
+
 ```
                     [All Noumena Effects]
-               /       |        |        \
-        [fs.write] [net.http] [ai.infer] [clock.now]
-               \       |        |        /
-              [fs.read]      [console.write]
-                     \        /
-                    [console.read]
-                          |
-                       [pure]
+                /       |        |        \
+         [fs.write] [net.http] [ai.infer] [clock.now]
+                \       |        |        /
+               [fs.read]      [console.write]
+                      \        /
+                     [console.read]
+                           |
+                        [pure]
 ```
 
 ---
 
 ## 3. Quarantined Dynamism (Guarantees G1–G4)
 
-Unconstrained higher-order functions or raw function pointers create invisible edges in the call graph, preventing agents from knowing the true blast radius of edits. Following the formalization in *rigid*, Kant enforces **Quarantined Dynamism**:
+Unconstrained dynamic dispatch and raw function pointers destroy the static call graph, introducing unprovable side effects and breaking automated refactoring blast-radius analysis. Kant enforces **Quarantined Dynamism**:
 
-* **Guarantee G1 (Sound Blast Radius):** Modifying definition $D$ requires re-analyzing only the transitive callers recorded in `EffectCallGraph.reverse_callers`.
-* **Guarantee G2 (Complete Static Edges):** Every potential execution flow is statically represented.
-* **Guarantee G3 (Bounded Dynamic Dispatch):** Higher-order function invocation is permitted ONLY via:
-  1. `effects of(param)` where the parameter's effect is inherited directly.
-  2. `dyn { target_1, ..., target_n }(callee, args)` where the callee's runtime value is formally proven to belong to the closed set $\{ \text{target}_1, \dots, \text{target}_n \}$.
-  3. Static closed dispatch tables (`table Dispatcher { "opA" => fnA, "opB" => fnB }`).
-* **Guarantee G4 (Determinism):** Dynamic calls inherit the exact union of all declared targets' effects:
+* **Guarantee G1 (Sound Blast Radius):** Modifying a definition $D$ requires re-analyzing strictly the transitive callers registered in `EffectCallGraph.reverse_callers`.
+* **Guarantee G2 (Complete Static Edges):** Every edge in the execution call graph is statically enumerated at compile time.
+* **Guarantee G3 (Bounded Dynamic Dispatch):** Higher-order function dispatch is permitted exclusively through:
+  1. Parameterized effect inheritance: `effects of(param)`.
+  2. Bounded dynamic calls: `dyn { target_1, ..., target_n }(callee, args)`, where the compiler proves $callee \in \{ target_1, \dots, target_n \}$.
+  3. Closed compile-time dispatch tables: `table Dispatcher { "opA" => fnA, "opB" => fnB }`.
+* **Guarantee G4 (Exact Union Soundness):** The inferred effect set of a `dyn` invocation is the exact union of all declared targets:
   $$E_{\text{inf}}(\text{dyn } \{t_1, \dots, t_n\}) = \bigcup_{i=1}^{n} E_{\text{decl}}(t_i)$$

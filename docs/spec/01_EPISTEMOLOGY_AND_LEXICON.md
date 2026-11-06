@@ -1,114 +1,98 @@
-# 01_EPISTEMOLOGY_AND_LEXICON.md: The Moussa Wehbe Kantian Lexicon & Type Theory Mapping
+# 01_EPISTEMOLOGY_AND_LEXICON.md: Constructive Epistemology, Categorical Judgment Forms & Moussa Wehbe's Bijective Lexicon
 
-This document establishes the official philosophical and type-theoretic foundations of the **Kant** programming language (`.kant`). It establishes the formal bridge between the epistemological architecture of Immanuel Kant's *Critique of Pure Reason* (*Kritik der reinen Vernunft*), through the seminal Arabic translation and critical apparatus of Lebanese philosopher **Moussa Wehbe** (Centre for National Development, Beirut, 1988/1990), and modern constructive type theory, algebraic effect systems, and compiler design.
-
----
-
-## 1. Moussa Wehbe's Epistemological Lexicon
-
-Moussa Wehbe demonstrated that Kant's critical project is primarily founded on logic rather than merely physics or mathematics, asserting that the *Critique* is an autonomous, self-grounded philosophical discourse. Below are the core terms coined by Wehbe and their structural realization in `kantc`:
-
-### 1.1. Al-Mujāwaz (المُجاوِز) — The Transcendental
-* **Kant's Term:** *Transzendental* / *Le Transcendantal*.
-* **Wehbe's Philological Insight:** Wehbe decisively rejected the common Arabized loanword "الترنسندنتال" as well as the ambiguous translation "المتعالي" (which conflates the condition of possibility with *Le Transcendant* / المفارق). Drawing from classical Arabic grammar, where a transitive verb is termed *Fi'l Mujāwaz* (فعل مجاوز) because its action crosses over from the subject to an object, Wehbe defined the transcendental subject as an active epistemological structure that crosses over to raw sense data to shape and organize it.
-* **Compiler Embodiment (`kantc`):** The compile-time verification pipeline itself acts as the *Transcendental Subject*. It does not passively accept arbitrary token streams from an AI agent; rather, it imposes a priori conditions of possibility (syntactic canonicalization, category-based typing, exact effect matching, and termination proofs) before executing any empirical (runtime) interaction.
-* **Source Token:** `@transcendental` / `mujauz`.
-
-### 1.2. Al-Afhūm (الأفهوم، ج: أفاهيم) — The Pure Concept of Understanding
-* **Kant's Term:** *Reiner Begriff des Verstandes* / *Concept pur de l'entendement*.
-* **Wehbe's Philological Insight:** Formed on the Arabic morphological pattern *Af'ūl* (أفعول, such as أسلوب or أنموذج), indicating an active, dynamic deed of thought rather than a static essence or passive thing. It designates an act of understanding that posits rules.
-* **Compiler Embodiment:** Formal structural type definitions, algebraic data types (ADTs), interfaces, and refinement predicates.
-* **Source Token:** `afhoum` (alias for `type` / `struct` / `enum`).
-
-### 1.3. Al-Hads wal-Hassāsiyya (الحدس والحساسية) — Sensibility and Intuition
-* **Kant's Term:** *Sinnlichkeit und Anschauung*.
-* **Wehbe's Philological Insight:** The receptive faculty through which objects are given to us immediately. Space and Time are not empirical concepts drawn from experience, but the two pure forms of sensible intuition.
-* **Compiler Embodiment:** The front-end ingestion layer. The Lexer, Pratt/LL(1) parser, and Canonical AST normalization represent the sensible reception of source tokens, structuring raw code into spatial and temporal forms.
-* **Source Token:** `intuition` / `hads`.
-
-### 1.4. Pure Space and Time (المكان والزمان القبليان)
-* **A Priori Space (المكان القبلي):** In Kant, space is the form of all outer intuitions (coexistence). In `kantc`, space is represented by **Content-Addressed Code**. Every definition's identity is not its transient file path or line number, but the 32-byte SHA-256 digest of its canonical abstract syntax tree (`DefHash`).
-* **A Priori Time (الزمان القبلي):** In Kant, time is the form of inner sense (succession). Following the categorical logic model of Achourioti & van Lambalgen, time is formalized as a directed index category. In `kantc`, time is embodied in the **Static Single Assignment (SSA) KANT-IR** coupled with the **Perceus memory engine**, ensuring deterministic lifetime tracking, instant reuse, and cycle-free drop sequences.
-* **Source Tokens:** `space_hash`, `time_ssa`.
-
-### 1.5. Phenomena vs. Noumena (الظاهرات والنومان)
-* **Phenomena (الظاهرات / الفينمانات):** Sensible appearances structured by space, time, and the categories. In `kantc`, these are fully verified, in-memory, memory-safe data structures residing within the program's bounded heap/stack.
-* **Noumena / Ding an sich (النومان / الشيء في ذاته):** The intelligible realm lying beyond the boundaries of sensible intuition. It cannot be directly known or arbitrarily manipulated by understanding. In `kantc`, the Noumenon represents the **Untrusted External World**: file systems, network sockets, OS system calls, clock timers, random seeds, and external large language models (LLMs). The runtime operates under `trust none`: code cannot breach the Noumenon without holding a linear, unforgeable capability token governed by an explicit handler.
-* **Source Tokens:** `phenomenon` / `dhahira`, `noumenon` / `external`.
-
-### 1.6. Synthetic A Priori Judgments (الأحكام التأليفية قبلياً)
-* **Kant's Term:** *Synthetische Urteile a priori*.
-* **Wehbe's Philological Insight:** Judgments that expand our knowledge (synthetic, unlike analytic tautologies) yet are universal and necessary (a priori, unlike empirical post-facto observations).
-* **Compiler Embodiment:** Compile-time function contracts (`requires`, `ensures`, `decreases`, `effects`) verified statically via Z3 SMT solving and algebraic refinement before any code is permitted to execute.
-* **Source Token:** `synthetic` / `judgment`.
-
-### 1.7. Al-Shaym (الشَّيْم) — The Schematism of Pure Concepts
-* **Kant's Term:** *Der Schematismus der reinen Verstandesbegriffe*.
-* **Wehbe's Philological Insight:** Wehbe translated *Schema* as *Al-Shaym* (الشيم), inspired by the classical Arabic idiom "شيم البرق" (anticipating and tracing the flash of lightning), conveying the dynamic temporal mediation between an abstract category and concrete appearances.
-* **Compiler Embodiment:** The **KANT-IR lowering pass**, which bridges abstract type declarations with low-level SSA execution, Perceus in-place buffer reuse tokens (`@r`), and algebraic effect continuations.
-* **Source Token:** `shaym` / `schema`.
-
-### 1.8. Dialectical Illusions: Paralogisms and Antinomies (الأغاليط والنقائض)
-* **Paralogisms (الأغاليط المجاوزة):** Fallacies of identity and substantiality. In `kantc`, paralogisms are aliasing errors, capability duplication, and secret taint leaks (e.g., using a secret key in a branch condition). Guarded by `kant-paralogism`.
-* **Antinomies (النقائض المجاوزة):** Structural contradictions when reason oversteps experience (e.g., infinite regression vs. first cause). In `kantc`, antinomies correspond to infinite non-terminating loops, deadlocks, and race conditions. Guarded by `kant-antinomy` (mandatory `decreases` clauses).
-* **Source Tokens:** `paralogism` (Error prefix `KANT-E4xx`), `antinomy` (Error prefix `KANT-E5xx`).
-
-### 1.9. Transcendental Doctrine of Method (مبحث المنهج المجاوز)
-* **Kant's Division:**
-  1. *Discipline of Pure Reason (انضباط العقل المحض):* Negative determination preventing error. Implemented via **XGrammar** constrained decoding masks that restrict AI agent token sampling to valid AST syntax.
-  2. *Canon of Pure Reason (قانون العقل المحض):* Positive synthetic principles. Implemented via **Exact Effect Matching**.
-  3. *Architectonic of Pure Reason (معمارية العقل المحض):* Systematic unity of the sciences. Implemented via dependency graphs (`kantc graph`) and **Merkle Evidence Bundles** for deterministic auditability.
+This specification establishes the formal type-theoretic foundations of the **Kant** programming language (`.kant`). It defines the constructive translation of the epistemological architecture of Immanuel Kant's *Critique of Pure Reason* (*Kritik der reinen Vernunft*) into modern constructive type theory, algebraic effect systems, and compiler design. The Arabic terminology formulated by Lebanese philosopher and translator **Moussa Wehbe** (Centre for National Development, Beirut, 1988/1990) is formalized as a bijective dual-surface AST projection ontology.
 
 ---
 
-## 2. Formal Mapping: Kant to Constructive Type Theory
+## 1. Constructive Epistemology in Modern Programming Language Theory
 
-Following Per Martin-Löf's *Analytic and Synthetic Judgments in Type Theory*:
+Kant replaces speculative metaphysics with constructive mathematical logic. Programs are not treated as arbitrary state mutation or unverified string generation; they are constructive proofs operating under rigorous operational invariants:
+
+### 1.1. Judgments and Proof Objects
+In constructive type theory (Martin-Löf 1984), a judgment is an assertion of knowledge backed by evidence:
+* **Analytic Judgments:** Reducible to definitional equality by computation ($\Gamma \vdash a \equiv b : A$). Verified entirely via normalization and beta-eta conversion at compile-time.
+* **Synthetic *A Priori* Judgments:** Constructive propositions verified statically prior to execution ($\Gamma \vdash p : \text{Id}_A(a, b)$ or $\Gamma \vdash e : \tau \ \& \ \text{Contracts}(e)$). In `kantc`, function contracts (`requires`, `ensures`, `decreases`) and exact effect typing are synthetic *a priori* judgments proven via syntactic interval analysis and automated SMT solving (Z3).
+* **Synthetic *A Posteriori* Judgments:** Empirical observations obtained via interaction with the external execution environment (*Noumena*). In `kantc`, empirical interactions are mediated strictly via linear, non-forgeable capability tokens threaded explicitly through the call graph.
+
+### 1.2. Accessible State vs. Quarantined Environment
+* **Accessible Typed State (*Phenomena* / الظاهرات):** Memory-safe, statically verified data structures bounded in stack and heap frames, governed deterministically by Perceus reference counting with cycle-free invariants.
+* **Quarantined External Environment (*Noumena* / النومان):** The unconditioned external execution environment (file descriptors, network interfaces, operating system kernels, physical clocks, unvetted language model endpoints). Execution enforces default `trust none`: no ambient authority exists, and external interaction requires explicit capability tokens and sandboxed governor runtimes.
+
+---
+
+## 2. Moussa Wehbe's Bijective Dual-Surface Lexicon
+
+Moussa Wehbe established that Kant's critical terminology constitutes an autonomous logical apparatus rather than empirical physics. In `kantc`, Wehbe's Arabic lexicon is defined as a formal 1:1 bijective mapping table onto compiler tokens, IR structures, and type-theoretic judgments:
+
+| Arabic Term | ASCII Canonical Identifier | Category | PLT Type-Theoretic Semantics | Operational Invariant |
+| :--- | :--- | :--- | :--- | :--- |
+| **المُجاوِز** (*Al-Mujāwaz*) | `@transcendental` / `mujauz` | Epistemic Structure | Compile-time verification pipeline imposing a priori well-typedness conditions. | All terms must pass static validation prior to code generation. |
+| **الأفهوم** (*Al-Afhūm*) | `afhoum` | Type Constructor | Structural record types, algebraic data types (ADTs), and product spaces. | Immutable structural value equality; field layout sorted alphabetically. |
+| **الحدس والحساسية** (*Al-Hads*) | `intuition` / `hads` | Reception Layer | Lexical token stream and syntactic CST-to-AST normalization pass. | Eliminates non-semantic formatting; deterministic token ingestion. |
+| **المكان القبلي** (*A Priori Space*) | `space_hash` | Identity Indexing | Content-addressed 32-byte cryptographic SHA-256 digest (`DefHash`). | $\text{DefHash} = \text{SHA-256}(\text{CanonicalAST})$; invariant under alpha-renaming. |
+| **الزمان القبلي** (*A Priori Time*) | `time_ssa` | Directed Execution | Static Single Assignment (SSA) basic blocks and directed index categories. | Each SSA value is defined exactly once; lifetimes strictly ordered. |
+| **الظاهرات** (*Phenomena*) | `phenomenon` / `dhahira` | Memory Space | Inhabited, verified typed values in heap and stack memory. | Memory managed deterministically via Perceus; zero leaks; cycle-free. |
+| **النومان** (*Noumena*) | `noumenon` / `external` | Security Sandbox | Quarantined external environment, operating system calls, and I/O. | Ambient authority prohibited; execution requires linear capability handles. |
+| **الحكم التأليفي** (*Synthetic Judgment*) | `synthetic` / `judgment` | Formal Contract | Statically proven function contracts (`requires`, `ensures`, `decreases`). | Certified by Tier 1 SMT / interval analysis or Tier 3 runtime assert. |
+| **الشَّيْم** (*Al-Shaym*) | `shaym` / `schema` | Intermediate Lowering | 30-op SSA KANT-IR lowering pass bridging abstract types to machine ops. | Preserves effect sets; transforms dropped values into in-place reuse tokens. |
+| **الأغلوطة** (*Paralogism*) | `paralogism` | Static Security | Aliasing errors, capability duplication, and secret taint branch leaks. | Linear capability move-only rules; secret-dependent branches rejected (`KANT-E4xx`). |
+| **النقيضة** (*Antinomy*) | `antinomy` | Termination Engine | Non-terminating recursive calls, ungrounded loops, and deadlocks. | Recursive calls require well-founded `decreases` metric (`KANT-E5xx`). |
+| **مبحث المنهج** (*Doctrine of Method*) | `method` | Backend Verification | Differential verification between reference interpreter and Cranelift JIT/AOT. | Dual-backend trace equivalence; cryptographic Merkle audit bundles. |
+| **الأمثول** (*Amthoul*) | `amthoul` / `spec` | Specification View | Contract interface declaration extracting effect signatures and bounds. | Bijective synchronization between `.kant` source and `.spec` contracts. |
+| **الحاكم / القاضي** (*Governor*) | `governor` | Capability Runtime | Algebraic effect handler and sandboxed capability execution supervisor. | Dispatches effect operations or suspends execution for approval gates. |
+
+---
+
+## 3. Formal Mapping: Epistemology to Martin-Löf Type Theory
+
+Following Per Martin-Löf's *Analytic and Synthetic Judgments in Type Theory* (1994):
 
 $$\begin{array}{rcl}
-\text{Kantian Epistemology} & \longleftrightarrow & \text{Constructive Type Theory} \\
+\text{Epistemological Construct} & \longleftrightarrow & \text{Constructive Type Theory} \\
 \hline
 \text{Pure Concept (الأفهوم)} & \longleftrightarrow & \text{Type } A \\
-\text{Object given in Intuition (الموضوع في الحدس)} & \longleftrightarrow & \text{Canonical Program / Term } a \\
-\text{Judgment of Experience (الحكم)} & \longleftrightarrow & \text{Typing Judgment } a : A \\
-\text{Analytic Judgment (الحكم التحليلي)} & \longleftrightarrow & \text{Definitional Equality } a \equiv b : A \\
-\text{Synthetic A Priori Judgment (الحكم التأليفي القبلي)} & \longleftrightarrow & \text{Propositional Equality / Proof Object } p : \text{Id}_A(a, b) \\
-\text{Categories of Quantity (مقولات الكم)} & \longleftrightarrow & \text{Primitive, Finite, and Sum Types} \\
-\text{Categories of Quality (مقولات الكيف)} & \longleftrightarrow & \text{Inhabitation, Bottom/Empty Type } \bot, \text{ Refinements} \\
-\text{Categories of Relation (مقولات الإضافة)} & \longleftrightarrow & \text{Function Spaces } A \to B ! E, \text{ Linear Stream Morphisms} \\
-\text{Categories of Modality (مقولات الجهة)} & \longleftrightarrow & \text{Option/Result, Capability Tokens, Const Invariants}
+\text{Synthesized Term (الموضوع في الحدس)} & \longleftrightarrow & \text{Canonical Program / Proof Witness } a \\
+\text{Categorical Judgment (الحكم)} & \longleftrightarrow & \text{Typing Judgment } a : A \\
+\text{Analytic Truth (الحكم التحليلي)} & \longleftrightarrow & \text{Definitional Equality } a \equiv b : A \\
+\text{Synthetic A Priori Proposition (الحكم التأليفي القبلي)} & \longleftrightarrow & \text{Propositional Identity Proof } p : \text{Id}_A(a, b) \\
+\text{Quantity: Unity, Plurality, Totality (مقولات الكم)} & \longleftrightarrow & \text{Base Types, Slices, Sum Types } \sum_{i} T_i \\
+\text{Quality: Reality, Negation, Limitation (مقولات الكيف)} & \longleftrightarrow & \text{Inhabitation, Bottom Type } \bot, \text{ Refinement Subtypes} \\
+\text{Relation: Substance, Causality, Community (مقولات الإضافة)} & \longleftrightarrow & \text{Product Types } \prod_{i} T_i, \text{ Arrow Types } A \xrightarrow{!E} B, \text{ Stream Morphisms} \\
+\text{Modality: Possibility, Actuality, Necessity (مقولات الجهة)} & \longleftrightarrow & \text{Option/Result Monads, Linear Capabilities, Const Invariants}
 \end{array}$$
 
 ---
 
-## 3. Dual Syntax Representation & Closed Vocabulary
+## 4. Dual Syntax Architecture & Closed Token Set
 
-To guarantee 100% interoperability with modern LLM tokenizers while honoring the Arabic philosophical heritage:
+The language establishes an algebraic isomorphism between ASCII canonical representation and localized sidecar projections:
 
-1. **Primary Compilation Syntax (`.kant`):** Uses standardized ASCII Latin keywords matching Wehbe's transliterated concepts (`afhoum`, `shaym`, `noumenon`) to prevent multi-token fragmentation during model inference.
-2. **Sidecar Visual Projection (`.kantd`):** A JSON/YAML sidecar mapping byte spans to full Arabic philosophical terms for human philosophers and bilingual developers.
+1. **Canonical ASCII Source (`.kant`):** Dense Latin ASCII keywords matching Wehbe's transliterated schema (`afhoum`, `shaym`, `noumenon`). Designed for minimal tokenization overhead, optimal LLM context packing, and unambiguous Lexer tokenization.
+2. **Sidecar Visual Projection (`.kantd`):** A JSON-formatted sidecar file containing byte-span mappings to Arabic terms (*المُجاوِز، الأفهوم، الشَّيْم، النومان، الأمثول*) and source formatting without altering canonical definition hashes.
 
-### The 48 Closed Vocabulary Tokens
+### The 48 Closed Lexical Tokens
+
+The grammar operates over a closed alphabet of 48 lexical tokens:
 
 ```
-// Toplevel Keywords
+// Top-Level Declarations
 afhoum          shaym           noumenon        synthetic       decision
 intent          requires        ensures         decreases       effects
 
-// Effect & Governance Keywords
+// Effect & Governance Subsystem
 pure            handle          with            governor        approval_gate
 dyn             table           of              perform         resume
 
-// Control & Expression Keywords
+// Control Flow & Expression Binding
 let             mut             if              else            match
 return          const           proof           type            cap
 
-// Modality & Type Keywords
+// Categorical Judgment Descriptors
 unity           plurality       totality        reality         negation
 limitation      substance       causality       community       possible
 actual          necessary       never           secret
 
-// Symbols & Punctuation
+// Delimiters, Operators & Sigils
 :               ::              ->              !               ?hole
 {               }               (               )               [               ]
 ,               ;               .               =               @
