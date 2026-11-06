@@ -1,4 +1,7 @@
-# Local-Only Kant Telemetry & Runtime Exclusions (Strict Isolation)
+# Local-Only Observatory & Telemetry Portal (Strict Isolation - Never on GitHub)
+kant-roadmap-tracker.html
+*.html
+portal/
 .kant-tracker/
 *.db
 *.db-journal
@@ -8,6 +11,8 @@
 target/
 dist/
 
-# Python Cache
+# Python Cache & Bytecode
 __pycache__/
 *.pyc
+*.pyo
+.pytest_cache/

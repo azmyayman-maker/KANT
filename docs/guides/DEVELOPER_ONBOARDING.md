@@ -7,7 +7,7 @@ Before developing or compiling the Kant compiler toolchain (`kantc`), verify tha
 | Tool / Runtime | Minimum Version | Recommended Purpose |
 | :--- | :--- | :--- |
 | **Rust / Cargo** | `1.80.0` or higher | Core compiler compilation, edition 2021 |
-| **Python** | `3.10` or higher | Telemetry portal server (`portal/server.py`), watcher scripts |
+| **Python** | `3.10` or higher | Workspace verification and testbench tooling |
 | **Git** | `2.40.0` or higher | Multi-agent branch management and conventional commit tracking |
 | **Z3 Theorem Prover** (Optional) | `4.12.0` or higher | Tier 1 Antinomy contract verification (`kant-antinomy`) |
 
@@ -126,20 +126,19 @@ cargo clippy --workspace --all-targets -- -D warnings
 
 ---
 
-## 7. Launching the Telemetry Portal
+## 7. Launching the Local Roadmap Observatory
 
-Kant includes an interactive web telemetry portal located in `portal/`. It provides real-time monitoring of compilation passes, agent worktree progress, commit metrics, and Merkle execution evidence.
+Kant includes an interactive, single-file engineering & verification observatory: `kant-roadmap-tracker.html`. It provides real-time visual monitoring of compilation passes, agent worktree progress, commit metrics, and pipeline flowcharts without external network dependencies, server runtimes, or workspace pollution.
 
-To launch the portal:
+To launch the local observatory:
 ```bash
-python portal/server.py --port 8080
+# Open in default browser (isolated local-only file)
+start kant-roadmap-tracker.html    # Windows
+xdg-open kant-roadmap-tracker.html # Linux
+open kant-roadmap-tracker.html     # macOS
 ```
 
-Once started, navigate to:
-```
-http://localhost:8080
-```
-The portal provides live visual dashboards, interactive pipeline flowcharts, and audit logs.
+The observatory provides live visual dashboards, interactive pipeline DAG flowcharts, and full verification tracking.
 
 ---
 

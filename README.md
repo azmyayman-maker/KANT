@@ -109,7 +109,7 @@ The toolchain integrates runtime deterministic replay and multi-tier verificatio
 
 * **Merkle Evidence Bundles (`module.kant.evidence.jsonl`):** Execution traces, capability invocations, and I/O transitions are recorded in cryptographic hash-chained Merkle logs, providing bit-level reproducibility (`kantc replay`).
 * **Differential Verification:** All compiler optimizations are differentially verified by executing the 30-op SSA reference interpreter (`kant-eval`) against Cranelift native machine codegen (`kant-codegen`), asserting byte-level execution equivalence.
-* **Telemetry Portal (`portal/`):** An isolated local visualization dashboard tracks verification milestones across the 17 workspace crates without external network dependencies or workspace pollution.
+* **Roadmap Observatory (`kant-roadmap-tracker.html`):** An isolated single-file local visualization dashboard tracks verification milestones across the 17 workspace crates without external network dependencies or workspace pollution.
 
 ---
 
@@ -117,7 +117,7 @@ The toolchain integrates runtime deterministic replay and multi-tier verificatio
 
 ### Toolchain Prerequisites
 * **Rust Toolchain:** 1.80.0+ (`kant-toolchain.toml`)
-* **Python:** 3.10+ (for local telemetry portal server)
+* **Python:** 3.10+ (for workspace validation tooling and telemetry engine)
 * **Git:** 2.40+
 
 ### Workspace Verification
@@ -134,13 +134,10 @@ cargo test --workspace
 cargo fmt --check
 ```
 
-### Launching the Isolated Telemetry Portal
+### Launching the Local Roadmap Observatory
 ```powershell
-# Option A: Standalone browser session
-start portal/index.html
-
-# Option B: Dedicated local telemetry server
-python portal/server.py --port 8080
+# Standalone local browser session (isolated from Git repository)
+start kant-roadmap-tracker.html
 ```
 
 ---
@@ -149,5 +146,5 @@ python portal/server.py --port 8080
 
 * **Canonical Remote:** `https://github.com/azmyayman-maker/KANT.git`
 * **Default Branch:** `main`
-* **Official Vector Icon:** `assets/kant-icon.svg` (and synchronized asset `portal/assets/kant-icon.svg`)
+* **Official Vector Icon:** `assets/kant-icon.svg`
 * **Licensing:** Dual-licensed under the [Apache License, Version 2.0](LICENSE) or the [MIT License](LICENSE).

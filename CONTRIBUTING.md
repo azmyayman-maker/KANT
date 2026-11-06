@@ -140,7 +140,7 @@ All 5 steps must exit with return code `0`.
 ## 6. Pull Request Lifecycle & Mandatory Review
 
 1. **Self-Verification Evidence:** Every Pull Request description must include the terminal output from the Five-Step Verification Harness.
-2. **Automated CI Matrix:** All jobs in `.github/workflows/ci.yml`, `.github/workflows/security.yml`, and `.github/workflows/portal.yml` must succeed.
+2. **Automated CI Matrix:** All jobs in `.github/workflows/ci.yml` and `.github/workflows/security.yml` must succeed.
 3. **SMT & Fuzzing Invariant Verification:**
    - Any modifications affecting the type system or contract engine require formal Z3 SMT contract consistency checks.
    - Any modifications to the lexer or parser must successfully execute continuous fuzzing vectors without panics or crashes.
