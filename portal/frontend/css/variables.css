@@ -1,0 +1,132 @@
+/* ==========================================================================
+   Kant Compiler Toolchain - Telemetry Portal Design Tokens
+   Strict 100% Offline Self-Contained System (Zero External CDNs)
+   ========================================================================== */
+
+:root {
+  /* Color Palette - Kant Gold Brand & Dark Modern Surface Tokens */
+  --color-gold-primary: #B8913F;
+  --color-gold-light: #D4AF37;
+  --color-gold-dark: #8C6A22;
+  --color-gold-deep: #5C4313;
+  --color-gold-glow: rgba(184, 145, 63, 0.35);
+
+  --color-bg-deep: #0F141C;
+  --color-bg-base: #121824;
+  --color-bg-elevated: #161D27;
+  --color-bg-surface: #1B2432;
+  --color-bg-overlay: rgba(15, 20, 28, 0.85);
+
+  --color-border-subtle: #232D3B;
+  --color-border-base: #2D3A4B;
+  --color-border-active: #B8913F;
+  --color-border-focus: #38BDF8;
+
+  --color-text-primary: #F0F4F8;
+  --color-text-secondary: #CBD5E1;
+  --color-text-muted: #8B949E;
+  --color-text-disabled: #475569;
+
+  /* Semantic Accents */
+  --color-success: #238636;
+  --color-success-light: #2EA043;
+  --color-success-glow: rgba(35, 134, 54, 0.35);
+
+  --color-warning: #D29922;
+  --color-warning-light: #E3B341;
+  --color-warning-glow: rgba(210, 153, 34, 0.35);
+
+  --color-danger: #F85149;
+  --color-danger-light: #FF7B72;
+  --color-danger-glow: rgba(248, 81, 73, 0.35);
+
+  --color-cyan: #38BDF8;
+  --color-cyan-glow: rgba(56, 189, 248, 0.35);
+
+  --color-blue: #3B82F6;
+  --color-blue-glow: rgba(59, 130, 246, 0.35);
+
+  --color-purple: #8B5CF6;
+  --color-purple-glow: rgba(139, 92, 246, 0.35);
+
+  /* Status Colors */
+  --status-pending: #8B949E;
+  --status-active: #38BDF8;
+  --status-done: #238636;
+  --status-locked: #475569;
+  --status-blocked: #F85149;
+  --status-todo: #64748B;
+  --status-wip: #D29922;
+
+  /* Pure System Offline Typography */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  /* Font Sizes */
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-base: 14px;
+  --font-size-md: 15px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 30px;
+
+  /* Spacing Scale */
+  --space-2xs: 2px;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 20px;
+  --space-2xl: 24px;
+  --space-3xl: 32px;
+  --space-4xl: 48px;
+
+  /* Border Radii */
+  --radius-xs: 3px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  /* Elevations & Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+  --shadow-gold: 0 0 20px var(--color-gold-glow);
+  --shadow-cyan: 0 0 16px var(--color-cyan-glow);
+
+  /* Animation Durations */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Layout Constants */
+  --header-height: 64px;
+  --metrics-height: 58px;
+}
+
+/* Light Theme Override */
+[data-theme="light"] {
+  --color-bg-deep: #F1F5F9;
+  --color-bg-base: #F8FAFC;
+  --color-bg-elevated: #FFFFFF;
+  --color-bg-surface: #F1F5F9;
+  --color-bg-overlay: rgba(248, 250, 252, 0.88);
+
+  --color-border-subtle: #E2E8F0;
+  --color-border-base: #CBD5E1;
+  --color-border-active: #B8913F;
+  --color-border-focus: #0284C7;
+
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #334155;
+  --color-text-muted: #64748B;
+  --color-text-disabled: #94A3B8;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
