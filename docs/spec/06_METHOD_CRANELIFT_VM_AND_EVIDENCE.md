@@ -1,14 +1,12 @@
-# 06_METHOD_CRANELIFT_VM_AND_EVIDENCE.md: Doctrine of Method, Cranelift Codegen & Merkle Bundles
+# 06_METHOD_CRANELIFT_VM_AND_EVIDENCE.md: Doctrine of Method: Deterministic Tree-Walk VM, Cranelift JIT/AOT & Merkle Evidence Traces
 
-The **Transcendental Doctrine of Method** (*Transzendentale Methodenlehre*) is the final division of the *Critique of Pure Reason*. Having analyzed the elements of pure reason, Kant specifies the formal conditions for erecting a complete, disciplined, and reliable scientific system.
-
-In `kantc`, the Doctrine of Method realizes this through the **Dual Execution Engine**, **Differential Verification**, and **Merkle Evidence Bundles**.
+The **Doctrine of Method** formalizes the execution backends, differential verification harness, and cryptographic auditability pipelines of `kantc`. It governs code generation, execution trace equivalence, and reproducible chain-of-custody verification.
 
 ---
 
-## 1. Dual Execution Engine Architecture
+## 1. Dual Execution Backend Architecture
 
-Kant provides two complementary execution backends for KANT-IR:
+Kant incorporates two independent execution backends for KANT-IR to guarantee semantic determinism:
 
 ```
                             ┌────────────────┐
@@ -20,7 +18,7 @@ Kant provides two complementary execution backends for KANT-IR:
                  ▼                                     ▼
       ┌──────────────────────┐              ┌──────────────────────┐
       │  Reference KANT-IR   │              │    Cranelift JIT     │
-      │      Evaluator       │              │   & Native AOT       │
+      │   Tree-Walk VM       │              │     & Native AOT     │
       │  (`kantc run --eval`)│              │   (`kantc build`)    │
       └──────────┬───────────┘              └──────────┬───────────┘
                  │                                     │
@@ -30,39 +28,40 @@ Kant provides two complementary execution backends for KANT-IR:
                                        ▼
                              ┌──────────────────┐
                              │ Byte & Semantic  │
-                             │  Identity Proof  │
+                             │  Trace Identity  │
                              └──────────────────┘
 ```
 
-### 1.1. Reference KANT-IR Evaluator (`kant-eval`)
-* A pure, deterministic SSA interpreter written in safe Rust.
-* Directly interprets the 30 KANT-IR opcodes.
-* Maintains an explicit execution trace, step counters, and virtualized Noumena handlers.
-* Serves as the primary behavioral oracle for debugging and agent simulation.
+### 1.1. Reference SSA Evaluator (`kant-eval`)
+* **Deterministic Tree-Walk Interpreter:** Implements direct interpretation over the 30 KANT-IR SSA opcodes in pure, memory-safe Rust.
+* **Virtualized Execution Environment:** Simulates memory layout, explicit call frames, gas metering, step counters, and virtualized Noumena handlers without issuing direct host OS system calls.
+* **Behavioral Oracle:** Acts as the ground-truth behavioral oracle against which optimizing code generators are validated.
 
 ### 1.2. Cranelift JIT & Native AOT Backend (`kant-codegen`)
-* Translates KANT-IR basic blocks directly into Cranelift IR (CLIF).
-* Leverages Cranelift's lightning-fast code generation (~2.6 ms per function, ~4x faster compilation than LLVM).
-* Supports **JIT Mode** (`kantc run`) for instant developer iterations and **AOT Mode** (`kantc build`) producing standalone, zero-dependency static binaries for x86-64 and ARM64.
+* **SSA-to-CLIF Lowering:** Translates KANT-IR SSA basic blocks directly into Cranelift Intermediate Format (CLIF), mapping SSA value ids to Cranelift variables.
+* **Calling Conventions & ABI:** Complies with platform standard calling conventions (`SystemV` for Linux/macOS, `Windows x64` for Windows).
+* **Execution Modes:**
+  * **JIT Mode (`kantc run`):** In-memory compilation and immediate execution (~2.6 ms compilation latency).
+  * **AOT Mode (`kantc build`):** Generates standalone, zero-dependency static native binaries targeting x86-64 and ARM64.
 
 ---
 
 ## 2. Differential Testing & Determinism Proofs
 
-To guarantee that compiler optimizations and native lowering introduce zero semantic drift:
+To eliminate semantic drift between the reference VM and native code generation passes:
 
-1. **The Conformance Harness:** A suite of 50 foundational test programs covering all 12 categories, recursive functions, Perceus in-place updates, and algebraic handlers is run simultaneously against both engines.
-2. **Acceptance Invariant:** The terminal output, exit status, and memory mutation trace of the Cranelift binary must match the Reference Evaluator byte-for-byte:
-   $$\text{Trace}(\text{Cranelift}(P)) \equiv \text{Trace}(\text{Evaluator}(P))$$
-3. **Byte-Identical Builds:** Compiling a `.kant` file with identical dependency lockfiles on two independent machines must produce bit-for-bit identical native binaries (`0 byte mismatches`), establishing a reproducible chain of custody.
+1. **50 Canonical Conformance Test Vectors:** A formal conformance suite spanning all 12 categorical types, recursive functions, Perceus in-place updates, and algebraic effect handlers is executed across both backends.
+2. **Execution Trace Equivalence Invariant:** The terminal output, return exit code, and heap mutation trace of the native binary must match the reference VM trace byte-for-byte:
+   $$\forall P \in \text{ConformanceSuite}, \quad \text{Trace}(\text{Cranelift}(P)) \equiv \text{Trace}(\text{Evaluator}(P))$$
+3. **Bit-Identical Reproducible Builds:** Compiling a `.kant` file with identical dependency lockfiles (`module.kant.lock`) on independent environments yields bit-for-bit identical native machine binaries (`0 byte difference`), certifying end-to-end build reproducibility.
 
 ---
 
-## 3. Hash-Chained Merkle Evidence Bundles (The Boruna Model)
+## 3. Hash-Chained Merkle Evidence Bundles
 
-Every mission-critical agentic workflow requires tamper-evident auditing. When a `.kant` program executes, particularly when interacting with the Noumenon, it generates an append-only JSON Lines evidence log: `module.kant.evidence.jsonl`.
+When a `.kant` program executes, particularly operations crossing the Noumena boundary, it produces an append-only JSON Lines evidence log: `module.kant.evidence.jsonl`.
 
-### Structure of an Evidence Block
+### Structure of an Evidence Log Record
 ```json
 {
   "sequence_id": 104,
@@ -80,7 +79,7 @@ Every mission-critical agentic workflow requires tamper-evident auditing. When a
 ```
 
 ### Deterministic Replay Engine (`kantc replay`)
-Using `kantc replay --evidence module.kant.evidence.jsonl`:
-* The compiler boots in replay mode.
-* When code encounters a Noumena call (e.g., `net.http` or `ai.infer`), the engine validates the cryptographic hash chain and injects the recorded output without calling the real external network.
-* Enables offline regression testing and absolute verification of agent actions.
+The execution trace can be audited via `kantc replay --evidence module.kant.evidence.jsonl`:
+1. The compiler executes in deterministic replay mode.
+2. When execution encounters an external Noumena effect (`net.http`, `ai.infer`), the engine validates the cryptographic hash chain and injects the recorded payload without invoking external network sockets.
+3. Guarantees deterministic regression testing and cryptographic auditability for autonomous software workflows.
