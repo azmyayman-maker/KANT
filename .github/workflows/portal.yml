@@ -1,0 +1,75 @@
+name: Portal & Telemetry Verification
+
+on:
+  push:
+    paths:
+      - "portal/**"
+      - ".kant-tracker/**"
+      - "scripts/telemetry/**"
+      - ".github/workflows/portal.yml"
+  pull_request:
+    paths:
+      - "portal/**"
+      - ".kant-tracker/**"
+      - "scripts/telemetry/**"
+      - ".github/workflows/portal.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  python-lint:
+    name: Lint Python Infrastructure
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Linting Tools
+        run: pip install ruff
+
+      - name: Lint Portal and Tooling Scripts
+        run: ruff check portal/ scripts/
+
+  html-validate:
+    name: Validate Observatory Portal HTML
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Check HTML Conformance
+        run: python scripts/ci/check_format.py --check-html
+
+  zero-state-guard:
+    name: Telemetry Zero-State Invariant Guard
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Assert Zero Completed Tasks Invariant
+        run: python scripts/ci/verify_workspace.py --zero-state-guard

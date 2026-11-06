@@ -197,7 +197,7 @@ def record_git_commit_telemetry(
     """
     now_iso = datetime.now(timezone.utc).isoformat()
     files_json = json.dumps(changed_files)
-    
+
     # Inferred circle from task ID or changed files if not provided
     if not circle_id and task_id:
         m = CIRCLE_ID_REGEX.search(task_id)
@@ -351,7 +351,7 @@ def validate_commit_message(msg: str) -> Tuple[bool, str, Optional[Dict[str, str
                 reason = f"Invalid commit type '{type_candidate}'. Allowed types are strictly: {allowed_str}"
             else:
                 reason = "Malformed header. Expected format: '<type>(<scope>): <description>' or '<type>: <description>' with a space after ':'."
-        
+
         return False, reason, None
 
     # Length check on subject line
@@ -851,14 +851,14 @@ def sync_branch_and_verify_lane(branch_name: Optional[str] = None) -> bool:
 
         lines = res_diff.stdout.strip().splitlines() if res_diff.stdout.strip() else []
         print(f"\n  Inspected Changes: {len(lines)} file(s) modified on branch:")
-        
+
         lane_violations = []
         for line in lines:
             toks = line.split(maxsplit=1)
             if len(toks) == 2:
                 status, path = toks[0], toks[1].replace("\\", "/")
                 print(f"    [{status}] {path}")
-                
+
                 # Check for lane violations if task is assigned to a specific crate
                 # E.g. if task_id starts with C1.H1.S1 -> SA-01
                 # But scripts/, docs/, and tests are permitted tooling lanes

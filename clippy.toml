@@ -1,0 +1,19 @@
+# Clippy configuration for Kant compiler infrastructure
+# Strict static analysis rules for mission-critical compiler code
+
+cognitive-complexity-threshold = 20
+too-many-arguments-threshold = 7
+doc-valid-idents = [
+    "KANT",
+    "kantc",
+    "KANT-IR",
+    "Perceus",
+    "Noumena",
+    "DefHash",
+    "ByteSpan"
+]
+
+disallowed-methods = [
+    { path = "std::panic", reason = "Use structured diagnostics and Result<T, DiagError>" },
+    { path = "std::process::exit", reason = "Propagate errors through main returning Result" }
+]
