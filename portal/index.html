@@ -3,64 +3,100 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kant Compiler Engineering & Verification Observatory — Real-Time Telemetry & Formal Pipeline Tracking</title>
+  <title>Kant Compiler Engineering &amp; Verification Observatory — Real-Time Telemetry &amp; Formal Pipeline Tracking</title>
   <link rel="icon" type="image/svg+xml" href="assets/kant-icon.svg">
-  
-  <!-- الخطوط العربية الراقية والخط البرمجي للشيفرات -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 
   <style>
+    /* ==========================================================================
+       Kant Compiler Toolchain - Executive Light Design System Tokens
+       100% Offline Self-Contained System (Zero External CDNs)
+       Inspired by Stripe Dashboard, Vercel, Linear Light, & Apple Developer UI
+       ========================================================================== */
     :root {
-      --bg-primary: #070a12;
-      --bg-secondary: #0d121f;
-      --bg-tertiary: #141c2e;
-      --bg-card: rgba(19, 27, 46, 0.78);
-      --border-color: #1e293b;
-      --border-focus: #38bdf8;
-      --text-primary: #f8fafc;
-      --text-secondary: #94a3b8;
-      --text-muted: #64748b;
-      --accent-cyan: #06b6d4;
-      --accent-blue: #3b82f6;
-      --accent-emerald: #10b981;
-      --accent-amber: #f59e0b;
-      --accent-rose: #f43f5e;
-      --accent-purple: #8b5cf6;
-      --status-done: #10b981;
-      --status-progress: #06b6d4;
-      --status-blocked: #f43f5e;
-      --status-todo: #64748b;
-      --status-deferred: #8b5cf6;
-      --font-mono: "JetBrains Mono", "Fira Code", monospace;
-      --font-sans: "Cairo", "Tajawal", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
-    }
+      /* Canvas & Surface Tokens (Pure White and Light Porcelain Slate) */
+      --bg-canvas: #F8FAFC;          /* Slate-50: Crisp, clean porcelain canvas background */
+      --bg-surface: #FFFFFF;         /* Pure White: Primary card and drawer panels */
+      --bg-surface-elevated: #FFFFFF;/* Filter bars, modals, elevated controls */
+      --bg-muted: #F1F5F9;           /* Slate-100: Secondary surfaces, table headers, inactive tabs */
+      --bg-subtle: #E2E8F0;          /* Slate-200: Dividers, borders, subtle hover backgrounds */
+      --bg-overlay: rgba(15, 23, 42, 0.4);
 
-    [data-theme="light"] {
-      --bg-primary: #f8fafc;
-      --bg-secondary: #f1f5f9;
-      --bg-tertiary: #e2e8f0;
-      --bg-card: rgba(255, 255, 255, 0.92);
-      --border-color: #cbd5e1;
-      --border-focus: #0284c7;
-      --text-primary: #0f172a;
-      --text-secondary: #475569;
-      --text-muted: #94a3b8;
-      --accent-cyan: #0284c7;
-      --accent-blue: #2563eb;
+      /* Border Tokens */
+      --border-subtle: #E2E8F0;      /* Slate-200: Default card and container borders */
+      --border-base: #CBD5E1;        /* Slate-300: Control borders, inputs, buttons */
+      --border-strong: #94A3B8;      /* Slate-400: Active element borders, dividers */
+      --border-focus: #0284C7;       /* Sky-600: Focus ring and active input highlight */
+
+      /* Text & Typography Hierarchy */
+      --text-primary: #0F172A;       /* Slate-900: High-contrast headings and primary labels */
+      --text-secondary: #334155;     /* Slate-700: Body text, card descriptions, active nav */
+      --text-muted: #64748B;         /* Slate-500: Subtitles, timestamps, metadata, captions */
+      --text-disabled: #94A3B8;      /* Slate-400: Disabled controls, locked stage indicators */
+
+      /* Imperial Bronze & Kant Gold Brand Accents (Restrained & Accessible) */
+      --brand-gold-primary: #936E22; /* Deep Imperial Gold/Bronze (Accessible on white, ratio > 4.5:1) */
+      --brand-gold-dark: #7A5B18;    /* Deep rich bronze for active hover states */
+      --brand-gold-light: #B8913F;   /* Warm metallic gold for subtle accents and badges */
+      --brand-gold-surface: #FEF9EE; /* Soft warm gold tint for active stage highlight */
+      --brand-gold-border: #F3E3B6;  /* Soft gold border */
+      --brand-gold-glow: rgba(147, 110, 34, 0.12);
+
+      /* Semantic Status Tokens (Refined Low-Saturation Pastels with High-Contrast Text) */
+      --status-pending-bg: #FFFBEB;     /* Amber-50 */
+      --status-pending-border: #FDE68A; /* Amber-200 */
+      --status-pending-text: #92400E;   /* Amber-800 */
+
+      --status-locked-bg: #F1F5F9;      /* Slate-100 */
+      --status-locked-border: #E2E8F0;  /* Slate-200 */
+      --status-locked-text: #64748B;    /* Slate-500 */
+
+      --status-active-bg: #EFF6FF;      /* Blue-50 */
+      --status-active-border: #BFDBFE;  /* Blue-200 */
+      --status-active-text: #1E40AF;    /* Blue-800 */
+
+      --status-verified-bg: #ECFDF5;    /* Emerald-50 */
+      --status-verified-border: #A7F3D0;/* Emerald-200 */
+      --status-verified-text: #065F46;  /* Emerald-800 */
+
+      --status-blocked-bg: #FFF1F2;     /* Rose-50 */
+      --status-blocked-border: #FECDD3; /* Rose-200 */
+      --status-blocked-text: #9F1239;   /* Rose-800 */
+
+      /* Legacy compatibility mappings */
+      --bg-primary: var(--bg-canvas);
+      --bg-secondary: var(--bg-surface);
+      --bg-tertiary: var(--bg-muted);
+      --bg-card: var(--bg-surface);
+      --border-color: var(--border-subtle);
+
+      --accent-cyan: #0284C7;
+      --accent-blue: #1D4ED8;
       --accent-emerald: #059669;
-      --accent-amber: #d97706;
-      --accent-rose: #e11d48;
-      --accent-purple: #7c3aed;
-      --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      --accent-amber: #D97706;
+      --accent-rose: #E11D48;
+      --accent-purple: #6D28D9;
+
+      --status-done: var(--status-verified-text);
+      --status-progress: var(--status-active-text);
+      --status-todo: var(--status-locked-text);
+      --status-deferred: #7C3AED;
+
+      /* Shadows (Subtle, Multi-Layered Elevation) */
+      --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+
+      /* Typography Stacks (100% Offline System Fonts) */
+      --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Cairo", "Tajawal", "Helvetica Neue", Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "JetBrains Mono", "Liberation Mono", "Courier New", monospace;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
       font-family: var(--font-sans);
-      background-color: var(--bg-primary);
+      background-color: var(--bg-canvas);
       color: var(--text-primary);
       height: 100vh;
       display: flex;
@@ -69,84 +105,111 @@
       user-select: none;
       direction: rtl;
       text-align: right;
+      -webkit-font-smoothing: antialiased;
     }
 
-    /* شريط التنقل العلوي الفاخر */
+    /* Top Executive Page Header */
     header {
-      background: var(--bg-secondary);
-      border-bottom: 1px solid var(--border-color);
-      height: 64px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-subtle);
+      height: 68px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 20px;
+      padding: 0 24px;
       z-index: 50;
       flex-shrink: 0;
+      box-shadow: var(--shadow-xs);
     }
 
     .brand-group {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
     }
 
     .brand-logo-img {
-      width: 38px;
-      height: 38px;
-      border-radius: 9px;
+      width: 42px;
+      height: 42px;
       object-fit: contain;
       background: transparent;
       border: none;
-      box-shadow: 0 0 16px rgba(184, 145, 63, 0.45);
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.08));
       flex-shrink: 0;
+    }
+
+    .brand-text-col {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .brand-title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
     .brand-title {
       font-size: 16px;
       font-weight: 800;
       letter-spacing: -0.2px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      color: var(--text-primary);
+      white-space: nowrap;
     }
 
-    .brand-title span.badge {
-      font-size: 11px;
-      font-family: var(--font-sans);
+    .brand-badge {
+      font-size: 10.5px;
+      font-family: var(--font-mono);
       font-weight: 700;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      padding: 3px 8px;
-      border-radius: 6px;
-      color: var(--accent-cyan);
+      background: var(--brand-gold-surface);
+      border: 1px solid var(--brand-gold-border);
+      padding: 2px 8px;
+      border-radius: 9999px;
+      color: var(--brand-gold-dark);
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+    }
+
+    .brand-subtitle {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      white-space: nowrap;
     }
 
     .nav-tabs {
       display: flex;
-      gap: 6px;
-      background: var(--bg-primary);
-      padding: 4px;
+      gap: 3px;
+      background: var(--bg-muted);
+      padding: 3px;
       border-radius: 8px;
-      border: 1px solid var(--border-color);
+      border: 1px solid var(--border-subtle);
     }
 
     .nav-tab {
       padding: 6px 16px;
       border-radius: 6px;
       font-size: 13px;
-      font-weight: 700;
+      font-weight: 600;
       cursor: pointer;
       border: none;
       background: transparent;
-      color: var(--text-secondary);
-      transition: all 0.2s ease;
+      color: var(--text-muted);
+      transition: all 0.15s ease;
       font-family: var(--font-sans);
+      white-space: nowrap;
+    }
+
+    .nav-tab:hover {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.6);
     }
 
     .nav-tab.active {
-      background: var(--accent-blue);
-      color: #fff;
-      box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
+      background: var(--bg-surface);
+      color: var(--brand-gold-dark);
+      font-weight: 700;
+      box-shadow: var(--shadow-xs);
     }
 
     .nav-actions {
@@ -159,81 +222,154 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 600;
       padding: 5px 12px;
-      border-radius: 12px;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      color: var(--text-primary);
-      transition: all 0.3s ease;
+      border-radius: 9999px;
+      background: var(--bg-muted);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      transition: all 0.2s ease;
     }
 
     .poll-status-badge.sse-live {
-      border-color: var(--accent-emerald) !important;
-      background: rgba(16, 185, 129, 0.12) !important;
-      color: #34d399 !important;
+      border-color: var(--status-verified-border) !important;
+      background: var(--status-verified-bg) !important;
+      color: var(--status-verified-text) !important;
     }
 
     .pulse-dot {
-      width: 9px;
-      height: 9px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
-      background: var(--accent-emerald);
-      box-shadow: 0 0 10px var(--accent-emerald);
-      animation: pulseAnim 2s infinite;
-    }
-
-    .poll-status-badge.sse-live .pulse-dot {
-      background: var(--accent-emerald) !important;
-      box-shadow: 0 0 12px var(--accent-emerald) !important;
-      animation: ssePulse 1.6s infinite !important;
-    }
-
-    @keyframes ssePulse {
-      0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-      70% { transform: scale(1.2); box-shadow: 0 0 0 9px rgba(16, 185, 129, 0); }
-      100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-    }
-
-    @keyframes pulseAnim {
-      0% { transform: scale(0.95); opacity: 0.8; }
-      50% { transform: scale(1.15); opacity: 1; }
-      100% { transform: scale(0.95); opacity: 0.8; }
+      background: #059669;
+      box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2);
     }
 
     .btn {
       padding: 6px 14px;
       border-radius: 6px;
       font-size: 12px;
-      font-weight: 700;
+      font-weight: 600;
       cursor: pointer;
-      border: 1px solid var(--border-color);
-      background: var(--bg-tertiary);
-      color: var(--text-primary);
+      border: 1px solid var(--border-base);
+      background: var(--bg-surface);
+      color: var(--text-secondary);
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      transition: all 0.2s;
+      transition: all 0.15s ease;
       font-family: var(--font-sans);
     }
 
     .btn:hover {
-      border-color: var(--border-focus);
-      background: var(--bg-secondary);
+      border-color: var(--border-strong);
+      color: var(--text-primary);
+      background: var(--bg-muted);
     }
 
     .btn-primary {
-      background: var(--accent-cyan);
-      border-color: var(--accent-cyan);
-      color: #041017;
+      background: var(--brand-gold-primary);
+      border-color: var(--brand-gold-dark);
+      color: #FFFFFF;
+      font-weight: 700;
     }
     .btn-primary:hover {
-      filter: brightness(1.12);
-      background: var(--accent-cyan);
+      background: var(--brand-gold-dark);
+      color: #FFFFFF;
     }
 
-    /* الحاوية الرئيسية للتطبيق */
+    /* Executive Systems Metrics Toolbar (6-Card Grid) */
+    .metrics-toolbar {
+      background: var(--bg-canvas);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 14px 24px;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 14px;
+      flex-shrink: 0;
+      z-index: 20;
+    }
+
+    .metric-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 12px 14px;
+      box-shadow: var(--shadow-xs);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .metric-card:hover {
+      border-color: var(--border-base);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .metric-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .metric-card-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      color: var(--text-muted);
+    }
+
+    .metric-card-badge {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: var(--bg-muted);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .metric-card-val {
+      font-size: 16.5px;
+      font-weight: 800;
+      color: var(--text-primary);
+      letter-spacing: -0.2px;
+      line-height: 1.2;
+      direction: ltr;
+      text-align: right;
+      unicode-bidi: isolate;
+    }
+
+    .metric-card-caption {
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      font-weight: 500;
+      direction: rtl;
+    }
+
+    .progress-bar-track {
+      width: 100%;
+      height: 5px;
+      background: var(--bg-muted);
+      border-radius: 9999px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .progress-bar-fill-el {
+      height: 100%;
+      width: 0.0%;
+      background: var(--brand-gold-primary);
+      border-radius: 9999px;
+      transition: width 0.4s ease;
+    }
+
+    /* Main App Layout */
     main {
       flex: 1;
       display: flex;
@@ -241,11 +377,13 @@
       overflow: hidden;
     }
 
-    /* مساحة الخريطة التفاعلية (DAG Canvas) */
+    /* Interactive DAG Canvas Area */
     .map-container {
       flex: 1;
       position: relative;
-      background: radial-gradient(circle at 50% 50%, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+      background-color: var(--bg-canvas);
+      background-image: radial-gradient(#CBD5E1 1.2px, transparent 1.2px);
+      background-size: 24px 24px;
       overflow: hidden;
     }
 
@@ -259,21 +397,20 @@
       cursor: grabbing;
     }
 
-    /* أزرار التحكم في التكبير والتصغير */
+    /* Map Controls Widget */
     .map-controls {
       position: absolute;
       bottom: 24px;
       right: 24px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      background: var(--bg-card);
-      backdrop-filter: blur(8px);
-      border: 1px solid var(--border-color);
+      gap: 6px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
       border-radius: 8px;
-      padding: 6px;
+      padding: 4px;
       z-index: 20;
-      box-shadow: var(--shadow-lg);
+      box-shadow: var(--shadow-md);
     }
 
     .control-btn {
@@ -282,70 +419,38 @@
       border-radius: 6px;
       background: transparent;
       border: none;
-      color: var(--text-primary);
+      color: var(--text-secondary);
       font-size: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       font-weight: 700;
+      transition: all 0.15s ease;
     }
-    .control-btn:hover { background: var(--bg-tertiary); color: var(--accent-cyan); }
+    .control-btn:hover { background: var(--bg-muted); color: var(--brand-gold-dark); }
 
-    /* بطاقات المؤشرات الإحصائية العائمة */
-    .summary-float {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background: var(--bg-card);
-      backdrop-filter: blur(12px);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 12px 22px;
-      display: flex;
-      gap: 26px;
-      z-index: 20;
-      box-shadow: var(--shadow-lg);
-    }
-
-    .stat-item {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-    }
-    .stat-label {
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--text-muted);
-      margin-bottom: 2px;
-    }
-    .stat-val {
-      font-size: 18px;
-      font-weight: 800;
-      font-family: var(--font-mono);
-      color: var(--text-primary);
-    }
-
-    /* الدرج الجانبي للفاحص التفصيلي (Inspector Drawer) */
+    /* Inspector Drawer (Split-Pane on Left in RTL) */
     .inspector-drawer {
-      width: 530px;
-      background: var(--bg-secondary);
-      border-right: 1px solid var(--border-color);
+      width: 460px;
+      background: var(--bg-surface);
+      border-left: 1px solid var(--border-subtle);
       display: flex;
       flex-direction: column;
       overflow: hidden;
       z-index: 30;
-      transition: width 0.3s ease;
+      transition: width 0.25s ease;
       flex-shrink: 0;
+      box-shadow: var(--shadow-lg);
     }
 
     .drawer-header {
       padding: 16px 20px;
-      border-bottom: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-subtle);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: var(--bg-tertiary);
+      background: var(--bg-surface);
     }
 
     .drawer-title-group {
@@ -358,10 +463,11 @@
       font-size: 13px;
       font-family: var(--font-mono);
       font-weight: 800;
-      padding: 4px 10px;
+      padding: 3px 9px;
       border-radius: 6px;
-      background: var(--accent-blue);
-      color: #fff;
+      background: var(--brand-gold-surface);
+      color: var(--brand-gold-dark);
+      border: 1px solid var(--brand-gold-border);
     }
 
     .drawer-content {
@@ -371,24 +477,23 @@
       user-select: text;
     }
 
-    /* بطاقة بوابة التحقق الخماسية (The Iron Law) */
+    /* Verification Gate Section (The Iron Law) */
     .gate-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
+      background: var(--bg-muted);
+      border: 1px solid var(--border-subtle);
       border-radius: 10px;
       padding: 16px;
       margin-bottom: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
 
     .gate-card-title {
       font-size: 13.5px;
-      font-weight: 800;
+      font-weight: 700;
       margin-bottom: 12px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      color: var(--text-primary);
+      color: var(--brand-gold-dark);
     }
 
     .gate-checklist {
@@ -407,10 +512,11 @@
       transition: color 0.15s;
       line-height: 1.45;
     }
-    .checklist-item:hover { color: var(--accent-cyan); }
+    .checklist-item:hover { color: var(--brand-gold-dark); }
     .checklist-item code {
       font-family: var(--font-mono);
-      color: var(--accent-cyan);
+      color: var(--brand-gold-dark);
+      font-weight: 700;
       direction: ltr;
       text-align: left;
       display: block;
@@ -421,25 +527,30 @@
       cursor: pointer;
       width: 16px;
       height: 16px;
-      accent-color: var(--accent-emerald);
+      border-radius: 4px;
+      border: 1.5px solid var(--border-strong);
+      accent-color: var(--brand-gold-primary);
+      margin-top: 2px;
     }
 
-    /* شجرة الهيكل الرباعي (4-Tier Tree) */
+    /* Tree Task Hierarchy */
     .tree-main-heading {
       margin-bottom: 16px;
-      border: 1px solid var(--border-color);
+      border: 1px solid var(--border-subtle);
       border-radius: 8px;
-      background: var(--bg-primary);
+      background: var(--bg-surface);
       overflow: hidden;
+      box-shadow: var(--shadow-xs);
     }
 
     .heading-header {
       padding: 12px 16px;
-      background: var(--bg-tertiary);
+      background: var(--bg-muted);
       display: flex;
       align-items: center;
       justify-content: space-between;
       cursor: pointer;
+      border-bottom: 1px solid var(--border-subtle);
     }
 
     .heading-title-group {
@@ -451,9 +562,9 @@
     .sub-agent-badge {
       font-size: 11px;
       font-family: var(--font-mono);
-      background: rgba(6, 182, 212, 0.15);
-      border: 1px solid var(--accent-cyan);
-      color: var(--accent-cyan);
+      background: var(--brand-gold-surface);
+      border: 1px solid var(--brand-gold-border);
+      color: var(--brand-gold-dark);
       padding: 2px 7px;
       border-radius: 4px;
       font-weight: 700;
@@ -461,13 +572,13 @@
 
     .sub-heading-group {
       padding: 12px 16px;
-      border-top: 1px solid var(--border-color);
+      border-top: 1px solid var(--border-subtle);
     }
 
     .sub-heading-title {
       font-size: 13px;
       font-weight: 700;
-      color: var(--accent-cyan);
+      color: var(--text-secondary);
       margin-bottom: 10px;
       display: flex;
       align-items: center;
@@ -478,19 +589,20 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
-      padding-right: 6px;
     }
 
     .task-card {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: 7px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
       padding: 12px;
-      transition: border-color 0.2s;
+      transition: all 0.15s ease;
+      box-shadow: var(--shadow-xs);
     }
 
     .task-card:hover {
-      border-color: var(--border-focus);
+      border-color: var(--border-base);
+      box-shadow: var(--shadow-sm);
     }
 
     .task-header {
@@ -512,35 +624,35 @@
     .task-id-badge {
       font-size: 10.5px;
       font-family: var(--font-mono);
-      color: var(--accent-purple);
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
+      color: var(--brand-gold-dark);
+      background: var(--brand-gold-surface);
+      border: 1px solid var(--brand-gold-border);
       padding: 2px 6px;
       border-radius: 4px;
       flex-shrink: 0;
-      font-weight: 600;
+      font-weight: 700;
     }
 
     .status-select {
       font-size: 11px;
-      font-weight: 700;
+      font-weight: 600;
       font-family: var(--font-sans);
       padding: 4px 8px;
       border-radius: 5px;
-      border: 1px solid var(--border-color);
-      background: var(--bg-tertiary);
+      border: 1px solid var(--border-base);
+      background: var(--bg-surface);
       color: var(--text-primary);
       cursor: pointer;
     }
 
     .task-cmd-box {
-      background: var(--bg-primary);
-      border: 1px solid var(--border-color);
-      border-radius: 5px;
+      background: var(--bg-muted);
+      border: 1px solid var(--border-base);
+      border-radius: 6px;
       padding: 6px 10px;
       font-family: var(--font-mono);
       font-size: 11px;
-      color: var(--accent-cyan);
+      color: var(--text-primary);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -550,9 +662,14 @@
       overflow-x: auto;
     }
 
+    .task-cmd-box code {
+      color: var(--brand-gold-dark);
+      font-weight: 600;
+    }
+
     .copy-btn {
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-base);
       color: var(--text-secondary);
       cursor: pointer;
       padding: 3px 8px;
@@ -562,79 +679,37 @@
       font-family: var(--font-sans);
       flex-shrink: 0;
       margin-left: 8px;
+      transition: all 0.15s ease;
     }
-    .copy-btn:hover { color: #fff; background: var(--accent-blue); border-color: var(--accent-blue); }
+    .copy-btn:hover {
+      color: var(--brand-gold-dark);
+      border-color: var(--brand-gold-primary);
+      background: var(--brand-gold-surface);
+    }
 
     .task-notes-input {
       width: 100%;
-      background: transparent;
-      border: none;
-      border-bottom: 1px dashed var(--border-color);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-base);
+      border-radius: 4px;
       font-size: 11.5px;
-      color: var(--text-secondary);
-      padding: 6px 0;
+      color: var(--text-primary);
+      padding: 6px 10px;
       margin-top: 6px;
       font-family: var(--font-sans);
+      outline: none;
     }
     .task-notes-input:focus {
-      outline: none;
-      border-bottom-color: var(--border-focus);
-      color: var(--text-primary);
+      border-color: var(--border-focus);
     }
 
-    /* لوحة مرصد التيليميتري وسجل التدقيق (Telemetry Observatory) */
+    /* Telemetry View & Audit Logs */
     .telemetry-view-container {
       flex: 1;
-      padding: 34px;
+      padding: 32px;
       overflow-y: auto;
       user-select: text;
-    }
-    .telemetry-badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 3px 8px;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 700;
-      font-family: var(--font-mono);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .badge-task { background: rgba(56, 189, 248, 0.15); color: var(--accent-cyan); border: 1px solid rgba(56, 189, 248, 0.3); }
-    .badge-gate { background: rgba(168, 85, 247, 0.15); color: var(--accent-purple); border: 1px solid rgba(168, 85, 247, 0.3); }
-    .badge-file { background: rgba(59, 130, 246, 0.15); color: var(--accent-blue); border: 1px solid rgba(59, 130, 246, 0.3); }
-    .badge-git  { background: rgba(245, 158, 11, 0.15); color: var(--accent-amber); border: 1px solid rgba(245, 158, 11, 0.3); }
-    .badge-mig  { background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border: 1px solid rgba(16, 185, 129, 0.3); }
-    .badge-sync { background: rgba(148, 163, 184, 0.15); color: var(--text-secondary); border: 1px solid rgba(148, 163, 184, 0.3); }
-    .telemetry-row-new {
-      animation: highlightNewRow 2.5s ease-out;
-    }
-    @keyframes highlightNewRow {
-      0% { background-color: rgba(16, 185, 129, 0.25); }
-      100% { background-color: transparent; }
-    }
-
-    /* لوحة تحكم التوزيع والإطلاق (Distribution Console) */
-    .dist-view-container {
-      flex: 1;
-      padding: 34px;
-      overflow-y: auto;
-      user-select: text;
-    }
-
-    .console-box {
-      background: #020408;
-      border: 1px solid var(--border-color);
-      border-radius: 9px;
-      padding: 16px;
-      font-family: var(--font-mono);
-      font-size: 12px;
-      color: #38bdf8;
-      line-height: 1.7;
-      margin-bottom: 24px;
-      position: relative;
-      direction: ltr;
-      text-align: left;
+      background: var(--bg-canvas);
     }
 
     .table-artifacts {
@@ -642,25 +717,58 @@
       border-collapse: collapse;
       margin-top: 14px;
       font-size: 12.5px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: var(--shadow-xs);
     }
 
     .table-artifacts th, .table-artifacts td {
-      border: 1px solid var(--border-color);
+      border: 1px solid var(--border-subtle);
       padding: 10px 14px;
       text-align: right;
     }
     .table-artifacts th {
-      background: var(--bg-tertiary);
+      background: var(--bg-muted);
       font-weight: 700;
-      color: var(--text-primary);
+      color: var(--text-muted);
     }
 
-    /* النافذة المنبثقة للتوسيع (Modal) */
+    .table-artifacts tr:hover td {
+      background: var(--bg-canvas);
+    }
+
+    /* Distribution View */
+    .dist-view-container {
+      flex: 1;
+      padding: 32px;
+      overflow-y: auto;
+      user-select: text;
+      background: var(--bg-canvas);
+    }
+
+    .console-box {
+      background: var(--bg-muted);
+      border: 1px solid var(--border-base);
+      border-radius: 9px;
+      padding: 16px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-primary);
+      line-height: 1.7;
+      margin-bottom: 24px;
+      position: relative;
+      direction: ltr;
+      text-align: left;
+    }
+
+    /* Modal Dialog */
     .modal-backdrop {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(5px);
+      background: var(--bg-overlay);
+      backdrop-filter: blur(4px);
       display: none;
       align-items: center;
       justify-content: center;
@@ -670,8 +778,8 @@
     .modal-box {
       width: 620px;
       max-height: 85vh;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-base);
       border-radius: 12px;
       box-shadow: var(--shadow-lg);
       display: flex;
@@ -681,8 +789,8 @@
 
     .modal-header {
       padding: 16px 20px;
-      background: var(--bg-tertiary);
-      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-muted);
+      border-bottom: 1px solid var(--border-subtle);
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -702,113 +810,174 @@
       gap: 6px;
     }
     .form-group label {
-      font-size: 12.5px;
+      font-size: 12px;
       font-weight: 700;
       color: var(--text-secondary);
     }
     .form-control {
-      background: var(--bg-primary);
-      border: 1px solid var(--border-color);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-base);
       border-radius: 6px;
-      padding: 9px 12px;
+      padding: 8px 12px;
       color: var(--text-primary);
       font-size: 13px;
       font-family: var(--font-sans);
     }
     .form-control:focus { outline: none; border-color: var(--border-focus); }
 
-    /* أنماط عُقد خريطة الـ DAG في SVG */
+    /* SVG DAG Node Styles */
     .node-group {
       cursor: pointer;
-      transition: transform 0.25s ease;
-    }
-    .node-group:hover {
-      filter: drop-shadow(0 0 14px rgba(56, 189, 248, 0.45));
+      transition: transform 0.2s ease;
     }
     .edge-line {
-      stroke: var(--border-color);
+      stroke: var(--border-base);
       stroke-width: 2.5;
       fill: none;
-      stroke-dasharray: 6 4;
-      animation: dashflow 30s linear infinite;
-    }
-    @keyframes dashflow {
-      to { stroke-dashoffset: -1000; }
+      stroke-linecap: round;
+      stroke-dasharray: 5 4;
     }
     .edge-line.active {
-      stroke: var(--accent-cyan);
-      stroke-width: 3;
+      stroke: var(--brand-gold-primary);
+      stroke-width: 2.5;
+      stroke-dasharray: none;
+    }
+
+    @media (max-width: 1300px) {
+      .metrics-toolbar {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    @media (max-width: 1024px) {
+      .inspector-drawer {
+        width: 380px;
+      }
+    }
+    @media (max-width: 860px) {
+      .metrics-toolbar {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      main {
+        flex-direction: column;
+      }
+      .inspector-drawer {
+        width: 100%;
+        height: 420px;
+        border-top: 1px solid var(--border-subtle);
+        border-left: none;
+      }
     }
   </style>
 </head>
 <body>
 
-  <!-- شريط التنقل العلوي -->
+  <!-- Top Executive Navigation Header -->
   <header>
-        <div class="brand-group">
+    <div class="brand-group">
       <img src="assets/kant-icon.svg" class="brand-logo-img" alt="Kant Compiler Observatory Logo">
-      <div>
-        <div class="brand-title">
-          Kant Compiler Engineering &amp; Verification Observatory
-          <span class="badge" style="font-family:var(--font-mono); font-size:11px; background:rgba(6,182,212,0.12); color:var(--accent-cyan); border:1px solid rgba(6,182,212,0.3); padding:2px 8px; border-radius:5px;">17-Crate Architecture Telemetry</span>
+      <div class="brand-text-col">
+        <div class="brand-title-row">
+          <span class="brand-title">مرصد هندسة مترجم Kant</span>
+          <span class="brand-badge">v0.1.0-alpha • 17-Crate Architecture</span>
         </div>
-        <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">
-          مرصد هندسة مترجم كانط والتحقق الصارم — Real-Time Systems Telemetry &amp; Formal Pipeline Tracking
-        </div>
+        <div class="brand-subtitle">Kant Compiler Engineering Observatory — Real-Time Systems Telemetry</div>
       </div>
     </div>
 
-        <div class="nav-tabs">
-      <button class="nav-tab active" id="tab-btn-map" onclick="switchView('map')">Pipeline DAG (مسار الترجمة والتحقق)</button>
-      <button class="nav-tab" id="tab-btn-tree" onclick="switchView('tree')">4-Tier Inspector (فاحص التحقق الصارم)</button>
-      <button class="nav-tab" id="tab-btn-telemetry" onclick="switchView('telemetry')">Live Telemetry (سجل التيليميتري الحي)</button>
-      <button class="nav-tab" id="tab-btn-dist" onclick="switchView('dist')">Release Distribution (توزيع النواة v0.1)</button>
+    <!-- Center Navigation Tabs -->
+    <div class="nav-tabs">
+      <button class="nav-tab active" id="tab-btn-map" onclick="switchView('map')">مسار المراحل (Pipeline Stages)</button>
+      <button class="nav-tab" id="tab-btn-tree" onclick="switchView('tree')">فاحص التحقق الصارم (Formal Verifier)</button>
+      <button class="nav-tab" id="tab-btn-telemetry" onclick="switchView('telemetry')">سجل القياس الحي (Live Telemetry)</button>
+      <button class="nav-tab" id="tab-btn-dist" onclick="switchView('dist')">حزم التوزيع (Releases)</button>
     </div>
 
+    <!-- Action Toolbar (Left in RTL) -->
     <div class="nav-actions">
       <div class="poll-status-badge" id="poll-indicator">
         <div class="pulse-dot" id="pulse-dot"></div>
-        <span id="poll-text">DATABASE: SQLITE (CONNECTING...)</span>
+        <span id="poll-text">متصل محلياً (SQLITE WAL)</span>
       </div>
       <button class="btn" onclick="openExtendModal()">+ توسيع الخريطة</button>
       <button class="btn" onclick="exportState()">تصدير JSON</button>
       <button class="btn" onclick="document.getElementById('import-file-input').click()">استيراد JSON</button>
       <input type="file" id="import-file-input" style="display:none;" onchange="importState(event)">
-      <button class="btn" onclick="toggleTheme()">🌓 المظهر</button>
+      <button class="btn" onclick="toggleTheme()">المظهر الفاتح</button>
     </div>
   </header>
 
-  <!-- الحاوية الرئيسية للعرض -->
-  <main>
-    <!-- واجهة الخريطة التفاعلية -->
-    <div class="map-container" id="map-view">
-      <div class="summary-float" id="systems-metrics-toolbar" style="max-width: 1080px; gap: 16px; padding: 12px 20px;">
-        <div class="stat-item">
-          <span class="stat-label">Pipeline Progress (تقدم المسار)</span>
-          <span class="stat-val" id="stat-progress-pct" style="color:var(--accent-cyan); font-family:var(--font-mono);">0.0% (0 / 75 Tasks Verified)</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Active Phase (المرحلة النشطة)</span>
-          <span class="stat-val" id="stat-active-wave" style="color:var(--accent-purple);">Stage C0: Bootstrap &amp; Scaffolding</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Verification Gate Status (حالة البوابة)</span>
-          <span class="stat-val" id="stat-gate-status" style="color:var(--accent-amber);">Pre-Implementation Zero-State</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Memory Model Guarantee (I₃)</span>
-          <span class="stat-val" style="color:var(--accent-emerald);">Perceus Zero-GC Drop Reuse</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Effect Boundary (I₂)</span>
-          <span class="stat-val" style="color:var(--accent-blue);">Exact Inference (E_decl = E_inf)</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Capability Security (I₄)</span>
-          <span class="stat-val" style="color:var(--accent-rose);">Linear Noumena Sandbox</span>
-        </div>
+  <!-- Executive Systems Metrics Toolbar (6-Card Grid) -->
+  <section class="metrics-toolbar" aria-label="Executive Systems Metrics Toolbar">
+    <!-- Card 1: Pipeline Progress -->
+    <div class="metric-card">
+      <div class="metric-card-top">
+        <span class="metric-card-label">نسبة إنجاز المسار (Progress)</span>
+        <span class="metric-card-badge">Zero-State</span>
       </div>
+      <div class="metric-card-val" id="stat-progress-pct" style="color: var(--brand-gold-dark);">0.0% (0 / 75 Tasks)</div>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill-el" id="progress-bar-fill"></div>
+      </div>
+      <div class="metric-card-caption">
+        <span id="stat-verified-count">0/75</span> مهمة منجزة ومبرهنة (0 تراجع)
+      </div>
+    </div>
 
+    <!-- Card 2: Active Stage -->
+    <div class="metric-card">
+      <div class="metric-card-top">
+        <span class="metric-card-label">المرحلة النشطة (Active Phase)</span>
+        <span class="metric-card-badge" style="color: var(--brand-gold-dark); background: var(--brand-gold-surface); border-color: var(--brand-gold-border);">C0</span>
+      </div>
+      <div class="metric-card-val" id="stat-active-wave" style="color: var(--brand-gold-dark);">Stage C0: Bootstrap</div>
+      <div class="metric-card-caption">إقلاع مساحة العمل والثوابت الإبستمولوجية</div>
+    </div>
+
+    <!-- Card 3: Verification Gate -->
+    <div class="metric-card">
+      <div class="metric-card-top">
+        <span class="metric-card-label">بوابة التحقق (Gate Status)</span>
+        <span class="metric-card-badge" style="color: var(--status-pending-text); background: var(--status-pending-bg); border-color: var(--status-pending-border);">PENDING</span>
+      </div>
+      <div class="metric-card-val" id="stat-gate-status" style="color: var(--status-pending-text);">Pre-Implementation</div>
+      <div class="metric-card-caption">القانون الحديدي: الصفرية الصارمة 0.0%</div>
+    </div>
+
+    <!-- Card 4: Memory Model Guarantee -->
+    <div class="metric-card">
+      <div class="metric-card-top">
+        <span class="metric-card-label">نموذج الذاكرة (Memory Model)</span>
+        <span class="metric-card-badge" style="color: var(--status-verified-text); background: var(--status-verified-bg); border-color: var(--status-verified-border);">I₃ Pin</span>
+      </div>
+      <div class="metric-card-val" style="color: var(--status-verified-text);">Perceus Zero-GC</div>
+      <div class="metric-card-caption">إعادة استخدام الذاكرة Drop-Guided Reuse</div>
+    </div>
+
+    <!-- Card 5: Effect Boundary -->
+    <div class="metric-card">
+      <div class="metric-card-top">
+        <span class="metric-card-label">حدود التأثيرات (Effect Boundary)</span>
+        <span class="metric-card-badge" style="color: var(--status-active-text); background: var(--status-active-bg); border-color: var(--status-active-border);">I₂ Pin</span>
+      </div>
+      <div class="metric-card-val" style="color: var(--status-active-text);">Exact Matching</div>
+      <div class="metric-card-caption">حتمية الاستنتاج: E_decl = E_inf</div>
+    </div>
+
+    <!-- Card 6: Capability Security -->
+    <div class="metric-card">
+      <div class="metric-card-top">
+        <span class="metric-card-label">صندوق الأمان (Capability Security)</span>
+        <span class="metric-card-badge" style="color: var(--status-blocked-text); background: var(--status-blocked-bg); border-color: var(--status-blocked-border);">I₄ Pin</span>
+      </div>
+      <div class="metric-card-val" style="color: var(--status-blocked-text);">Noumena Sandbox</div>
+      <div class="metric-card-caption">Linear Token Isolation &amp; Affine Types</div>
+    </div>
+  </section>
+
+  <!-- Main View Container -->
+  <main>
+    <!-- View 1: Interactive DAG Canvas -->
+    <div class="map-container" id="map-view">
       <div class="map-controls">
         <button class="control-btn" onclick="zoomIn()" title="تكبير">+</button>
         <button class="control-btn" onclick="zoomOut()" title="تصغير">−</button>
@@ -818,11 +987,11 @@
       <svg id="dag-svg"></svg>
     </div>
 
-    <!-- الدرج الجانبي للفاحص التفصيلي (يمين في العرض المنطقي، يسار في RTL) -->
+    <!-- Split-Pane Inspector Drawer -->
     <div class="inspector-drawer" id="inspector-drawer">
       <div class="drawer-header">
         <div class="drawer-title-group">
-          <span class="node-badge" id="drawer-node-id">C1</span>
+          <span class="node-badge" id="drawer-node-id">C0</span>
           <h3 id="drawer-node-title" style="font-size: 14.5px;">فاحص الدائرة</h3>
         </div>
         <div style="display:flex; gap:8px;">
@@ -831,16 +1000,16 @@
       </div>
 
       <div class="drawer-content" id="drawer-content">
-        <!-- المحتوى التفصيلي يتم توليده برمجياً -->
+        <!-- Rendered dynamically by JavaScript -->
       </div>
     </div>
 
-    <!-- لوحة مرصد التيليميتري الحي وسجل التدقيق الإبستمولوجي SQLite -->
+    <!-- View 2: Live Telemetry & Audit Logs -->
     <div class="telemetry-view-container" id="telemetry-view" style="display: none;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
         <div>
-          <h2 style="font-size: 17.5px; font-weight: 800; margin-bottom: 4px;">مرصد التيليميتري الحي وسجل التدقيق الإبستمولوجي (SQLite Live SSE)</h2>
-          <p style="color: var(--text-secondary); font-size: 13px;">
+          <h2 style="font-size: 17.5px; font-weight: 800; margin-bottom: 4px; color: var(--text-primary);">مرصد التيليميتري الحي وسجل التدقيق الإبستمولوجي (SQLite Live SSE)</h2>
+          <p style="color: var(--text-muted); font-size: 13px;">
             تتبع حي وفوري بدون استطلاع (Zero-Polling SSE) لجميع أحداث المشروع، تعديل المهام الذرية، نتائج فحص البوابات الخماسية، وتعديلات ملفات المستودع.
           </p>
         </div>
@@ -850,34 +1019,34 @@
         </div>
       </div>
 
-      <!-- بطاقات حالة قاعدة البيانات والتخزين -->
-      <div class="summary-float" style="position:static; margin-bottom:20px; box-shadow:none; width:100%; justify-content:space-between; direction:rtl;">
-        <div class="stat-item">
-          <span class="stat-label">قاعدة البيانات المحلية</span>
-          <span class="stat-val" style="color:var(--accent-cyan); font-size:12.5px; font-family:var(--font-mono); direction:ltr; text-align:right;">.kant-tracker/kant_telemetry.db</span>
+      <!-- Database Info Cluster -->
+      <div style="display:grid; grid-template-columns:repeat(5, 1fr); gap:12px; margin-bottom:20px;">
+        <div class="metric-card">
+          <span class="metric-card-label">قاعدة البيانات المحلية</span>
+          <span class="metric-card-val" style="font-size:12px; font-family:var(--font-mono); direction:ltr; text-align:right;">.kant-tracker/kant_telemetry.db</span>
         </div>
-        <div class="stat-item">
-          <span class="stat-label">نمط التخزين المتزامن</span>
-          <span class="stat-val" style="color:var(--accent-emerald);">WAL Mode (SQLite 3)</span>
+        <div class="metric-card">
+          <span class="metric-card-label">نمط التخزين المتزامن</span>
+          <span class="metric-card-val" style="color:var(--status-verified-text);">WAL Mode (SQLite 3)</span>
         </div>
-        <div class="stat-item">
-          <span class="stat-label">قناة البث اللحظي</span>
-          <span class="stat-val" style="color:var(--accent-purple);">SSE /api/events (0ms)</span>
+        <div class="metric-card">
+          <span class="metric-card-label">قناة البث اللحظي</span>
+          <span class="metric-card-val" style="color:var(--accent-purple);">SSE /api/events</span>
         </div>
-        <div class="stat-item">
-          <span class="stat-label">إجمالي الأحداث المسجلة</span>
-          <span class="stat-val" id="telemetry-total-badge" style="color:var(--accent-amber);">0</span>
+        <div class="metric-card">
+          <span class="metric-card-label">إجمالي الأحداث المسجلة</span>
+          <span class="metric-card-val" id="telemetry-total-badge" style="color:var(--brand-gold-dark);">0</span>
         </div>
-        <div class="stat-item">
-          <span class="stat-label">آخر إيداع Git</span>
-          <span class="stat-val" id="telemetry-commit-badge" style="color:var(--accent-cyan); font-family:var(--font-mono); direction:ltr; text-align:right;">--</span>
+        <div class="metric-card">
+          <span class="metric-card-label">آخر إيداع Git</span>
+          <span class="metric-card-val" id="telemetry-commit-badge" style="font-size:12px; font-family:var(--font-mono); direction:ltr; text-align:right;">--</span>
         </div>
       </div>
 
-      <!-- شريط تصفية وبحث الأحداث -->
+      <!-- Search & Filters -->
       <div style="display:flex; gap:12px; margin-bottom:14px; align-items:center;">
         <input type="text" id="telemetry-search-input" class="form-control" placeholder="البحث في سجل التيليميتري، المهام، البوابات، أو مسارات الملفات..." style="flex:1;" oninput="filterTelemetryRows()">
-        <select id="telemetry-filter-action" class="status-select" style="padding:9px 12px; font-size:12px;" onchange="filterTelemetryRows()">
+        <select id="telemetry-filter-action" class="status-select" style="padding:8px 12px; font-size:12px;" onchange="filterTelemetryRows()">
           <option value="ALL">جميع أنواع الأحداث (All Telemetry Events)</option>
           <option value="TASK_UPDATE">تحديث المهام (TASK_UPDATE)</option>
           <option value="GATE_RUN">برهنة البوابات (GATE_RUN)</option>
@@ -889,7 +1058,7 @@
         </select>
       </div>
 
-      <!-- جدول سجل الأحداث الحي -->
+      <!-- Telemetry Events Table -->
       <table class="table-artifacts" id="telemetry-table">
         <thead>
           <tr>
@@ -903,27 +1072,27 @@
           </tr>
         </thead>
         <tbody id="telemetry-tbody">
-          <!-- يُولد ديناميكياً -->
+          <!-- Rendered dynamically -->
         </tbody>
       </table>
     </div>
 
-    <!-- لوحة تحكم الإصدار وتوزيع النواة (منظر بديل كامل) -->
+    <!-- View 3: Distribution & Releases -->
     <div class="dist-view-container" id="dist-view" style="display: none;">
-      <h2 style="margin-bottom: 6px; font-weight: 800;">منصة إطلاق وتوزيع الإصدار المعتمد للغة كانط (Kant .kant v0.1)</h2>
-      <p style="color: var(--text-secondary); margin-bottom: 22px; font-size: 13.5px; line-height: 1.6;">
+      <h2 style="margin-bottom: 6px; font-weight: 800; color: var(--text-primary);">منصة إطلاق وتوزيع الإصدار المعتمد للغة كانط (Kant .kant v0.1)</h2>
+      <p style="color: var(--text-muted); margin-bottom: 22px; font-size: 13.5px; line-height: 1.6;">
         بوابات الفحص المؤتمتة، تدقيق نظافة مستودع Git قبل الإطلاق، حزم الإصدار للمنصات المتعددة، ومثبت النظام الموحد بنقرة واحدة، ومنافذ استكشاف الوكلاء الذكاء الاصطناعي.
       </p>
 
       <div class="console-box" id="dist-live-output">
-        <div style="display:flex; justify-content:space-between; margin-bottom:10px; border-bottom:1px solid #1e293b; padding-bottom:6px; direction:rtl;">
-          <span style="font-weight: 700; color:#f8fafc;">محاكاة الطرفية وأوامر التوزيع المعتمدة</span>
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px; border-bottom:1px solid var(--border-base); padding-bottom:6px; direction:rtl;">
+          <span style="font-weight: 700; color: var(--text-primary);">محاكاة الطرفية وأوامر التوزيع المعتمدة</span>
           <button class="copy-btn" onclick="copyDistScriptCmd()">نسخ أمر Bash</button>
         </div>
-        <pre id="dist-cmd-text">bash scripts/distribute_v0_1.sh</pre>
+        <pre id="dist-cmd-text" style="color: var(--text-primary); font-family: var(--font-mono);">bash scripts/distribute_v0_1.sh</pre>
       </div>
 
-      <h3 style="margin-bottom: 12px; font-size: 14.5px; font-weight: 700;">جاهزية حزم الإصدار عبر المنصات المختلفة</h3>
+      <h3 style="margin-bottom: 12px; font-size: 14.5px; font-weight: 700; color: var(--text-primary);">جاهزية حزم الإصدار عبر المنصات المختلفة</h3>
       <table class="table-artifacts">
         <thead>
           <tr>
@@ -936,33 +1105,33 @@
         <tbody>
           <tr>
             <td>لينكس Linux x86_64</td>
-            <td><code style="font-family:var(--font-mono); color:var(--accent-cyan);">kant-0.1.0-linux-x86_64.tar.gz</code></td>
+            <td><code style="font-family:var(--font-mono); color:var(--brand-gold-dark);">kant-0.1.0-linux-x86_64.tar.gz</code></td>
             <td>kantc, kant-mcp, المكتبة المعيارية, kant-toolchain.toml</td>
-            <td><span class="badge" style="background:#10b981; color:#000; padding:3px 8px; border-radius:4px; font-weight:700;">جاهز ومُجاز</span></td>
+            <td><span class="badge" style="background:var(--status-verified-bg); color:var(--status-verified-text); border:1px solid var(--status-verified-border); padding:3px 8px; border-radius:4px; font-weight:700;">جاهز ومُجاز</span></td>
           </tr>
           <tr>
             <td>ماك macOS Apple Silicon (ARM64)</td>
-            <td><code style="font-family:var(--font-mono); color:var(--accent-cyan);">kant-0.1.0-darwin-arm64.tar.gz</code></td>
+            <td><code style="font-family:var(--font-mono); color:var(--brand-gold-dark);">kant-0.1.0-darwin-arm64.tar.gz</code></td>
             <td>kantc, kant-mcp, المكتبة المعيارية, kant-toolchain.toml</td>
-            <td><span class="badge" style="background:#10b981; color:#000; padding:3px 8px; border-radius:4px; font-weight:700;">جاهز ومُجاز</span></td>
+            <td><span class="badge" style="background:var(--status-verified-bg); color:var(--status-verified-text); border:1px solid var(--status-verified-border); padding:3px 8px; border-radius:4px; font-weight:700;">جاهز ومُجاز</span></td>
           </tr>
           <tr>
             <td>ويندوز Windows x86_64</td>
-            <td><code style="font-family:var(--font-mono); color:var(--accent-cyan);">kant-0.1.0-windows-x86_64.tar.gz</code></td>
+            <td><code style="font-family:var(--font-mono); color:var(--brand-gold-dark);">kant-0.1.0-windows-x86_64.tar.gz</code></td>
             <td>kantc.exe, kant-mcp.exe, المكتبة المعيارية, kant-toolchain.toml</td>
-            <td><span class="badge" style="background:#10b981; color:#000; padding:3px 8px; border-radius:4px; font-weight:700;">جاهز ومُجاز</span></td>
+            <td><span class="badge" style="background:var(--status-verified-bg); color:var(--status-verified-text); border:1px solid var(--status-verified-border); padding:3px 8px; border-radius:4px; font-weight:700;">جاهز ومُجاز</span></td>
           </tr>
           <tr>
             <td>المُثبّت الشامل بنقرة واحدة</td>
-            <td><code style="font-family:var(--font-mono); color:var(--accent-cyan);">dist/v0.1.0/install.sh</code></td>
+            <td><code style="font-family:var(--font-mono); color:var(--brand-gold-dark);">dist/v0.1.0/install.sh</code></td>
             <td>كشف تلقائي لنظام التشغيل والمعمارية، وتدقيق بصمات SHA-256</td>
-            <td><span class="badge" style="background:#10b981; color:#000; padding:3px 8px; border-radius:4px; font-weight:700;">مُتحقق منه</span></td>
+            <td><span class="badge" style="background:var(--status-verified-bg); color:var(--status-verified-text); border:1px solid var(--status-verified-border); padding:3px 8px; border-radius:4px; font-weight:700;">مُتحقق منه</span></td>
           </tr>
           <tr>
             <td>بوابة وكلاء الذكاء الاصطناعي</td>
-            <td><code style="font-family:var(--font-mono); color:var(--accent-cyan);">/llms.txt &amp; /agent/v0.1/manifest.json</code></td>
+            <td><code style="font-family:var(--font-mono); color:var(--brand-gold-dark);">/llms.txt &amp; /agent/v0.1/manifest.json</code></td>
             <td>مواصفات التشغيل السريع (&lt;3,200 رمز) و10 أدوات لبروتوكول MCP</td>
-            <td><span class="badge" style="background:#10b981; color:#000; padding:3px 8px; border-radius:4px; font-weight:700;">نشط ومتاح</span></td>
+            <td><span class="badge" style="background:var(--status-verified-bg); color:var(--status-verified-text); border:1px solid var(--status-verified-border); padding:3px 8px; border-radius:4px; font-weight:700;">نشط ومتاح</span></td>
           </tr>
         </tbody>
       </table>
@@ -974,11 +1143,11 @@
     </div>
   </main>
 
-  <!-- النافذة المنبثقة: توسيع الخريطة وإضافة دائرة ماكرو جديدة -->
+  <!-- Modal Dialog: Add New Circle -->
   <div class="modal-backdrop" id="extend-modal">
     <div class="modal-box">
       <div class="modal-header">
-        <h3 style="font-size: 15px; font-weight: 800;">توسيع خريطة مسار الإنجاز / إضافة دائرة ماكرو جديدة</h3>
+        <h3 style="font-size: 15px; font-weight: 800; color: var(--text-primary);">توسيع خريطة مسار الإنجاز / إضافة دائرة ماكرو جديدة</h3>
         <button class="control-btn" onclick="closeExtendModal()">&times;</button>
       </div>
       <div class="modal-body">
@@ -1012,6 +1181,7 @@
   </div>
 
   <script>
+
     /* =========================================================================
        1. معجم موسى وهبه ومخطط البيانات الأساسي باللغة العربية الفصحى
        ========================================================================= */
@@ -3026,23 +3196,24 @@
       }, 3000);
     }
 
+
     /* =========================================================================
-       2. محرك الخريطة الطوبولوجية التفاعلية (SVG DAG PAN & ZOOM)
+       2. محرك الخريطة الطوبولوجية التفاعلية (SVG DAG PAN & ZOOM) - Executive Light
        ========================================================================= */
     const svg = document.getElementById("dag-svg");
     let viewBox = { x: 0, y: 0, width: 1400, height: 800 };
     let isPanning = false;
     let startPoint = { x: 0, y: 0 };
 
-    // الإحداثيات الهندسية للعقد من C0 إلى C6
+    // الإحداثيات الهندسية للعقد من C0 إلى C6 (مسافات واسعة ومريحة >= 190px)
     const NODE_COORDINATES = {
-      C0: { x: 120, y: 380 },
-      C1: { x: 320, y: 380 },
-      C2: { x: 530, y: 380 },
-      C3: { x: 740, y: 380 },
-      C4: { x: 950, y: 380 },
-      C5: { x: 1140, y: 280 },
-      C6: { x: 1280, y: 480 } // المحطة النهائية
+      C0: { x: 100, y: 350 },
+      C1: { x: 300, y: 350 },
+      C2: { x: 500, y: 350 },
+      C3: { x: 700, y: 350 },
+      C4: { x: 900, y: 350 },
+      C5: { x: 1100, y: 260 },
+      C6: { x: 1260, y: 440 }
     };
 
     function setupSvgEvents() {
@@ -3068,7 +3239,7 @@
 
       svg.addEventListener("wheel", (e) => {
         e.preventDefault();
-        const zoomFactor = e.deltaY > 0 ? 1.1 : 0.9;
+        const zoomFactor = e.deltaY > 0 ? 1.08 : 0.92;
         const mouseX = e.clientX - svg.getBoundingClientRect().left;
         const mouseY = e.clientY - svg.getBoundingClientRect().top;
         const svgMouseX = viewBox.x + (mouseX / svg.clientWidth) * viewBox.width;
@@ -3104,27 +3275,25 @@
     function renderMap() {
       svg.innerHTML = "";
 
-      // المؤثرات البصرية والمرشحات الضوئية
+      // Definitions for subtle shadows and markers
       const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
       defs.innerHTML = `
-        <filter id="glow-gold" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur" />
-          <feMerge>
-            <feMergeNode in="blur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
+        <filter id="node-shadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0F172A" flood-opacity="0.08"/>
         </filter>
-        <filter id="glow-cyan" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
-          <feMerge>
-            <feMergeNode in="blur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
+        <filter id="node-active-shadow" x="-30%" y="-30%" width="160%" height="160%">
+          <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#936E22" flood-opacity="0.18"/>
         </filter>
+        <marker id="arrow-gold" markerWidth="10" markerHeight="10" refX="8" refY="3.5" orient="auto">
+          <polygon points="0 0, 10 3.5, 0 7" fill="#936E22"/>
+        </marker>
+        <marker id="arrow-muted" markerWidth="10" markerHeight="10" refX="8" refY="3.5" orient="auto">
+          <polygon points="0 0, 10 3.5, 0 7" fill="#CBD5E1"/>
+        </marker>
       `;
       svg.appendChild(defs);
 
-      // رسم الحواف والروابط بين العقد
+      // Draw directed cubic bezier connection edges
       state.circles.forEach(circle => {
         const fromCoord = NODE_COORDINATES[circle.id] || { x: 700, y: 600 };
         (circle.dependencies || []).forEach(depId => {
@@ -3132,59 +3301,90 @@
           if (!toCoord) return;
           const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
           const dx = Math.abs(fromCoord.x - toCoord.x) / 2;
+          const isFromActive = circle.id === activeCircleId || depId === activeCircleId;
           const d = `M ${toCoord.x + 45} ${toCoord.y} C ${toCoord.x + 45 + dx} ${toCoord.y}, ${fromCoord.x - 45 - dx} ${fromCoord.y}, ${fromCoord.x - 45} ${fromCoord.y}`;
           path.setAttribute("d", d);
-          path.setAttribute("class", `edge-line ${circle.gate_status !== "LOCKED" ? "active" : ""}`);
+          path.setAttribute("fill", "none");
+          path.setAttribute("stroke", isFromActive ? "#936E22" : "#CBD5E1");
+          path.setAttribute("stroke-width", isFromActive ? "2.5" : "2");
+          path.setAttribute("stroke-linecap", "round");
+          path.setAttribute("stroke-dasharray", isFromActive ? "none" : "5 4");
           svg.appendChild(path);
         });
       });
 
-      // وصلات خاصة للمسار النهائي: C4 -> C5 -> C6
+      // Special connection for final stage flow C5 -> C6
       const c5Coord = NODE_COORDINATES["C5"];
       const c6Coord = NODE_COORDINATES["C6"];
       if (c5Coord && c6Coord) {
         const path56 = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        path56.setAttribute("d", `M ${c5Coord.x + 45} ${c5Coord.y} C ${c5Coord.x + 100} ${c5Coord.y}, ${c6Coord.x - 45} ${c6Coord.y - 40}, ${c6Coord.x} ${c6Coord.y - 50}`);
-        path56.setAttribute("class", "edge-line active");
+        path56.setAttribute("d", `M ${c5Coord.x + 45} ${c5Coord.y} C ${c5Coord.x + 80} ${c5Coord.y}, ${c6Coord.x - 45} ${c6Coord.y - 40}, ${c6Coord.x} ${c6Coord.y - 45}`);
+        path56.setAttribute("fill", "none");
+        path56.setAttribute("stroke", "#CBD5E1");
+        path56.setAttribute("stroke-width", "2");
+        path56.setAttribute("stroke-dasharray", "5 4");
         svg.appendChild(path56);
       }
 
-      // رسم دوائر الماكرو (Macro-Circles)
+      const stageDisplayNames = {
+        "C0": { en: "Bootstrap & Scaffolding", ar: "إقلاع مساحة العمل والثوابت" },
+        "C1": { en: "Aesthetic (Lexer & AST)", ar: "الجمالياء والمعجم والـ AST" },
+        "C2": { en: "Analytic (Types & IR)", ar: "التحليلياء وشيم KANT-IR" },
+        "C3": { en: "Dialectic & Noumena", ar: "الجدلياء ونطاق النومان" },
+        "C4": { en: "Method (VM & JIT)", ar: "مبحث المنهج والمفسر" },
+        "C5": { en: "Foundational Proofs", ar: "براهين الجودة الأربعة" },
+        "C6": { en: "Official Release v0.1", ar: "حزم التوزيع والإطلاق" },
+      };
+
+      // Draw Macro-Circle Nodes (72px diameter, pure white and light porcelain)
       state.circles.forEach(circle => {
         const coord = NODE_COORDINATES[circle.id] || { x: 700, y: 600 };
         const isSelected = circle.id === activeCircleId;
         const isFinal = circle.is_final_destination;
 
-        // حساب نسبة إنجاز الدائرة
+        // Compute completion stats
         let total = 0, done = 0;
         for (const h of circle.main_headings || []) {
           for (const s of h.sub_headings || []) {
             for (const t of s.tasks || []) {
               total++;
-              if (t.status === "DONE_VERIFIED") done++;
+              if (t.status === "DONE_VERIFIED" || t.status === "DONE") done++;
             }
           }
         }
         const pct = total > 0 ? done / total : 0;
-        const radius = 42;
-        const circumference = 2 * Math.PI * radius;
-        const offset = circumference - (pct * circumference);
+        const radius = 38;
 
-        // ترجمة حالة البوابة برمجياً وبصرياً
-        let statusColor = "#64748b";
-        let statusTextArabic = "مغلق بانتظار السلف";
-        if (circle.gate_status === "VERIFIED_PASSED") {
-          statusColor = "#10b981";
-          statusTextArabic = "مُبرهن ومُجاز";
-        } else if (circle.gate_status === "IN_ITERATION") {
-          statusColor = "#06b6d4";
-          statusTextArabic = "قيد التكرار البرهاني";
-        } else if (circle.gate_status === "REGRESSION_DETECTED") {
-          statusColor = "#f43f5e";
-          statusTextArabic = "تراجع مرصود!";
-        } else if (circle.gate_status === "GATE_PENDING") {
-          statusColor = "#f59e0b";
-          statusTextArabic = "بانتظار بوابة الفحص";
+        // Semantic status tokens
+        let statusBorderColor = "#CBD5E1";
+        let statusFillColor = "#F8FAFC";
+        let statusBadgeBg = "#F1F5F9";
+        let statusBadgeBorder = "#E2E8F0";
+        let statusBadgeText = "#64748B";
+
+        if (circle.gate_status === "VERIFIED_PASSED" || circle.gate_status === "PASSED") {
+          statusBorderColor = "#059669";
+          statusFillColor = "#FFFFFF";
+          statusBadgeBg = "#ECFDF5";
+          statusBadgeBorder = "#A7F3D0";
+          statusBadgeText = "#065F46";
+        } else if (circle.gate_status === "IN_ITERATION" || circle.gate_status === "ACTIVE") {
+          statusBorderColor = "#1D4ED8";
+          statusFillColor = "#FFFFFF";
+          statusBadgeBg = "#EFF6FF";
+          statusBadgeBorder = "#BFDBFE";
+          statusBadgeText = "#1E40AF";
+        } else if (circle.gate_status === "GATE_PENDING" || circle.gate_status === "PENDING") {
+          statusBorderColor = "#D97706";
+          statusFillColor = "#FFFFFF";
+          statusBadgeBg = "#FFFBEB";
+          statusBadgeBorder = "#FDE68A";
+          statusBadgeText = "#92400E";
+        }
+
+        if (isSelected) {
+          statusBorderColor = "#936E22";
+          statusFillColor = "#FFFFFF";
         }
 
         const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -3192,26 +3392,32 @@
         g.setAttribute("transform", `translate(${coord.x}, ${coord.y})`);
         g.onclick = () => selectCircle(circle.id);
 
-        const circleDisplayTitle = circle.short_title || circle.name;
-
         g.innerHTML = `
-          <!-- النواة الخلفية -->
-          <circle r="${radius + 5}" fill="${isFinal ? '#1a1805' : '#0d1322'}" stroke="${isSelected ? '#38bdf8' : (isFinal ? '#f59e0b' : '#1e293b')}" stroke-width="${isSelected ? 3 : (isFinal ? 2.5 : 1.5)}" ${isFinal ? 'filter="url(#glow-gold)"' : (isSelected ? 'filter="url(#glow-cyan)"' : '')} />
+          <!-- Outer accent ring for active stage -->
+          ${isSelected ? `<circle r="${radius + 7}" fill="none" stroke="#F3E3B6" stroke-width="2.5" />` : ''}
 
-          <!-- مسار حلقة التقدم الشعاعية -->
-          <circle r="${radius}" fill="none" stroke="#1e293b" stroke-width="5" />
+          <!-- Base Circle Body -->
+          <circle r="${radius}" fill="${statusFillColor}" stroke="${statusBorderColor}" stroke-width="${isSelected ? 3 : 2}" filter="${isSelected ? 'url(#node-active-shadow)' : 'url(#node-shadow)'}" />
 
-          <!-- مؤشر حلقة التقدم الشعاعية -->
-          <circle r="${radius}" fill="none" stroke="${statusColor}" stroke-width="5" stroke-dasharray="${circumference}" stroke-dashoffset="${offset}" stroke-linecap="round" transform="rotate(-90)" />
+          <!-- Radial Progress Track -->
+          <circle r="${radius - 6}" fill="none" stroke="#F1F5F9" stroke-width="3" />
 
-          <!-- النصوص والعلامات المركزية -->
-          <text y="-6" text-anchor="middle" fill="#f8fafc" font-weight="800" font-family="var(--font-mono)" font-size="14">${circle.id}</text>
-          <text y="14" text-anchor="middle" fill="${statusColor}" font-weight="700" font-family="var(--font-mono)" font-size="11">${Math.round(pct * 100)}%</text>
+          <!-- Radial Progress Indicator -->
+          <circle r="${radius - 6}" fill="none" stroke="${isSelected ? '#936E22' : statusBorderColor}" stroke-width="3" stroke-dasharray="${2 * Math.PI * (radius - 6)}" stroke-dashoffset="${(2 * Math.PI * (radius - 6)) * (1 - pct)}" stroke-linecap="round" transform="rotate(-90)" />
 
-          <!-- بطاقات التعريف أسفل العقدة -->
-          <text y="${radius + 20}" text-anchor="middle" fill="#f8fafc" font-weight="700" font-family="var(--font-sans)" font-size="11.5">${circle.short_title || circle.name}</text>
-          <text y="${radius + 35}" text-anchor="middle" fill="var(--text-secondary)" font-size="10.5" font-family="var(--font-sans)">${circle.arabic_short_title || circle.arabic_title || ''}</text>
-          <text y="${radius + 49}" text-anchor="middle" fill="${statusColor}" font-weight="700" font-family="var(--font-mono)" font-size="10">${circle.gate_status || 'LOCKED'}</text>
+          <!-- Central Stage ID & Percent -->
+          <text y="-4" text-anchor="middle" fill="${isSelected ? '#936E22' : '#0F172A'}" font-weight="800" font-family="var(--font-mono)" font-size="16">${circle.id}</text>
+          <text y="14" text-anchor="middle" fill="${statusBadgeText}" font-weight="700" font-family="var(--font-mono)" font-size="11">${Math.round(pct * 100)}%</text>
+
+          <!-- Concise & Elegantly Spaced Stage Labels -->
+          <text y="${radius + 19}" text-anchor="middle" fill="#0F172A" font-weight="700" font-family="var(--font-sans)" font-size="11.5">${stageDisplayNames[circle.id] ? stageDisplayNames[circle.id].en : circle.id}</text>
+          <text y="${radius + 33}" text-anchor="middle" fill="#334155" font-weight="500" font-family="var(--font-sans)" font-size="10.5">${stageDisplayNames[circle.id] ? stageDisplayNames[circle.id].ar : ''}</text>
+
+          <!-- Status Badge Pill -->
+          <g transform="translate(0, ${radius + 44})">
+            <rect x="-36" y="0" width="72" height="17" rx="4" fill="${statusBadgeBg}" stroke="${statusBadgeBorder}" stroke-width="1" />
+            <text x="0" y="12" text-anchor="middle" fill="${statusBadgeText}" font-weight="700" font-family="var(--font-mono)" font-size="9.5">${circle.gate_status || 'LOCKED'}</text>
+          </g>
         `;
 
         svg.appendChild(g);
@@ -3227,7 +3433,10 @@
       renderDrawer();
       const circle = state.circles.find(c => c.id === circleId);
       if (circle) {
-        document.getElementById("stat-active-wave").textContent = circle.wave || circle.name;
+        const waveElem = document.getElementById("stat-active-wave");
+        if (waveElem) {
+          waveElem.textContent = `${circle.id}: ${circle.short_title || circle.name}`;
+        }
       }
     }
 
@@ -3235,10 +3444,10 @@
       const circle = state.circles.find(c => c.id === activeCircleId);
       if (!circle) return;
 
-            document.getElementById("drawer-node-id").textContent = circle.id;
+      document.getElementById("drawer-node-id").textContent = circle.id;
       document.getElementById("drawer-node-title").innerHTML = `
         <div style="font-weight:800; font-size:14px; color:var(--text-primary);">${circle.name}</div>
-        <div style="font-size:11.5px; color:var(--accent-cyan); margin-top:2px;">${circle.arabic_title || ''}</div>
+        <div style="font-size:11.5px; color:var(--brand-gold-dark); margin-top:2px;">${circle.arabic_title || ''}</div>
         <div style="font-size:10.5px; font-family:var(--font-mono); color:var(--text-muted); margin-top:3px;">Invariant: ${circle.gate_invariant || 'N/A'}</div>
       `;
       document.getElementById("next-iter-num").textContent = (circle.iteration || 1) + 1;
@@ -3250,149 +3459,152 @@
       const gateCard = document.createElement("div");
       gateCard.className = "gate-card";
 
-      // تخصيص بنود البوابة حسب طبيعة الدائرة
       let checklistHtml = "";
       if (circle.id === "C0") {
-        checklistHtml = `          <label class="checklist-item">
+        checklistHtml = `
+          <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.spec_pinning ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'spec_pinning')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] Invariant I_1: Canonical Content-Addressing Hash Pinned</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] Invariant I_1: Canonical Content-Addressing Hash Pinned</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">تثبيت الوثائق المرجعية الثمانية (.md) وتأمين تطابق بصمات BLAKE3/SHA-256</div>
             </div>
           </label>
           <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.lexicon_mapping ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'lexicon_mapping')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] Academic Wehbe Lexicon Mapped to Constructive MLTT Types</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] Wehbe Epistemic Lexicon Mapped to Constructive MLTT Types</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">مواءمة معجم موسى وهبه الفلسفي مع نظرية الأنماط البنائية (Martin-Löf)</div>
             </div>
           </label>
           <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.clarification_triage ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'clarification_triage')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] ADR Engine: 24 Pragmatic Deferrals Triaged &amp; Pinned</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] ADR Engine: 24 Pragmatic Deferrals Triaged &amp; Pinned</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">فرز وتوثيق 24 قراراً معمارياً وحسم الخيارات الأساسية (P0 Baselines)</div>
             </div>
           </label>
           <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.toolchain_hashes ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'toolchain_hashes')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] Toolchain Manifest: SHA-256 Pinning in kant-toolchain.toml</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] Toolchain Manifest: SHA-256 Pinning in kant-toolchain.toml</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">تثبيت بصمات حزمة الأدوات والتحقق التام من نزاهة المستودع</div>
             </div>
           </label>
           <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.git_lane_hygiene ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'git_lane_hygiene')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] Git Lane Hygiene: 16 Subagent Concurrency Domains Isolated</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] Git Lane Hygiene: 16 Subagent Concurrency Domains Isolated</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">انضباط ونظافة 16 مسار عمل معزول في AGENTS.md دون أي تداخل بالملفات</div>
             </div>
           </label>`;
       } else if (circle.id === "C5") {
-        checklistHtml = `          <label class="checklist-item">
+        checklistHtml = `
+          <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.differential_proof ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'differential_proof')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] Proof 1: Differential Oracle (Evaluator == Codegen, 100% Match)</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] Proof 1: Differential Oracle (Evaluator == Codegen, 100% Match)</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">البرهان الأول: أوراكل التفاضل بين المفسر ومولد الكود عبر 50 برنامجاً مرجعياً</div>
             </div>
           </label>
           <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.byte_determinism_proof ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'byte_determinism_proof')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] Proof 2: Byte-for-Byte Determinism (0 Jitter Across Compilations)</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] Proof 2: Byte-for-Byte Determinism (0 Jitter Across Compilations)</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">البرهان الثاني: الحتمية الثنائية وتطابق البايتات التام بين عمليتي بناء مستقلتين</div>
             </div>
           </label>
           <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.repair_convergence_proof ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'repair_convergence_proof')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] Proof 3: Auto-Repair Convergence Loop (kantc fix --apply)</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] Proof 3: Auto-Repair Convergence Loop (kantc fix --apply)</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">البرهان الثالث: تقارب الإصلاح التلقائي المستقل عبر 30 برنامجاً به عيوب مدروسة</div>
             </div>
           </label>
           <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.zero_escape_security_proof ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'zero_escape_security_proof')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] Proof 4: Noumena Zero-Escape Containment (100% Rejection)</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] Proof 4: Noumena Zero-Escape Containment (100% Rejection)</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">البرهان الرابع: أمان النومان وانعدام أي هروب أو تزوير للقدرات في الاختبارات الهجومية</div>
             </div>
           </label>
           <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.git_status_clean ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'git_status_clean')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] Clean Workspace State: git status --porcelain Clean</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] Clean Workspace State: git status --porcelain Clean</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">نظافة بيئة الإيداع والتحقق التام من متجهات الفحص دون شوائب</div>
             </div>
           </label>`;
       } else if (circle.id === "C6") {
-        checklistHtml = `          <label class="checklist-item">
+        checklistHtml = `
+          <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.clean_git_tree ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'clean_git_tree')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] Pre-Release Git Hygiene Gate (git check-ignore)</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] Pre-Release Git Hygiene Gate (git check-ignore)</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">نظافة شجرة Git واستبعاد ملفات التتبع بالكامل من الفحص والإيداع</div>
             </div>
           </label>
           <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.tarballs_generated ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'tarballs_generated')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] Multi-Platform Release Tarballs (x86_64, darwin-arm64, windows)</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] Multi-Platform Release Tarballs (x86_64, darwin-arm64, windows)</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">بناء وتوليد حزم التوزيع للمنصات الثلاث ومطابقة الحزم المجردة</div>
             </div>
           </label>
           <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.checksums_verified ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'checksums_verified')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] SHA256SUMS Cryptographic Distribution Manifest Verified</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] SHA256SUMS Cryptographic Distribution Manifest Verified</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">التحقق المشفر من بيان بصمات التوزيع SHA256SUMS ومطابقتها الآلية</div>
             </div>
           </label>
           <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.installer_smoke_tested ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'installer_smoke_tested')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] Universal Installer Script Smoke-Tested (install.sh)</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] Universal Installer Script Smoke-Tested (install.sh)</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">الاختبار الدخاني لسكربت التثبيت الشامل install.sh والتحقق من المسارات</div>
             </div>
           </label>
           <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.agent_portal_ready ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'agent_portal_ready')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] Agent Discovery Endpoints: /llms.txt (&lt;3,200 tok) &amp; 10 MCP Tools</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] Agent Discovery Endpoints: /llms.txt (&lt;3,200 tok) &amp; 10 MCP Tools</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">جاهزية بوابة الوكلاء الآلية /llms.txt ومنافذ الاستكشاف الموحدة</div>
             </div>
           </label>`;
       } else {
-        checklistHtml = `          <label class="checklist-item">
+        checklistHtml = `
+          <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.cargo_fmt ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'cargo_fmt')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] cargo fmt -p &lt;crate&gt; -- --check (Formatting Compliance)</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] cargo fmt -p &lt;crate&gt; -- --check (Formatting Compliance)</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">فحص التنسيق الصارم لقواعد الشيفرة القياسية في Rust</div>
             </div>
           </label>
           <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.cargo_clippy ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'cargo_clippy')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] cargo clippy -p &lt;crate&gt; -- -D warnings (Zero-Warning Linter)</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] cargo clippy -p &lt;crate&gt; -- -D warnings (Zero-Warning Linter)</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">فحص المدقق الصارم بانعدام أي تحذيرات أو تجاوزات نمطية</div>
             </div>
           </label>
           <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.cargo_test ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'cargo_test')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] cargo test -p &lt;crate&gt; -- --nocapture (100% Tests Pass)</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] cargo test -p &lt;crate&gt; -- --nocapture (100% Tests Pass)</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">حزمة الاختبارات الوحدوية والاندماجية الممررة بالكامل دون إخفاق</div>
             </div>
           </label>
           <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.conformance_tests ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'conformance_tests')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] cargo test -p &lt;crate&gt; conformance -- --exact (Formal Gate Vectors)</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] cargo test -p &lt;crate&gt; conformance -- --exact (Formal Gate Vectors)</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">متجهات مطابقة المعايير الصارمة لثوابت المرحلة وبوابتها الإبستمولوجية</div>
             </div>
           </label>
           <label class="checklist-item">
             <input type="checkbox" ${circle.gate_checklist?.git_status_clean ? 'checked' : ''} onchange="toggleGateCheck('${circle.id}', 'git_status_clean')">
             <div>
-              <code style="font-size:11.5px; font-weight:700;">[ ] git status --porcelain (Pristine Clean Working Tree)</code>
+              <code style="font-size:11px; font-weight:700; direction:ltr; text-align:left; display:block;">[ ] git status --porcelain (Pristine Clean Working Tree)</code>
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">نظافة مسار Git وخلوه من أي شوائب أو ملفات غير متتبعة</div>
             </div>
           </label>`;
@@ -3412,6 +3624,10 @@
         <div class="gate-checklist">
           ${checklistHtml}
         </div>
+        <div style="margin-top: 10px; background: var(--bg-surface); border: 1px solid var(--border-base); border-radius: 6px; padding: 6px 10px; font-family: var(--font-mono); font-size: 11px; color: var(--text-primary); display: flex; align-items: center; justify-content: space-between;">
+          <code>$ cargo test -p ${circle.id === 'C0' ? 'kant-core' : 'kant-' + circle.id.toLowerCase()}</code>
+          <button class="copy-btn" onclick="navigator.clipboard.writeText('cargo test -p ${circle.id === 'C0' ? 'kant-core' : 'kant-' + circle.id.toLowerCase()}'); alert('تم نسخ أمر الفحص بنجاح!');">نسخ الأمر</button>
+        </div>
       `;
       container.appendChild(gateCard);
 
@@ -3423,8 +3639,8 @@
         headingDiv.innerHTML = `
           <div class="heading-header" onclick="this.nextElementSibling.classList.toggle('collapsed')">
             <div class="heading-title-group">
-              <span class="sub-agent-badge">${heading.assigned_agent || 'SA-XX'}</span>
-              <strong style="font-size:13.5px;">${heading.title}</strong>
+              <span class="sub-agent-badge">${heading.assigned_agent || 'SA-01'}</span>
+              <strong style="font-size:13.5px; color:var(--text-primary);">${heading.title}</strong>
             </div>
             <span style="font-size:11px; font-family:var(--font-mono); color:var(--text-muted); direction:ltr;">${heading.crate_lane}</span>
           </div>
@@ -3448,8 +3664,8 @@
                       </div>
                       ${task.target_crate || task.assigned_agent ? `
                         <div style="display:flex; gap:8px; margin:4px 0; font-family:var(--font-mono); font-size:11px;">
-                          ${task.assigned_agent ? `<span style="color:var(--accent-purple); background:rgba(139,92,246,0.1); padding:1px 6px; border-radius:4px;">Agent: ${task.assigned_agent}</span>` : ''}
-                          ${task.target_crate ? `<span style="color:var(--accent-cyan); background:rgba(6,182,212,0.1); padding:1px 6px; border-radius:4px; direction:ltr;">${task.target_crate}</span>` : ''}
+                          ${task.assigned_agent ? `<span style="color:var(--brand-gold-dark); background:var(--brand-gold-surface); border:1px solid var(--brand-gold-border); padding:1px 6px; border-radius:4px;">Agent: ${task.assigned_agent}</span>` : ''}
+                          ${task.target_crate ? `<span style="color:var(--text-secondary); background:var(--bg-muted); border:1px solid var(--border-subtle); padding:1px 6px; border-radius:4px; direction:ltr;">${task.target_crate}</span>` : ''}
                         </div>
                       ` : ''}
                       ${task.description ? `
@@ -3460,12 +3676,12 @@
                       ${(task.verification_gate || task.verification_cmd) ? `
                         <div class="task-cmd-box" style="margin:6px 0;">
                           <code style="font-size:11px;">${task.verification_gate || task.verification_cmd}</code>
-                          <button class="copy-btn" onclick="navigator.clipboard.writeText('${(task.verification_gate || task.verification_cmd).replace(/'/g, "\'")}')">Copy Gate</button>
+                          <button class="copy-btn" onclick="navigator.clipboard.writeText('${(task.verification_gate || task.verification_cmd).replace(/'/g, "\\'")}'); alert('تم نسخ أمر التحقق!');">نسخ الأمر</button>
                         </div>
                       ` : ''}
                       ${task.acceptance_criteria ? `
-                        <div class="task-criteria-box" style="font-size:11px; font-family:var(--font-mono); color:var(--accent-emerald); background:rgba(16,185,129,0.06); border:1px solid rgba(16,185,129,0.22); border-radius:5px; padding:5px 8px; margin:6px 0; line-height:1.4;">
-                          <strong style="color:var(--accent-emerald);">Acceptance Criteria:</strong> ${task.acceptance_criteria}
+                        <div class="task-criteria-box" style="font-size:11px; font-family:var(--font-mono); color:var(--status-verified-text); background:var(--status-verified-bg); border:1px solid var(--status-verified-border); border-radius:5px; padding:5px 8px; margin:6px 0; line-height:1.4;">
+                          <strong style="color:var(--status-verified-text);">Acceptance Criteria:</strong> ${task.acceptance_criteria}
                         </div>
                       ` : ''}
                       <input type="text" class="task-notes-input" value="${task.notes || ''}" placeholder="Engineering notes, verification metrics, test vector status..." onchange="updateTaskNotes('${task.id}', this.value)">
@@ -3547,7 +3763,6 @@
       if (!circle) return;
       circle.gate_status = status;
       saveState();
-      // مزامنة مباشرة ومحددة مع نقطة النهاية /api/gate في SQLite
       fetch("/api/gate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -3600,9 +3815,8 @@
         return;
       }
 
-      // إضافة موضع هندسي للعقدة في خريطة الـ DAG
       const count = Object.keys(NODE_COORDINATES).length;
-      NODE_COORDINATES[id] = { x: 700 + ((count - 6) * 180), y: 620 };
+      NODE_COORDINATES[id] = { x: 700 + ((count - 6) * 190), y: 620 };
 
       const newCircle = {
         id,
@@ -3655,7 +3869,7 @@
         document.getElementById("tab-btn-map").classList.add("active");
         document.getElementById("map-view").style.display = "block";
         document.getElementById("inspector-drawer").style.display = "flex";
-        document.getElementById("inspector-drawer").style.width = "530px";
+        document.getElementById("inspector-drawer").style.width = "460px";
         document.getElementById("telemetry-view").style.display = "none";
         document.getElementById("dist-view").style.display = "none";
       } else if (viewName === "tree") {
@@ -3687,7 +3901,7 @@
     }
 
     function copyInstallCmd() {
-      const cmd = "curl -fsSL https://raw.githubusercontent.com/kant-lang/kant/main/dist/v0.1.0/install.sh | sh";
+      const cmd = "curl -fsSL https://raw.githubusercontent.com/azmyayman-maker/KANT/main/dist/v0.1.0/install.sh | sh";
       navigator.clipboard.writeText(cmd);
       alert("تم نسخ أمر التثبيت الشامل المباشر:\n" + cmd);
     }
@@ -3695,12 +3909,12 @@
     function runDistributeAction() {
       const output = document.getElementById("dist-live-output");
       output.innerHTML = `
-        <div style="color:var(--accent-emerald);">[✓] جاري تدقيق نظافة مستودع Git قبل الإطلاق...</div>
+        <div style="color:var(--status-verified-text);">[✓] جاري تدقيق نظافة مستودع Git قبل الإطلاق...</div>
         <div style="color:var(--text-secondary);">[✓] تم التأكد من إدراج kant-roadmap-tracker.html و .kant-tracker/ في .gitignore</div>
         <div style="color:var(--text-secondary);">[✓] تم تجهيز حزم linux-x86_64 و darwin-arm64 و windows-x86_64 في مجلد dist/v0.1.0/</div>
         <div style="color:var(--text-secondary);">[✓] تم التحقق المشفر من بيان بصمات SHA256SUMS</div>
         <div style="color:var(--text-secondary);">[✓] تم توليد وتضمين مواصفة التشغيل السريع /llms.txt (&lt;3,200 رمز)</div>
-        <div style="color:var(--accent-cyan); margin-top:8px; font-weight:bold;">[✓] جميع بوابات إطلاق الإصدار v0.1.0 مُجتازة ومُبرهنة بنجاح!</div>
+        <div style="color:var(--brand-gold-dark); margin-top:8px; font-weight:bold;">[✓] جميع بوابات إطلاق الإصدار v0.1.0 مُجتازة ومُبرهنة بنجاح!</div>
       `;
     }
 
@@ -3739,9 +3953,8 @@
     }
 
     function toggleTheme() {
-      const current = document.body.getAttribute("data-theme");
-      const next = current === "light" ? "dark" : "light";
-      document.body.setAttribute("data-theme", next);
+      // The Executive Light theme is the canonical permanent theme
+      alert("المظهر الفاتح القياسي (Executive Light) هو المظهر الأساسي والمعتمد لنظام المرصد.");
     }
 
     // تهيئة التطبيق عند اكتمال تحميل الصفحة

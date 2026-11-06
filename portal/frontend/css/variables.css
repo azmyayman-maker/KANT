@@ -1,70 +1,119 @@
 /* ==========================================================================
-   Kant Compiler Toolchain - Telemetry Portal Design Tokens
-   Strict 100% Offline Self-Contained System (Zero External CDNs)
+   Kant Compiler Toolchain - Executive Light Design System Tokens
+   100% Offline Self-Contained System (Zero External CDNs)
+   Inspired by Stripe Dashboard, Vercel, Linear Light, & Apple Developer UI
    ========================================================================== */
 
 :root {
-  /* Color Palette - Kant Gold Brand & Dark Modern Surface Tokens */
-  --color-gold-primary: #B8913F;
-  --color-gold-light: #D4AF37;
-  --color-gold-dark: #8C6A22;
+  /* Canvas & Surface Tokens (Pure White and Light Porcelain Slate) */
+  --bg-canvas: #F8FAFC;          /* Slate-50: Crisp, clean porcelain canvas background */
+  --bg-surface: #FFFFFF;         /* Pure White: Primary cards, panels, and drawer */
+  --bg-surface-elevated: #FFFFFF;/* Elevated dropdowns, modals, floating widgets */
+  --bg-muted: #F1F5F9;           /* Slate-100: Secondary surfaces, table headers, inactive tabs */
+  --bg-subtle: #E2E8F0;          /* Slate-200: Dividers, borders, subtle hover backgrounds */
+  --bg-overlay: rgba(15, 23, 42, 0.4); /* Backdrop overlay with subtle dimming */
+
+  /* Border Tokens */
+  --border-subtle: #E2E8F0;      /* Slate-200: Default card and container borders */
+  --border-base: #CBD5E1;        /* Slate-300: Control borders, inputs, buttons */
+  --border-strong: #94A3B8;      /* Slate-400: Active element borders, dividers */
+  --border-focus: #0284C7;       /* Sky-600: Focus ring and active input highlight */
+
+  /* Text & Typography Hierarchy (High-Contrast Charcoal & Slate) */
+  --text-primary: #0F172A;       /* Slate-900: High-contrast headings and primary labels */
+  --text-secondary: #334155;     /* Slate-700: Body text, card descriptions, active nav */
+  --text-muted: #64748B;         /* Slate-500: Subtitles, timestamps, metadata, captions */
+  --text-disabled: #94A3B8;      /* Slate-400: Disabled controls, locked stage indicators */
+
+  /* Imperial Bronze & Kant Gold Brand Accents (Restrained, Accessible & Elegant) */
+  --brand-gold-primary: #936E22; /* Deep Imperial Gold/Bronze (Accessible on white: ratio > 4.5:1) */
+  --brand-gold-dark: #7A5B18;    /* Deep rich bronze for active hover states */
+  --brand-gold-light: #B8913F;   /* Warm metallic gold for subtle accents, badges, icons */
+  --brand-gold-surface: #FEF9EE; /* Soft warm gold tint for active stage highlight */
+  --brand-gold-border: #F3E3B6;  /* Soft gold border for active highlight */
+  --brand-gold-glow: rgba(147, 110, 34, 0.12); /* Very subtle elevation tint */
+
+  /* Semantic Status Tokens (Refined Low-Saturation Pastels with High-Contrast Text) */
+  --status-pending-bg: #FFFBEB;     /* Amber-50 */
+  --status-pending-border: #FDE68A; /* Amber-200 */
+  --status-pending-text: #92400E;   /* Amber-800 */
+
+  --status-locked-bg: #F1F5F9;      /* Slate-100 */
+  --status-locked-border: #E2E8F0;  /* Slate-200 */
+  --status-locked-text: #64748B;    /* Slate-500 */
+
+  --status-active-bg: #EFF6FF;      /* Blue-50 */
+  --status-active-border: #BFDBFE;  /* Blue-200 */
+  --status-active-text: #1E40AF;    /* Blue-800 */
+
+  --status-verified-bg: #ECFDF5;    /* Emerald-50 */
+  --status-verified-border: #A7F3D0;/* Emerald-200 */
+  --status-verified-text: #065F46;  /* Emerald-800 */
+
+  --status-blocked-bg: #FFF1F2;     /* Rose-50 */
+  --status-blocked-border: #FECDD3; /* Rose-200 */
+  --status-blocked-text: #9F1239;   /* Rose-800 */
+
+  /* Legacy & Semantic Color Aliases */
+  --color-gold-primary: var(--brand-gold-primary);
+  --color-gold-light: var(--brand-gold-light);
+  --color-gold-dark: var(--brand-gold-dark);
   --color-gold-deep: #5C4313;
-  --color-gold-glow: rgba(184, 145, 63, 0.35);
+  --color-gold-glow: var(--brand-gold-glow);
 
-  --color-bg-deep: #0F141C;
-  --color-bg-base: #121824;
-  --color-bg-elevated: #161D27;
-  --color-bg-surface: #1B2432;
-  --color-bg-overlay: rgba(15, 20, 28, 0.85);
+  --color-bg-deep: var(--bg-canvas);
+  --color-bg-base: var(--bg-canvas);
+  --color-bg-elevated: var(--bg-surface);
+  --color-bg-surface: var(--bg-muted);
+  --color-bg-overlay: var(--bg-overlay);
 
-  --color-border-subtle: #232D3B;
-  --color-border-base: #2D3A4B;
-  --color-border-active: #B8913F;
-  --color-border-focus: #38BDF8;
+  --color-border-subtle: var(--border-subtle);
+  --color-border-base: var(--border-base);
+  --color-border-active: var(--brand-gold-primary);
+  --color-border-focus: var(--border-focus);
 
-  --color-text-primary: #F0F4F8;
-  --color-text-secondary: #CBD5E1;
-  --color-text-muted: #8B949E;
-  --color-text-disabled: #475569;
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-disabled: var(--text-disabled);
 
-  /* Semantic Accents */
-  --color-success: #238636;
-  --color-success-light: #2EA043;
-  --color-success-glow: rgba(35, 134, 54, 0.35);
+  --color-success: #065F46;
+  --color-success-light: #059669;
+  --color-success-glow: rgba(5, 150, 105, 0.12);
 
-  --color-warning: #D29922;
-  --color-warning-light: #E3B341;
-  --color-warning-glow: rgba(210, 153, 34, 0.35);
+  --color-warning: #92400E;
+  --color-warning-light: #D97706;
+  --color-warning-glow: rgba(217, 119, 6, 0.12);
 
-  --color-danger: #F85149;
-  --color-danger-light: #FF7B72;
-  --color-danger-glow: rgba(248, 81, 73, 0.35);
+  --color-danger: #9F1239;
+  --color-danger-light: #E11D48;
+  --color-danger-glow: rgba(225, 29, 72, 0.12);
 
-  --color-cyan: #38BDF8;
-  --color-cyan-glow: rgba(56, 189, 248, 0.35);
+  --color-cyan: #0284C7;
+  --color-cyan-glow: rgba(2, 132, 199, 0.12);
 
-  --color-blue: #3B82F6;
-  --color-blue-glow: rgba(59, 130, 246, 0.35);
+  --color-blue: #1D4ED8;
+  --color-blue-glow: rgba(29, 78, 216, 0.12);
 
-  --color-purple: #8B5CF6;
-  --color-purple-glow: rgba(139, 92, 246, 0.35);
+  --color-purple: #6D28D9;
+  --color-purple-glow: rgba(109, 40, 217, 0.12);
 
-  /* Status Colors */
-  --status-pending: #8B949E;
-  --status-active: #38BDF8;
-  --status-done: #238636;
-  --status-locked: #475569;
-  --status-blocked: #F85149;
-  --status-todo: #64748B;
-  --status-wip: #D29922;
+  --status-pending: var(--status-pending-text);
+  --status-active: var(--status-active-text);
+  --status-done: var(--status-verified-text);
+  --status-locked: var(--status-locked-text);
+  --status-blocked: var(--status-blocked-text);
+  --status-todo: #475569;
+  --status-wip: #B45309;
 
-  /* Pure System Offline Typography */
-  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", "Courier New", monospace;
+  /* Typography Stacks (100% Offline System Fonts) */
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
   /* Font Sizes */
-  --font-size-xs: 11px;
-  --font-size-sm: 12px;
+  --font-size-2xs: 10.5px;
+  --font-size-xs: 11.5px;
+  --font-size-sm: 13px;
   --font-size-base: 14px;
   --font-size-md: 15px;
   --font-size-lg: 18px;
@@ -84,19 +133,20 @@
   --space-4xl: 48px;
 
   /* Border Radii */
-  --radius-xs: 3px;
+  --radius-xs: 4px;
   --radius-sm: 6px;
   --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
   --radius-full: 9999px;
 
-  /* Elevations & Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
-  --shadow-gold: 0 0 20px var(--color-gold-glow);
-  --shadow-cyan: 0 0 16px var(--color-cyan-glow);
+  /* Shadows (Subtle, Multi-Layered Elevation - Zero Neon) */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+  --shadow-gold: 0 2px 8px var(--brand-gold-glow);
+  --shadow-cyan: 0 2px 8px var(--color-cyan-glow);
 
   /* Animation Durations */
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -104,29 +154,6 @@
   --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
 
   /* Layout Constants */
-  --header-height: 64px;
-  --metrics-height: 58px;
-}
-
-/* Light Theme Override */
-[data-theme="light"] {
-  --color-bg-deep: #F1F5F9;
-  --color-bg-base: #F8FAFC;
-  --color-bg-elevated: #FFFFFF;
-  --color-bg-surface: #F1F5F9;
-  --color-bg-overlay: rgba(248, 250, 252, 0.88);
-
-  --color-border-subtle: #E2E8F0;
-  --color-border-base: #CBD5E1;
-  --color-border-active: #B8913F;
-  --color-border-focus: #0284C7;
-
-  --color-text-primary: #0F172A;
-  --color-text-secondary: #334155;
-  --color-text-muted: #64748B;
-  --color-text-disabled: #94A3B8;
-
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  --header-height: 68px;
+  --metrics-height: 72px;
 }
