@@ -1,0 +1,15 @@
+[package]
+name = "kant-core"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+description = "Core epistemological primitives, ByteSpan, SymbolId, and DefHash for Kant (.kant)"
+license.workspace = true
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+sha2 = { workspace = true }
+
+[dev-dependencies]
+pretty_assertions = { workspace = true }

@@ -1,0 +1,16 @@
+[package]
+name = "kant-parser"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+description = "Flattened Pratt and LL(1) Parser for Kant (.kant)"
+license.workspace = true
+
+[dependencies]
+kant-core = { path = "../kant-core" }
+kant-lexer = { path = "../kant-lexer" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+[dev-dependencies]
+pretty_assertions = { workspace = true }

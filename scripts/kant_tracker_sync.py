@@ -1,16 +1,23 @@
 #!/usr/bin/env python3
 """
-kant_tracker_sync.py: Local state-sync helper script and HTTP server for Kant (.kant) v0.1 Roadmap Tracker.
-Allows AI sub-agents and developers to update .kant-tracker/state.json from CLI commands or poll via HTTP.
+kant_tracker_sync.py: SQLite-backed Telemetry Engine & Live SSE Server for Kant (.kant) v0.1 Roadmap Tracker.
+Provides SQLite database persistence at .kant-tracker/kant_telemetry.db, backward-compatible state.json sync,
+real-time Server-Sent Events (SSE) streaming, gate verification audit logging, and CLI commands.
 """
 
 import sys
 import os
 import json
+import sqlite3
 import argparse
+import subprocess
+import threading
+import queue
+import urllib.parse
+from datetime import datetime, timezone
 from pathlib import Path
 from http.server import SimpleHTTPRequestHandler, HTTPServer
-import urllib.parse
+from socketserver import ThreadingMixIn
 
 # Ensure UTF-8 output on Windows consoles
 if sys.platform == "win32":
@@ -22,6 +29,7 @@ if sys.platform == "win32":
 
 TRACKER_DIR = Path(".kant-tracker")
 STATE_FILE = TRACKER_DIR / "state.json"
+DB_FILE = TRACKER_DIR / "kant_telemetry.db"
 
 DEFAULT_ROADMAP = {
     "version": "0.1.0",
@@ -1088,96 +1096,658 @@ DEFAULT_ROADMAP = {
 def ensure_tracker_dir():
     TRACKER_DIR.mkdir(parents=True, exist_ok=True)
 
-def load_state():
-    if not STATE_FILE.exists():
-        save_state(DEFAULT_ROADMAP)
-        return DEFAULT_ROADMAP
+# ------------------------------------------------------------------------------
+# Git & Environment Helpers
+# ------------------------------------------------------------------------------
+def get_git_commit_hash(short=True):
     try:
-        with open(STATE_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except Exception as e:
-        print(f"[!] Warning reading state file: {e}. Falling back to default schema.", file=sys.stderr)
-        return DEFAULT_ROADMAP
+        cmd = ["git", "rev-parse", "--short", "HEAD"] if short else ["git", "rev-parse", "HEAD"]
+        res = subprocess.run(cmd, capture_output=True, text=True, timeout=2)
+        if res.returncode == 0:
+            return res.stdout.strip()
+    except Exception:
+        pass
+    return "workspace"
 
-def save_state(state):
+def get_git_commit_info():
+    info = {"hash": get_git_commit_hash(short=True), "author": "", "message": ""}
+    try:
+        res = subprocess.run(
+            ["git", "log", "-1", "--pretty=format:%h|%an|%s"],
+            capture_output=True, text=True, timeout=2
+        )
+        if res.returncode == 0 and res.stdout.strip():
+            parts = res.stdout.strip().split("|", 2)
+            if len(parts) == 3:
+                info["hash"] = parts[0]
+                info["author"] = parts[1]
+                info["message"] = parts[2]
+    except Exception:
+        pass
+    return info
+
+# ------------------------------------------------------------------------------
+# Real-Time Server-Sent Events (SSE) Engine
+# ------------------------------------------------------------------------------
+sse_clients = []
+sse_lock = threading.Lock()
+
+def sse_broadcast(event_name: str, payload: dict):
+    """Push real-time event to all active SSE subscribers."""
+    data_str = json.dumps(payload, ensure_ascii=False)
+    message = f"event: {event_name}\ndata: {data_str}\n\n"
+    with sse_lock:
+        dead = []
+        for client_q in sse_clients:
+            try:
+                client_q.put_nowait(message)
+            except Exception:
+                dead.append(client_q)
+        for d in dead:
+            if d in sse_clients:
+                sse_clients.remove(d)
+
+# ------------------------------------------------------------------------------
+# SQLite Persistence & Schema Definition
+# ------------------------------------------------------------------------------
+def get_db_conn():
     ensure_tracker_dir()
-    # Recalculate stats
-    total = 0
-    completed = 0
-    blocked = 0
-    for circle in state.get("circles", []):
-        for h in circle.get("main_headings", []):
-            for s in h.get("sub_headings", []):
-                for t in s.get("tasks", []):
-                    total += 1
-                    status = t.get("status")
-                    if status == "DONE_VERIFIED":
-                        completed += 1
-                    elif status == "BLOCKED":
-                        blocked += 1
+    conn = sqlite3.connect(str(DB_FILE), timeout=30.0)
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA journal_mode = WAL;")
+    conn.execute("PRAGMA synchronous = NORMAL;")
+    conn.execute("PRAGMA foreign_keys = ON;")
+    return conn
 
-    pct = round((completed / total * 100), 1) if total > 0 else 0.0
-    state["global_stats"] = {
-        "total_tasks": total,
-        "completed_tasks": completed,
-        "blocked_tasks": blocked,
-        "progress_percent": pct
+_db_initialized = False
+
+def init_db():
+    """Initializes SQLite tables and automatically migrates state.json if empty."""
+    global _db_initialized
+    if _db_initialized:
+        return
+    ensure_tracker_dir()
+    conn = get_db_conn()
+    cur = conn.cursor()
+
+    cur.executescript("""
+        CREATE TABLE IF NOT EXISTS metadata (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS circles (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            short_title TEXT,
+            wave TEXT,
+            gate_status TEXT NOT NULL DEFAULT 'LOCKED',
+            iteration INTEGER NOT NULL DEFAULT 1,
+            dependencies TEXT DEFAULT '[]',
+            gate_checklist TEXT DEFAULT '{}',
+            ordering INTEGER DEFAULT 0,
+            updated_at TEXT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS headings (
+            id TEXT PRIMARY KEY,
+            circle_id TEXT NOT NULL REFERENCES circles(id) ON DELETE CASCADE,
+            title TEXT NOT NULL,
+            crate_lane TEXT,
+            assigned_agent TEXT,
+            ordering INTEGER DEFAULT 0
+        );
+
+        CREATE TABLE IF NOT EXISTS subheadings (
+            id TEXT PRIMARY KEY,
+            heading_id TEXT NOT NULL REFERENCES headings(id) ON DELETE CASCADE,
+            circle_id TEXT NOT NULL REFERENCES circles(id) ON DELETE CASCADE,
+            title TEXT NOT NULL,
+            ordering INTEGER DEFAULT 0
+        );
+
+        CREATE TABLE IF NOT EXISTS tasks (
+            id TEXT PRIMARY KEY,
+            subheading_id TEXT NOT NULL REFERENCES subheadings(id) ON DELETE CASCADE,
+            heading_id TEXT NOT NULL REFERENCES headings(id) ON DELETE CASCADE,
+            circle_id TEXT NOT NULL REFERENCES circles(id) ON DELETE CASCADE,
+            title TEXT NOT NULL,
+            status TEXT NOT NULL DEFAULT 'TODO',
+            iteration_completed INTEGER DEFAULT 0,
+            verification_cmd TEXT,
+            notes TEXT DEFAULT '',
+            ordering INTEGER DEFAULT 0,
+            updated_at TEXT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS iterations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            circle_id TEXT NOT NULL REFERENCES circles(id) ON DELETE CASCADE,
+            number INTEGER NOT NULL,
+            timestamp TEXT NOT NULL,
+            status TEXT NOT NULL,
+            summary TEXT
+        );
+
+        CREATE TABLE IF NOT EXISTS gate_runs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            circle_id TEXT NOT NULL REFERENCES circles(id) ON DELETE CASCADE,
+            iteration INTEGER NOT NULL,
+            gate_step TEXT NOT NULL,
+            status TEXT NOT NULL,
+            command TEXT,
+            output TEXT,
+            run_at TEXT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS telemetry_events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp TEXT NOT NULL,
+            action_type TEXT NOT NULL,
+            task_id TEXT,
+            circle_id TEXT,
+            git_commit TEXT,
+            status_diff TEXT,
+            details TEXT
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_tasks_circle ON tasks(circle_id);
+        CREATE INDEX IF NOT EXISTS idx_tasks_subheading ON tasks(subheading_id);
+        CREATE INDEX IF NOT EXISTS idx_telemetry_timestamp ON telemetry_events(timestamp);
+        CREATE INDEX IF NOT EXISTS idx_telemetry_action ON telemetry_events(action_type);
+        CREATE INDEX IF NOT EXISTS idx_telemetry_task ON telemetry_events(task_id);
+        CREATE INDEX IF NOT EXISTS idx_gate_runs_circle ON gate_runs(circle_id);
+    """)
+    conn.commit()
+
+    # Check if migration is needed
+    cur.execute("SELECT COUNT(*) FROM circles")
+    count = cur.fetchone()[0]
+
+    if count == 0:
+        # Migrate existing state.json or DEFAULT_ROADMAP
+        initial_state = DEFAULT_ROADMAP
+        if STATE_FILE.exists():
+            try:
+                with open(STATE_FILE, "r", encoding="utf-8") as f:
+                    initial_state = json.load(f)
+            except Exception as e:
+                print(f"[!] Warning reading existing state.json during migration: {e}", file=sys.stderr)
+                initial_state = DEFAULT_ROADMAP
+
+        now_iso = datetime.now(timezone.utc).isoformat()
+        with conn:
+            _write_state_to_conn(conn, initial_state, now_iso)
+            conn.execute("""
+                INSERT INTO telemetry_events (timestamp, action_type, git_commit, details)
+                VALUES (?, 'MIGRATION', ?, 'Automated migration from state.json to kant_telemetry.db completed')
+            """, (now_iso, get_git_commit_hash()))
+
+        refreshed = _read_state_from_conn(conn)
+        with open(STATE_FILE, "w", encoding="utf-8") as f:
+            json.dump(refreshed, f, indent=2, ensure_ascii=False)
+        print(f"[✓] Initialized SQLite telemetry database at {DB_FILE} with auto-migration from state.json.")
+
+    conn.close()
+
+def _write_state_to_conn(conn, state: dict, now_iso: str):
+    """Low-level helper to write state hierarchy into database tables within an active transaction."""
+    conn.execute("INSERT OR REPLACE INTO metadata (key, value) VALUES ('version', ?)", (state.get("version", "0.1.0"),))
+    conn.execute("INSERT OR REPLACE INTO metadata (key, value) VALUES ('last_updated', ?)", (now_iso,))
+    conn.execute("INSERT OR REPLACE INTO metadata (key, value) VALUES ('current_circle_focus', ?)", (state.get("current_circle_focus", "C1"),))
+
+    # Clear structural hierarchy to avoid orphaned tasks
+    conn.execute("DELETE FROM tasks")
+    conn.execute("DELETE FROM subheadings")
+    conn.execute("DELETE FROM headings")
+    conn.execute("DELETE FROM circles")
+
+    for c_idx, circle in enumerate(state.get("circles", [])):
+        cid = circle["id"]
+        deps_json = json.dumps(circle.get("dependencies", []))
+        check_json = json.dumps(circle.get("gate_checklist", {}))
+        conn.execute("""
+            INSERT OR REPLACE INTO circles (id, name, short_title, wave, gate_status, iteration, dependencies, gate_checklist, ordering, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            cid,
+            circle.get("name", cid),
+            circle.get("short_title", cid),
+            circle.get("wave", ""),
+            circle.get("gate_status", "LOCKED"),
+            circle.get("iteration", 1),
+            deps_json,
+            check_json,
+            c_idx,
+            now_iso
+        ))
+
+        for h_idx, heading in enumerate(circle.get("main_headings", [])):
+            hid = heading["id"]
+            conn.execute("""
+                INSERT OR REPLACE INTO headings (id, circle_id, title, crate_lane, assigned_agent, ordering)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (
+                hid,
+                cid,
+                heading.get("title", hid),
+                heading.get("crate_lane", ""),
+                heading.get("assigned_agent", ""),
+                h_idx
+            ))
+
+            for s_idx, sub in enumerate(heading.get("sub_headings", [])):
+                sid = sub["id"]
+                conn.execute("""
+                    INSERT OR REPLACE INTO subheadings (id, heading_id, circle_id, title, ordering)
+                    VALUES (?, ?, ?, ?, ?)
+                """, (
+                    sid,
+                    hid,
+                    cid,
+                    sub.get("title", sid),
+                    s_idx
+                ))
+
+                for t_idx, task in enumerate(sub.get("tasks", [])):
+                    tid = task["id"]
+                    conn.execute("""
+                        INSERT OR REPLACE INTO tasks (id, subheading_id, heading_id, circle_id, title, status, iteration_completed, verification_cmd, notes, ordering, updated_at)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """, (
+                        tid,
+                        sid,
+                        hid,
+                        cid,
+                        task.get("title", tid),
+                        task.get("status", "TODO"),
+                        task.get("iteration_completed", 0),
+                        task.get("verification_cmd", ""),
+                        task.get("notes", ""),
+                        t_idx,
+                        now_iso
+                    ))
+
+        for it in circle.get("iterations", []):
+            cur = conn.cursor()
+            cur.execute("SELECT id FROM iterations WHERE circle_id = ? AND number = ?", (cid, it["number"]))
+            row = cur.fetchone()
+            if row:
+                conn.execute("""
+                    UPDATE iterations SET timestamp = ?, status = ?, summary = ? WHERE id = ?
+                """, (it.get("timestamp", now_iso), it.get("status", "VERIFIED_PASSED"), it.get("summary", ""), row[0]))
+            else:
+                conn.execute("""
+                    INSERT INTO iterations (circle_id, number, timestamp, status, summary)
+                    VALUES (?, ?, ?, ?, ?)
+                """, (cid, it["number"], it.get("timestamp", now_iso), it.get("status", "VERIFIED_PASSED"), it.get("summary", "")))
+
+def _read_state_from_conn(conn):
+    """Low-level helper to reconstruct full state dict from an active database connection."""
+    cur = conn.cursor()
+    cur.execute("SELECT key, value FROM metadata")
+    meta = dict(cur.fetchall())
+    version = meta.get("version", "0.1.0")
+    last_updated = meta.get("last_updated", datetime.now(timezone.utc).isoformat())
+    current_circle_focus = meta.get("current_circle_focus", "C1")
+
+    cur.execute("SELECT id, name, short_title, wave, gate_status, iteration, dependencies, gate_checklist, updated_at FROM circles ORDER BY ordering ASC, id ASC")
+    circle_rows = cur.fetchall()
+
+    circles = []
+    total_tasks = 0
+    completed_tasks = 0
+    blocked_tasks = 0
+
+    for crow in circle_rows:
+        cid = crow["id"]
+
+        cur.execute("SELECT number, timestamp, status, summary FROM iterations WHERE circle_id = ? ORDER BY number ASC", (cid,))
+        iter_rows = cur.fetchall()
+        circle_iters = [
+            {
+                "number": r["number"],
+                "timestamp": r["timestamp"],
+                "status": r["status"],
+                "summary": r["summary"] or ""
+            } for r in iter_rows
+        ]
+
+        cur.execute("SELECT id, title, crate_lane, assigned_agent FROM headings WHERE circle_id = ? ORDER BY ordering ASC, id ASC", (cid,))
+        hrows = cur.fetchall()
+
+        main_headings = []
+        for hrow in hrows:
+            hid = hrow["id"]
+            cur.execute("SELECT id, title FROM subheadings WHERE heading_id = ? ORDER BY ordering ASC, id ASC", (hid,))
+            srows = cur.fetchall()
+
+            sub_headings = []
+            for srow in srows:
+                sid = srow["id"]
+                cur.execute("SELECT id, title, status, iteration_completed, verification_cmd, notes FROM tasks WHERE subheading_id = ? ORDER BY ordering ASC, id ASC", (sid,))
+                trows = cur.fetchall()
+
+                tasks = []
+                for trow in trows:
+                    total_tasks += 1
+                    tstatus = trow["status"]
+                    if tstatus == "DONE_VERIFIED":
+                        completed_tasks += 1
+                    elif tstatus == "BLOCKED":
+                        blocked_tasks += 1
+
+                    tasks.append({
+                        "id": trow["id"],
+                        "title": trow["title"],
+                        "status": trow["status"],
+                        "iteration_completed": trow["iteration_completed"] or 0,
+                        "verification_cmd": trow["verification_cmd"] or "",
+                        "notes": trow["notes"] or ""
+                    })
+
+                sub_headings.append({
+                    "id": sid,
+                    "title": srow["title"],
+                    "tasks": tasks
+                })
+
+            main_headings.append({
+                "id": hid,
+                "title": hrow["title"],
+                "crate_lane": hrow["crate_lane"] or "",
+                "assigned_agent": hrow["assigned_agent"] or "",
+                "sub_headings": sub_headings
+            })
+
+        try:
+            deps = json.loads(crow["dependencies"]) if crow["dependencies"] else []
+        except Exception:
+            deps = []
+
+        try:
+            checklist = json.loads(crow["gate_checklist"]) if crow["gate_checklist"] else {}
+        except Exception:
+            checklist = {}
+
+        circles.append({
+            "id": cid,
+            "name": crow["name"],
+            "short_title": crow["short_title"] or cid,
+            "wave": crow["wave"] or "",
+            "gate_status": crow["gate_status"] or "LOCKED",
+            "iteration": crow["iteration"] or 1,
+            "dependencies": deps,
+            "gate_checklist": checklist,
+            "iterations": circle_iters,
+            "main_headings": main_headings
+        })
+
+    pct = round((completed_tasks / total_tasks * 100), 1) if total_tasks > 0 else 0.0
+
+    return {
+        "version": version,
+        "last_updated": last_updated,
+        "current_circle_focus": current_circle_focus,
+        "global_stats": {
+            "total_tasks": total_tasks,
+            "completed_tasks": completed_tasks,
+            "blocked_tasks": blocked_tasks,
+            "progress_percent": pct
+        },
+        "circles": circles
     }
 
+# ------------------------------------------------------------------------------
+# State Reconstitution & Synchronization Engine
+# ------------------------------------------------------------------------------
+def load_state_from_db():
+    """Loads and reconstructs complete JSON roadmap state dictionary from SQLite tables."""
+    init_db()
+    conn = get_db_conn()
+    state = _read_state_from_conn(conn)
+    conn.close()
+    return state
+
+def save_state_to_db(state: dict, record_telemetry: bool = True, action_detail: str = None):
+    """Saves complete state tree into SQLite tables and mirrors to state.json."""
+    ensure_tracker_dir()
+    init_db()
+    conn = get_db_conn()
+    now_iso = datetime.now(timezone.utc).isoformat()
+
+    with conn:
+        _write_state_to_conn(conn, state, now_iso)
+
+    refreshed_state = _read_state_from_conn(conn)
+    conn.close()
+
+    # Mirror to state.json for backward compatibility
     with open(STATE_FILE, "w", encoding="utf-8") as f:
-        json.dump(state, f, indent=2)
+        json.dump(refreshed_state, f, indent=2, ensure_ascii=False)
 
-def update_task(task_id, new_status, notes=None, iteration=None):
-    state = load_state()
-    found = False
+    if record_telemetry:
+        record_telemetry_event(
+            action_type="STATE_SYNC",
+            details=action_detail or "Full state tree synchronized with SQLite database",
+            git_commit=get_git_commit_hash()
+        )
 
-    for circle in state["circles"]:
-        circle_had_regression = False
-        for h in circle.get("main_headings", []):
-            for s in h.get("sub_headings", []):
-                for t in s.get("tasks", []):
-                    if t["id"] == task_id:
-                        found = True
-                        old_status = t.get("status")
-                        t["status"] = new_status
-                        if notes:
-                            t["notes"] = notes
-                        if iteration is not None:
-                            t["iteration_completed"] = iteration
-                        elif new_status == "DONE_VERIFIED" and t.get("iteration_completed", 0) == 0:
-                            t["iteration_completed"] = circle.get("iteration", 1)
+    sse_broadcast("state_update", refreshed_state)
+    return refreshed_state
 
-                        # Regression check: If circle was VERIFIED_PASSED and task becomes BLOCKED or IN_PROGRESS
-                        if circle.get("gate_status") == "VERIFIED_PASSED" and new_status in ("BLOCKED", "IN_PROGRESS"):
-                            circle["gate_status"] = "REGRESSION_DETECTED"
-                            circle["iteration"] = circle.get("iteration", 1) + 1
-                            circle_had_regression = True
-                            print(f"[!] REGRESSION DETECTED in Circle {circle['id']}: Task {task_id} shifted from {old_status} to {new_status}. Bumped to Iteration #{circle['iteration']}.")
+# ------------------------------------------------------------------------------
+# Telemetry Logging & Audit Trail
+# ------------------------------------------------------------------------------
+def record_telemetry_event(action_type, task_id=None, circle_id=None, git_commit=None, status_diff=None, details=None):
+    """Records an append-only telemetry event in SQLite and broadcasts via SSE."""
+    init_db()
+    conn = get_db_conn()
+    now_iso = datetime.now(timezone.utc).isoformat()
+    commit = git_commit or get_git_commit_hash()
 
-    if not found:
-        print(f"[x] Error: Task ID '{task_id}' not found in state schema.", file=sys.stderr)
+    with conn:
+        cur = conn.execute("""
+            INSERT INTO telemetry_events (timestamp, action_type, task_id, circle_id, git_commit, status_diff, details)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (now_iso, action_type, task_id, circle_id, commit, status_diff, details))
+        event_id = cur.lastrowid
+    conn.close()
+
+    event_data = {
+        "id": event_id,
+        "timestamp": now_iso,
+        "action_type": action_type,
+        "task_id": task_id,
+        "circle_id": circle_id,
+        "git_commit": commit,
+        "status_diff": status_diff,
+        "details": details
+    }
+    sse_broadcast("telemetry", event_data)
+    return event_data
+
+def get_recent_telemetry_events(limit=50, action_type=None):
+    init_db()
+    conn = get_db_conn()
+    cur = conn.cursor()
+    if action_type:
+        cur.execute("""
+            SELECT id, timestamp, action_type, task_id, circle_id, git_commit, status_diff, details
+            FROM telemetry_events WHERE action_type = ?
+            ORDER BY id DESC LIMIT ?
+        """, (action_type, limit))
+    else:
+        cur.execute("""
+            SELECT id, timestamp, action_type, task_id, circle_id, git_commit, status_diff, details
+            FROM telemetry_events
+            ORDER BY id DESC LIMIT ?
+        """, (limit,))
+    rows = cur.fetchall()
+    events = [dict(r) for r in rows]
+    conn.close()
+    return events
+
+def record_gate_run(circle_id, iteration, gate_step, status, command="", output=""):
+    """Records an automated Five-Step Gate Run into SQLite."""
+    init_db()
+    conn = get_db_conn()
+    now_iso = datetime.now(timezone.utc).isoformat()
+
+    with conn:
+        cur = conn.execute("""
+            INSERT INTO gate_runs (circle_id, iteration, gate_step, status, command, output, run_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (circle_id, iteration, gate_step, status, command, output, now_iso))
+        run_id = cur.lastrowid
+
+        # If gate step passed, automatically update checklist in circles table
+        if status.upper() == "PASSED":
+            cur.execute("SELECT gate_checklist FROM circles WHERE id = ?", (circle_id,))
+            crow = cur.fetchone()
+            if crow:
+                try:
+                    chk = json.loads(crow["gate_checklist"]) if crow["gate_checklist"] else {}
+                except Exception:
+                    chk = {}
+                chk[gate_step] = True
+                conn.execute("UPDATE circles SET gate_checklist = ?, updated_at = ? WHERE id = ?", (json.dumps(chk), now_iso, circle_id))
+    conn.close()
+
+    # Record telemetry
+    ev = record_telemetry_event(
+        action_type="GATE_RUN",
+        circle_id=circle_id,
+        status_diff=f"{gate_step}: {status.upper()}",
+        details=f"Gate step {gate_step} result: {status.upper()} (run #{run_id})"
+    )
+
+    refreshed = load_state_from_db()
+    with open(STATE_FILE, "w", encoding="utf-8") as f:
+        json.dump(refreshed, f, indent=2, ensure_ascii=False)
+    sse_broadcast("state_update", refreshed)
+
+    return {"run_id": run_id, "circle_id": circle_id, "gate_step": gate_step, "status": status, "telemetry_id": ev.get("id")}
+
+def get_recent_gate_runs(circle_id=None, limit=20):
+    init_db()
+    conn = get_db_conn()
+    cur = conn.cursor()
+    if circle_id:
+        cur.execute("SELECT id, circle_id, iteration, gate_step, status, command, output, run_at FROM gate_runs WHERE circle_id = ? ORDER BY id DESC LIMIT ?", (circle_id, limit))
+    else:
+        cur.execute("SELECT id, circle_id, iteration, gate_step, status, command, output, run_at FROM gate_runs ORDER BY id DESC LIMIT ?", (limit,))
+    rows = cur.fetchall()
+    runs = [dict(r) for r in rows]
+    conn.close()
+    return runs
+
+# ------------------------------------------------------------------------------
+# High-Level State Mutators
+# ------------------------------------------------------------------------------
+def load_state():
+    return load_state_from_db()
+
+def save_state(state):
+    return save_state_to_db(state)
+
+def update_task(task_id, new_status, notes=None, iteration=None, commit_hash=None):
+    """Updates atomic task status, notes, or iteration completed in SQLite, handles regression detection."""
+    init_db()
+    conn = get_db_conn()
+    cur = conn.cursor()
+
+    cur.execute("SELECT id, circle_id, subheading_id, status, iteration_completed, notes FROM tasks WHERE id = ?", (task_id,))
+    t_row = cur.fetchone()
+    if not t_row:
+        print(f"[x] Error: Task ID '{task_id}' not found in database.", file=sys.stderr)
+        conn.close()
         sys.exit(1)
 
-    save_state(state)
-    print(f"[✓] Task {task_id} updated to status '{new_status}'. State synchronized in {STATE_FILE}.")
+    old_status = t_row["status"]
+    cid = t_row["circle_id"]
+
+    cur.execute("SELECT id, gate_status, iteration FROM circles WHERE id = ?", (cid,))
+    c_row = cur.fetchone()
+    circle_gate = c_row["gate_status"] if c_row else "LOCKED"
+    circle_iter = c_row["iteration"] if c_row else 1
+
+    target_iter = iteration if iteration is not None else t_row["iteration_completed"]
+    if new_status == "DONE_VERIFIED" and target_iter == 0:
+        target_iter = circle_iter
+
+    new_notes = notes if notes is not None else t_row["notes"]
+    now_iso = datetime.now(timezone.utc).isoformat()
+
+    with conn:
+        conn.execute("""
+            UPDATE tasks SET status = ?, iteration_completed = ?, notes = ?, updated_at = ? WHERE id = ?
+        """, (new_status, target_iter, new_notes, now_iso, task_id))
+
+        # Regression check: If circle was VERIFIED_PASSED and task becomes BLOCKED or IN_PROGRESS
+        if circle_gate == "VERIFIED_PASSED" and new_status in ("BLOCKED", "IN_PROGRESS"):
+            new_iter = circle_iter + 1
+            conn.execute("UPDATE circles SET gate_status = 'REGRESSION_DETECTED', iteration = ?, updated_at = ? WHERE id = ?", (new_iter, now_iso, cid))
+            print(f"[!] REGRESSION DETECTED in Circle {cid}: Task {task_id} shifted from {old_status} to {new_status}. Bumped to Iteration #{new_iter}.")
+    conn.close()
+
+    diff = f"{old_status} -> {new_status}"
+    event = record_telemetry_event(
+        action_type="TASK_UPDATE",
+        task_id=task_id,
+        circle_id=cid,
+        git_commit=commit_hash or get_git_commit_hash(),
+        status_diff=diff,
+        details=f"Task {task_id} updated to {new_status}. Notes: {new_notes or ''}"
+    )
+
+    refreshed_state = load_state_from_db()
+    with open(STATE_FILE, "w", encoding="utf-8") as f:
+        json.dump(refreshed_state, f, indent=2, ensure_ascii=False)
+
+    sse_broadcast("state_update", refreshed_state)
+    print(f"[✓] Task {task_id} updated: {diff}. Telemetry event #{event.get('id')} recorded.")
+    return event
 
 def update_circle_gate(circle_id, gate_status):
-    state = load_state()
-    found = False
-    for circle in state["circles"]:
-        if circle["id"] == circle_id:
-            found = True
-            old = circle.get("gate_status")
-            circle["gate_status"] = gate_status
-            print(f"[✓] Circle {circle_id} gate status transitioned from {old} to {gate_status}.")
-            break
+    init_db()
+    conn = get_db_conn()
+    cur = conn.cursor()
 
-    if not found:
+    cur.execute("SELECT id, gate_status FROM circles WHERE id = ?", (circle_id,))
+    c_row = cur.fetchone()
+    if not c_row:
         print(f"[x] Error: Circle ID '{circle_id}' not found.", file=sys.stderr)
+        conn.close()
         sys.exit(1)
 
-    save_state(state)
+    old_status = c_row["gate_status"]
+    now_iso = datetime.now(timezone.utc).isoformat()
 
+    with conn:
+        conn.execute("UPDATE circles SET gate_status = ?, updated_at = ? WHERE id = ?", (gate_status, now_iso, circle_id))
+    conn.close()
+
+    diff = f"{old_status} -> {gate_status}"
+    event = record_telemetry_event(
+        action_type="GATE_UPDATE",
+        circle_id=circle_id,
+        git_commit=get_git_commit_hash(),
+        status_diff=diff,
+        details=f"Circle {circle_id} gate transitioned from {old_status} to {gate_status}"
+    )
+
+    refreshed_state = load_state_from_db()
+    with open(STATE_FILE, "w", encoding="utf-8") as f:
+        json.dump(refreshed_state, f, indent=2, ensure_ascii=False)
+
+    sse_broadcast("state_update", refreshed_state)
+    print(f"[✓] Circle {circle_id} gate status transitioned from {old_status} to {gate_status}.")
+    return event
+
+# ------------------------------------------------------------------------------
+# Terminal Dashboard & Reporting
+# ------------------------------------------------------------------------------
 def print_summary():
     state = load_state()
     stats = state.get("global_stats", {})
@@ -1187,6 +1757,8 @@ def print_summary():
     print(f"  Overall Progress: {stats.get('progress_percent', 0)}% "
           f"({stats.get('completed_tasks', 0)} / {stats.get('total_tasks', 0)} tasks verified)")
     print(f"  Blocked Tasks:    {stats.get('blocked_tasks', 0)}")
+    print(f"  Database Engine:  SQLite ({DB_FILE}) [WAL Mode Active]")
+    print(f"  Current Focus:    Circle {state.get('current_circle_focus', 'C1')}")
     print("-" * 72)
     print(f"  {'Node':<6} | {'Gate Status':<20} | {'Iter':<6} | {'Completed':<10} | {'Circle Name'}")
     print("-" * 72)
@@ -1205,20 +1777,125 @@ def print_summary():
         print(f"  {cid:<6} | {gate:<20} | {it:<6} | {pct_str:<10} | {circle.get('name')}")
     print("=" * 72)
 
+def print_telemetry(limit=25):
+    events = get_recent_telemetry_events(limit=limit)
+    print("=" * 88)
+    print(f"  KANT TELEMETRY AUDIT TRAIL (Last {len(events)} events from SQLite)")
+    print("=" * 88)
+    print(f"  {'ID':<5} | {'Timestamp':<20} | {'Action':<14} | {'Commit':<8} | {'Diff / Details'}")
+    print("-" * 88)
+    for ev in events:
+        eid = ev["id"]
+        ts = ev["timestamp"][:19].replace("T", " ")
+        act = ev["action_type"]
+        cmt = ev["git_commit"] or "--"
+        diff = ev["status_diff"] or ""
+        det = ev["details"] or ""
+        summary = f"{diff} - {det}" if diff and det else (diff or det)
+        print(f"  {eid:<5} | {ts:<20} | {act:<14} | {cmt:<8} | {summary[:34]}")
+    print("=" * 88)
+
+# ------------------------------------------------------------------------------
+# HTTP API Server with Real-Time SSE
+# ------------------------------------------------------------------------------
 class TrackerApiHandler(SimpleHTTPRequestHandler):
+    def end_headers(self):
+        # Universal CORS headers
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Cache-Control")
+        super().end_headers()
+
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.end_headers()
+
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
-        if parsed.path == "/api/state":
-            state = load_state()
-            data = json.dumps(state).encode("utf-8")
+        path = parsed.path
+
+        if path == "/api/events":
+            # Server-Sent Events (SSE) Live Push Stream
             self.send_response(200)
-            self.send_header("Content-Type", "application/json")
-            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Content-Type", "text/event-stream; charset=utf-8")
+            self.send_header("Cache-Control", "no-cache, no-transform")
+            self.send_header("Connection", "keep-alive")
+            self.send_header("X-Accel-Buffering", "no")
+            self.end_headers()
+
+            client_q = queue.Queue(maxsize=200)
+            with sse_lock:
+                sse_clients.append(client_q)
+
+            # Send initial connected greeting & state snapshot
+            try:
+                state = load_state()
+                init_msg = json.dumps({"status": "connected", "database": "sqlite", "file": str(DB_FILE)})
+                self.wfile.write(f"event: connected\ndata: {init_msg}\n\n".encode("utf-8"))
+                state_msg = json.dumps(state, ensure_ascii=False)
+                self.wfile.write(f"event: state_update\ndata: {state_msg}\n\n".encode("utf-8"))
+                self.wfile.flush()
+            except Exception:
+                with sse_lock:
+                    if client_q in sse_clients:
+                        sse_clients.remove(client_q)
+                return
+
+            try:
+                while True:
+                    try:
+                        msg = client_q.get(timeout=15.0)
+                        self.wfile.write(msg.encode("utf-8"))
+                        self.wfile.flush()
+                    except queue.Empty:
+                        # Heartbeat ping
+                        self.wfile.write(b": ping\n\n")
+                        self.wfile.flush()
+            except (BrokenPipeError, ConnectionResetError, OSError):
+                pass
+            finally:
+                with sse_lock:
+                    if client_q in sse_clients:
+                        sse_clients.remove(client_q)
+            return
+
+        elif path == "/api/state":
+            state = load_state()
+            data = json.dumps(state, ensure_ascii=False).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
             self.send_header("Content-Length", str(len(data)))
             self.end_headers()
             self.wfile.write(data)
-        elif parsed.path == "/" or parsed.path == "/index.html":
-            # Serve kant-roadmap-tracker.html if requested at root
+            return
+
+        elif path == "/api/telemetry":
+            query = urllib.parse.parse_qs(parsed.query)
+            limit = int(query.get("limit", [50])[0])
+            action_filter = query.get("action", [None])[0]
+            events = get_recent_telemetry_events(limit=limit, action_type=action_filter)
+            data = json.dumps(events, ensure_ascii=False).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+            return
+
+        elif path == "/api/gate_runs":
+            query = urllib.parse.parse_qs(parsed.query)
+            circle_id = query.get("circle", [None])[0]
+            limit = int(query.get("limit", [20])[0])
+            runs = get_recent_gate_runs(circle_id=circle_id, limit=limit)
+            data = json.dumps(runs, ensure_ascii=False).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+            return
+
+        elif path in ("/", "/index.html", "/kant-roadmap-tracker.html"):
             target = Path("kant-roadmap-tracker.html")
             if target.exists():
                 with open(target, "rb") as f:
@@ -1228,6 +1905,7 @@ class TrackerApiHandler(SimpleHTTPRequestHandler):
                 self.send_header("Content-Length", str(len(content)))
                 self.end_headers()
                 self.wfile.write(content)
+                return
             else:
                 super().do_GET()
         else:
@@ -1235,71 +1913,227 @@ class TrackerApiHandler(SimpleHTTPRequestHandler):
 
     def do_POST(self):
         parsed = urllib.parse.urlparse(self.path)
-        if parsed.path == "/api/state":
-            content_length = int(self.headers.get("Content-Length", 0))
-            body = self.rfile.read(content_length)
+        path = parsed.path
+        content_length = int(self.headers.get("Content-Length", 0))
+        body = self.rfile.read(content_length).decode("utf-8") if content_length > 0 else "{}"
+
+        try:
+            payload = json.loads(body)
+        except Exception:
+            payload = {}
+
+        if path == "/api/state":
             try:
-                new_state = json.loads(body.decode("utf-8"))
-                save_state(new_state)
-                resp = json.dumps({"status": "ok", "message": "State synchronized"}).encode("utf-8")
+                save_state(payload)
+                resp = json.dumps({"status": "ok", "message": "State synchronized with SQLite"}).encode("utf-8")
                 self.send_response(200)
-                self.send_header("Content-Type", "application/json")
-                self.send_header("Access-Control-Allow-Origin", "*")
+                self.send_header("Content-Type", "application/json; charset=utf-8")
                 self.send_header("Content-Length", str(len(resp)))
                 self.end_headers()
                 self.wfile.write(resp)
             except Exception as e:
                 err = json.dumps({"status": "error", "message": str(e)}).encode("utf-8")
                 self.send_response(400)
-                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Content-Length", str(len(err)))
+                self.end_headers()
+                self.wfile.write(err)
+
+        elif path == "/api/task":
+            try:
+                task_id = payload.get("task_id")
+                status = payload.get("status")
+                notes = payload.get("notes")
+                iteration = payload.get("iteration")
+                commit = payload.get("git_commit")
+                if not task_id or not status:
+                    raise ValueError("task_id and status are required")
+                ev = update_task(task_id, status, notes=notes, iteration=iteration, commit_hash=commit)
+                resp = json.dumps({"status": "ok", "event": ev}).encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Content-Length", str(len(resp)))
+                self.end_headers()
+                self.wfile.write(resp)
+            except Exception as e:
+                err = json.dumps({"status": "error", "message": str(e)}).encode("utf-8")
+                self.send_response(400)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Content-Length", str(len(err)))
+                self.end_headers()
+                self.wfile.write(err)
+
+        elif path == "/api/gate":
+            try:
+                circle_id = payload.get("circle_id")
+                gate_status = payload.get("gate_status")
+                if not circle_id or not gate_status:
+                    raise ValueError("circle_id and gate_status are required")
+                ev = update_circle_gate(circle_id, gate_status)
+                resp = json.dumps({"status": "ok", "event": ev}).encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Content-Length", str(len(resp)))
+                self.end_headers()
+                self.wfile.write(resp)
+            except Exception as e:
+                err = json.dumps({"status": "error", "message": str(e)}).encode("utf-8")
+                self.send_response(400)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Content-Length", str(len(err)))
+                self.end_headers()
+                self.wfile.write(err)
+
+        elif path == "/api/telemetry":
+            try:
+                action_type = payload.get("action_type", "CUSTOM")
+                task_id = payload.get("task_id")
+                circle_id = payload.get("circle_id")
+                commit = payload.get("git_commit")
+                diff = payload.get("status_diff")
+                details = payload.get("details", "")
+
+                if task_id and payload.get("status"):
+                    ev = update_task(task_id, payload.get("status"), notes=details, commit_hash=commit)
+                else:
+                    ev = record_telemetry_event(
+                        action_type=action_type,
+                        task_id=task_id,
+                        circle_id=circle_id,
+                        git_commit=commit,
+                        status_diff=diff,
+                        details=details
+                    )
+                resp = json.dumps({"status": "ok", "event": ev}).encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Content-Length", str(len(resp)))
+                self.end_headers()
+                self.wfile.write(resp)
+            except Exception as e:
+                err = json.dumps({"status": "error", "message": str(e)}).encode("utf-8")
+                self.send_response(400)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Content-Length", str(len(err)))
+                self.end_headers()
+                self.wfile.write(err)
+
+        elif path == "/api/gate_run":
+            try:
+                cid = payload.get("circle_id")
+                it = int(payload.get("iteration", 1))
+                step = payload.get("gate_step")
+                status = payload.get("status")
+                cmd = payload.get("command", "")
+                output = payload.get("output", "")
+                if not cid or not step or not status:
+                    raise ValueError("circle_id, gate_step, and status are required")
+                res = record_gate_run(cid, it, step, status, cmd, output)
+                resp = json.dumps({"status": "ok", "result": res}).encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Content-Length", str(len(resp)))
+                self.end_headers()
+                self.wfile.write(resp)
+            except Exception as e:
+                err = json.dumps({"status": "error", "message": str(e)}).encode("utf-8")
+                self.send_response(400)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Content-Length", str(len(err)))
                 self.end_headers()
                 self.wfile.write(err)
         else:
             self.send_response(404)
             self.end_headers()
 
+class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
+    daemon_threads = True
+    allow_reuse_address = True
+
 def run_server(port=8080):
-    ensure_tracker_dir()
+    init_db()
     load_state()
     server_address = ("", port)
-    httpd = HTTPServer(server_address, TrackerApiHandler)
-    print(f"[*] Kant Roadmap Tracker server active at: http://localhost:{port}/")
-    print(f"[*] API endpoint live at: http://localhost:{port}/api/state")
-    print(f"[*] Serving kant-roadmap-tracker.html directly from repository root.")
+    httpd = ThreadedHTTPServer(server_address, TrackerApiHandler)
+    print("=" * 72)
+    print(f"[*] Kant Roadmap Tracker & Telemetry SSE Server Active")
+    print("=" * 72)
+    print(f"[*] Web Interface:        http://localhost:{port}/")
+    print(f"[*] Real-Time SSE Stream: http://localhost:{port}/api/events")
+    print(f"[*] State JSON API:       http://localhost:{port}/api/state")
+    print(f"[*] Telemetry Audit API:  http://localhost:{port}/api/telemetry")
+    print(f"[*] Gate Runs Audit API:  http://localhost:{port}/api/gate_runs")
+    print(f"[*] Database Persistence: SQLite at {DB_FILE} (WAL mode)")
+    print(f"[*] Serving kant-roadmap-tracker.html directly with zero-polling SSE.")
+    print("=" * 72)
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
         print("\n[!] Server stopped.")
 
+# ------------------------------------------------------------------------------
+# Unified CLI Entrypoint
+# ------------------------------------------------------------------------------
 def main():
-    parser = argparse.ArgumentParser(description="Kant (.kant) v0.1 Roadmap Tracker CLI Sync Engine")
-    parser.add_argument("--init", action="store_true", help="Initialize .kant-tracker/state.json with default C0-C6 roadmap schema")
-    parser.add_argument("--task", type=str, help="Target Atomic Task ID (e.g. C2.H2.S1.T02)")
+    parser = argparse.ArgumentParser(description="Kant (.kant) v0.1 Roadmap Tracker & SQLite Telemetry Engine")
+    parser.add_argument("--init", action="store_true", help="Initialize/Reset SQLite DB and state.json with default C0-C6 schema")
+    parser.add_argument("--migrate", action="store_true", help="Force migrate state.json into SQLite kant_telemetry.db")
+    parser.add_argument("--task", type=str, help="Target Atomic Task ID (e.g. C1.H1.S1.T01)")
     parser.add_argument("--status", type=str, choices=["TODO", "IN_PROGRESS", "BLOCKED", "DEFERRED_V02", "DONE_VERIFIED"], help="Set task status")
     parser.add_argument("--notes", type=str, help="Update task notes")
     parser.add_argument("--iteration", type=int, help="Set iteration cycle number")
     parser.add_argument("--gate", type=str, help="Target Circle ID to update gate status (e.g. C1)")
     parser.add_argument("--gate-status", type=str, choices=["LOCKED", "IN_ITERATION", "GATE_PENDING", "VERIFIED_PASSED", "REGRESSION_DETECTED"], help="Gate status")
     parser.add_argument("--summary", action="store_true", help="Print terminal dashboard summary of roadmap state")
-    parser.add_argument("--serve", action="store_true", help="Run local HTTP server for tracker web app")
-    parser.add_argument("--port", type=int, default=8080, help="Port for local HTTP server (default: 8080)")
+    parser.add_argument("--telemetry", action="store_true", help="Print recent telemetry audit events from SQLite")
+    parser.add_argument("--limit", type=int, default=25, help="Event limit for --telemetry (default: 25)")
+    parser.add_argument("--serve", action="store_true", help="Run multi-threaded HTTP server with SSE live streaming")
+    parser.add_argument("--port", type=int, default=8080, help="Port for HTTP server (default: 8080)")
+
+    # Gate run arguments
+    parser.add_argument("--record-gate-run", action="store_true", help="Record a Five-Step Iron Law gate verification run")
+    parser.add_argument("--circle", type=str, help="Circle ID for gate run (e.g. C1)")
+    parser.add_argument("--step", type=str, choices=["cargo_fmt", "cargo_clippy", "cargo_test", "conformance_tests", "git_status_clean"], help="Gate step name")
+    parser.add_argument("--run-status", type=str, choices=["PASSED", "FAILED", "PENDING"], help="Gate step status")
+    parser.add_argument("--cmd", type=str, default="", help="Command executed")
+    parser.add_argument("--output", type=str, default="", help="Command output log")
 
     args = parser.parse_args()
 
     if args.init:
-        save_state(DEFAULT_ROADMAP)
-        print(f"[✓] Initialized fresh roadmap schema in {STATE_FILE} with 7 Circles (C0-C6).")
+        save_state_to_db(DEFAULT_ROADMAP, record_telemetry=True, action_detail="Explicit CLI --init reset")
+        print(f"[✓] Initialized fresh roadmap schema in {DB_FILE} and {STATE_FILE} with 7 Circles (C0-C6).")
+        print_summary()
+    elif args.migrate:
+        init_db()
+        if STATE_FILE.exists():
+            with open(STATE_FILE, "r", encoding="utf-8") as f:
+                s = json.load(f)
+            save_state_to_db(s, record_telemetry=True, action_detail="CLI explicit --migrate from state.json")
+            print(f"[✓] Successfully migrated state.json into SQLite: {DB_FILE}")
+        else:
+            print(f"[!] state.json does not exist. Initializing from DEFAULT_ROADMAP.")
+            save_state_to_db(DEFAULT_ROADMAP)
         print_summary()
     elif args.task and args.status:
         update_task(args.task, args.status, args.notes, args.iteration)
     elif args.gate and args.gate_status:
         update_circle_gate(args.gate, args.gate_status)
+    elif args.record_gate_run:
+        if not args.circle or not args.step or not args.run_status:
+            print("[x] Error: --circle, --step, and --run-status are required for --record-gate-run", file=sys.stderr)
+            sys.exit(1)
+        res = record_gate_run(args.circle, args.iteration or 1, args.step, args.run_status, args.cmd, args.output)
+        print(f"[✓] Recorded gate verification run #{res['run_id']} for {args.circle} ({args.step}: {args.run_status}).")
+    elif args.telemetry:
+        print_telemetry(args.limit)
     elif args.summary:
         print_summary()
     elif args.serve:
         run_server(args.port)
     else:
-        parser.print_help()
+        print_summary()
 
 if __name__ == "__main__":
     main()
+

@@ -1,0 +1,15 @@
+[package]
+name = "kant-lexer"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+description = "Transcendental Aesthetic Zero-Copy Lexer for Kant (.kant)"
+license.workspace = true
+
+[dependencies]
+kant-core = { path = "../kant-core" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+[dev-dependencies]
+pretty_assertions = { workspace = true }
