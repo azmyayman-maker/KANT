@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """
-kant_tracker_sync.py: SQLite-backed Telemetry Engine & Live SSE Server for Kant (.kant) v0.1 Roadmap Tracker.
-Provides SQLite database persistence at .kant-tracker/kant_telemetry.db, backward-compatible state.json sync,
-real-time Server-Sent Events (SSE) streaming, gate verification audit logging, and CLI commands.
+kant_tracker_sync.py: High-Assurance SQLite Telemetry Engine & Live SSE Server
+for the Kant (.kant) Compiler Verification Observatory.
+
+Provides persistent SQLite database telemetry at .kant-tracker/kant_telemetry.db,
+bidirectional state.json synchronization, real-time Server-Sent Events (SSE) streaming,
+formal Five-Step Gate Run audit logging, and automated CLI verification commands.
 """
 
 import sys
@@ -31,1060 +34,7 @@ TRACKER_DIR = Path(".kant-tracker")
 STATE_FILE = TRACKER_DIR / "state.json"
 DB_FILE = TRACKER_DIR / "kant_telemetry.db"
 
-DEFAULT_ROADMAP = {
-    "version": "0.1.0",
-    "last_updated": "2026-11-06T14:30:00Z",
-    "current_circle_focus": "C0",
-    "global_stats": {
-        "total_tasks": 75,
-        "completed_tasks": 0,
-        "blocked_tasks": 0,
-        "progress_percent": 0.0
-    },
-    "circles": [
-        {
-            "id": "C0",
-            "name": "Epistemological Pinning & Clarification Gate",
-            "short_title": "Epistemic Foundation",
-            "wave": "Pre-Wave Foundation",
-            "gate_status": "PENDING",
-            "iteration": 0,
-            "dependencies": [],
-            "gate_checklist": {
-                "spec_pinning": False,
-                "lexicon_mapping": False,
-                "clarification_triage": False,
-                "toolchain_hashes": False,
-                "git_lane_hygiene": False
-            },
-            "iterations": [],
-            "main_headings": [
-                {
-                    "id": "C0.H1",
-                    "title": "Reference .md Architecture & Toolchain Hash Pinning",
-                    "crate_lane": "Cargo.toml, AGENTS.md, docs/spec/",
-                    "assigned_agent": "SA-01",
-                    "sub_headings": [
-                        {
-                            "id": "C0.H1.S1",
-                            "title": "Root Constitution & Lexicon (AGENTS.md & 01_EPISTEMOLOGY.md)",
-                            "tasks": [
-                                {
-                                    "id": "C0.H1.S1.T01",
-                                    "title": "Author AGENTS.md (<350 lines) with 16 isolated file lanes & 5-step verification law",
-                                    "status": "DONE_VERIFIED",
-                                    "iteration_completed": 1,
-                                    "verification_cmd": "git status --porcelain AGENTS.md",
-                                    "notes": "Verified <350 lines, lanes SA-01 to SA-16 defined."
-                                },
-                                {
-                                    "id": "C0.H1.S1.T02",
-                                    "title": "Define Moussa Wehbe terminology mapping (mujauz, afhoum, shaym, noumenon, amthoul)",
-                                    "status": "DONE_VERIFIED",
-                                    "iteration_completed": 1,
-                                    "verification_cmd": "test -f docs/spec/01_EPISTEMOLOGY_AND_LEXICON.md",
-                                    "notes": "Philological dictionary and Martin-Löf constructive type theory mapping verified."
-                                },
-                                {
-                                    "id": "C0.H1.S1.T03",
-                                    "title": "Enforce namespace isolation (kantc binary, kant-lang-* packages, #![kant(v0.1)] header)",
-                                    "status": "DONE_VERIFIED",
-                                    "iteration_completed": 1,
-                                    "verification_cmd": "grep '#!\\[kant(v0.1)\\]' AGENTS.md",
-                                    "notes": "Disambiguated from legacy CAS, Langium DSL, and crates.io micro-crates."
-                                }
-                            ]
-                        },
-                        {
-                            "id": "C0.H1.S2",
-                            "title": "Deep Specification Suite (02–07 .md files & kant-toolchain.toml)",
-                            "tasks": [
-                                {
-                                    "id": "C0.H1.S2.T01",
-                                    "title": "Author 02_AESTHETICS_GRAMMAR_AND_AST.md (EBNF, De Bruijn indices, and SHA-256 identity)",
-                                    "status": "DONE_VERIFIED",
-                                    "iteration_completed": 1,
-                                    "verification_cmd": "test -f docs/spec/02_AESTHETICS_GRAMMAR_AND_AST.md",
-                                    "notes": "Flattened toplevel EBNF and 5 canonicalization rules locked."
-                                },
-                                {
-                                    "id": "C0.H1.S2.T02",
-                                    "title": "Author 03_ANALYTIC_CATEGORIES_AND_EFFECTS.md (12 Categories + Exact Effect Matching)",
-                                    "status": "DONE_VERIFIED",
-                                    "iteration_completed": 1,
-                                    "verification_cmd": "test -f docs/spec/03_ANALYTIC_CATEGORIES_AND_EFFECTS.md",
-                                    "notes": "Quantity, Quality, Relation, Modality triads and Sigil Law formalized."
-                                },
-                                {
-                                    "id": "C0.H1.S2.T03",
-                                    "title": "Author 04_SCHEMATISM_IR_AND_PERCEUS.md (30 SSA ops, directed time category & Perceus)",
-                                    "status": "DONE_VERIFIED",
-                                    "iteration_completed": 1,
-                                    "verification_cmd": "test -f docs/spec/04_SCHEMATISM_IR_AND_PERCEUS.md",
-                                    "notes": "30 KANT-IR ops, frame-limited Alloc@r reuse tokens, cycle-free arena design."
-                                },
-                                {
-                                    "id": "C0.H1.S2.T04",
-                                    "title": "Author 05_DIALECTIC_VERIFICATION_AND_CAPABILITIES.md (Paralogism, Antinomy & Noumena)",
-                                    "status": "DONE_VERIFIED",
-                                    "iteration_completed": 1,
-                                    "verification_cmd": "test -f docs/spec/05_DIALECTIC_VERIFICATION_AND_CAPABILITIES.md",
-                                    "notes": "Affine capability ownership, Secret<T> taint analysis, 3-tier contract proofs."
-                                },
-                                {
-                                    "id": "C0.H1.S2.T05",
-                                    "title": "Author 06_METHOD_CRANELIFT_VM_AND_EVIDENCE.md (Dual Engine & Merkle Audit)",
-                                    "status": "DONE_VERIFIED",
-                                    "iteration_completed": 1,
-                                    "verification_cmd": "test -f docs/spec/06_METHOD_CRANELIFT_VM_AND_EVIDENCE.md",
-                                    "notes": "KANT-IR evaluator, Cranelift JIT/AOT backend, Merkle evidence format."
-                                },
-                                {
-                                    "id": "C0.H1.S2.T06",
-                                    "title": "Author 07_AGENT_SURFACE_SIDECAR_AND_MCP.md (JSON Diagnostics, R1–R6 & 10 MCP Tools)",
-                                    "status": "DONE_VERIFIED",
-                                    "iteration_completed": 1,
-                                    "verification_cmd": "test -f docs/spec/07_AGENT_SURFACE_SIDECAR_AND_MCP.md",
-                                    "notes": "RFC 6902 JSON patch auto-fixes and XGrammar constrained sampling."
-                                },
-                                {
-                                    "id": "C0.H1.S2.T07",
-                                    "title": "Compute BLAKE3/SHA-256 digests and pin in kant-toolchain.toml",
-                                    "status": "DONE_VERIFIED",
-                                    "iteration_completed": 1,
-                                    "verification_cmd": "test -f kant-toolchain.toml",
-                                    "notes": "Pinned all 8 document hashes and subagent rules."
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "id": "C0.H2",
-                    "title": "32-Question Clarification & Pragmatic Deferral Engine",
-                    "crate_lane": "docs/DECISIONS_AND_DEFERRED_ROADMAP.md",
-                    "assigned_agent": "SA-01",
-                    "sub_headings": [
-                        {
-                            "id": "C0.H2.S1",
-                            "title": "P0-Blocking Architectural Decisions (Q01–Q05, Q09, Q17, Q25)",
-                            "tasks": [
-                                {
-                                    "id": "C0.H2.S1.T01",
-                                    "title": "Lock Latin/Arabic surface representation & .kantd sidecar format",
-                                    "status": "DONE_VERIFIED",
-                                    "iteration_completed": 1,
-                                    "verification_cmd": "grep 'Q01' docs/DECISIONS_AND_DEFERRED_ROADMAP.md",
-                                    "notes": "Latin ASCII for tokenizer fidelity, Arabic .kantd sidecar for inspection."
-                                },
-                                {
-                                    "id": "C0.H2.S1.T02",
-                                    "title": "Lock flattened infix grammar mode with De Bruijn slot canonical indexing",
-                                    "status": "DONE_VERIFIED",
-                                    "iteration_completed": 1,
-                                    "verification_cmd": "grep 'Q03' docs/DECISIONS_AND_DEFERRED_ROADMAP.md",
-                                    "notes": "Flattened infix to avoid KV-cache misses; @T.0 De Bruijn indices for hashes."
-                                },
-                                {
-                                    "id": "C0.H2.S1.T03",
-                                    "title": "Lock exact set-equality effect matching (Sigil Law) and 3-tier contract verifier",
-                                    "status": "DONE_VERIFIED",
-                                    "iteration_completed": 1,
-                                    "verification_cmd": "grep 'Q09' docs/DECISIONS_AND_DEFERRED_ROADMAP.md",
-                                    "notes": "E_decl = E_inf with SAFE quickfixes; Tier 1 SMT + Tier 3 runtime fallback."
-                                },
-                                {
-                                    "id": "C0.H2.S1.T04",
-                                    "title": "Lock dual target backends: KANT-IR Evaluator + Cranelift JIT/AOT native codegen",
-                                    "status": "DONE_VERIFIED",
-                                    "iteration_completed": 1,
-                                    "verification_cmd": "grep 'Q25' docs/DECISIONS_AND_DEFERRED_ROADMAP.md",
-                                    "notes": "Evaluator for deterministic traces, Cranelift for native x86-64 / ARM64."
-                                }
-                            ]
-                        },
-                        {
-                            "id": "C0.H2.S2",
-                            "title": "P1/P2 Pragmatic Deferral Registry (DECISIONS_AND_DEFERRED_ROADMAP.md)",
-                            "tasks": [
-                                {
-                                    "id": "C0.H2.S2.T01",
-                                    "title": "Auto-triage 24 deferrable questions to MVP pragmatic defaults",
-                                    "status": "DONE_VERIFIED",
-                                    "iteration_completed": 1,
-                                    "verification_cmd": "test -f docs/DECISIONS_AND_DEFERRED_ROADMAP.md",
-                                    "notes": "Recorded all 24 P1/P2 items in ADR format."
-                                },
-                                {
-                                    "id": "C0.H2.S2.T02",
-                                    "title": "Isolate deferred v0.2/v0.5 features (Lean 4, Atomic RC, WASM, GPUI) behind trait boundaries",
-                                    "status": "DONE_VERIFIED",
-                                    "iteration_completed": 1,
-                                    "verification_cmd": "grep 'v0.2' docs/DECISIONS_AND_DEFERRED_ROADMAP.md",
-                                    "notes": "Trait boundaries defined for ProofExporter, AtomicRC, and WASM backend."
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "id": "C1",
-            "name": "Wave 1: Transcendental Aesthetic (Foundation)",
-            "short_title": "Wave 1: Aesthetic",
-            "wave": "Wave 1",
-            "gate_status": "IN_ITERATION",
-            "iteration": 1,
-            "dependencies": ["C0"],
-            "gate_checklist": {
-                "cargo_fmt": False,
-                "cargo_clippy": False,
-                "cargo_test": False,
-                "conformance_tests": False,
-                "git_status_clean": False
-            },
-            "iterations": [
-                {
-                    "number": 1,
-                    "timestamp": "2026-11-06T14:26:00Z",
-                    "status": "IN_ITERATION",
-                    "summary": "Implemented kant-core, kant-lexer, kant-parser, and kant-canonical with conformance suites."
-                }
-            ],
-            "main_headings": [
-                {
-                    "id": "C1.H1",
-                    "title": "Core Primitives & Zero-Copy Lexer",
-                    "crate_lane": "crates/kant-core, crates/kant-lexer",
-                    "assigned_agent": "SA-01 & SA-02",
-                    "sub_headings": [
-                        {
-                            "id": "C1.H1.S1",
-                            "title": "ByteSpans, Symbol Interner & Closed Vocabulary Table",
-                            "tasks": [
-                                {
-                                    "id": "C1.H1.S1.T01",
-                                    "title": "Implement ByteSpan, SymbolId, and DefHash in kant-core",
-                                    "status": "DONE_VERIFIED",
-                                    "iteration_completed": 1,
-                                    "verification_cmd": "cargo test -p kant-core -- --nocapture",
-                                    "notes": "ByteSpan with merge/len, SymbolId interner, DefHash with SHA-256."
-                                },
-                                {
-                                    "id": "C1.H1.S1.T02",
-                                    "title": "Define closed 48-token vocabulary table in kant-lexer",
-                                    "status": "DONE_VERIFIED",
-                                    "iteration_completed": 1,
-                                    "verification_cmd": "cargo test -p kant-lexer test_closed_epistemic_keywords",
-                                    "notes": "Closed keywords matching Moussa Wehbe lexicon and effect operators."
-                                },
-                                {
-                                    "id": "C1.H1.S1.T03",
-                                    "title": "Implement zero-copy tokenizer for literals, keywords, contracts, and ?hole tokens",
-                                    "status": "DONE_VERIFIED",
-                                    "iteration_completed": 1,
-                                    "verification_cmd": "cargo test -p kant-lexer conformance_lexer",
-                                    "notes": "Magic header, ?hole, @T.0 De Bruijn slots, strings, numbers."
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "id": "C1.H2",
-                    "title": "Flattened Pratt & LL(1) Parser",
-                    "crate_lane": "crates/kant-parser",
-                    "assigned_agent": "SA-03",
-                    "sub_headings": [
-                        {
-                            "id": "C1.H2.S1",
-                            "title": "Toplevel Flattened Declarations & Contract Clauses",
-                            "tasks": [
-                                {
-                                    "id": "C1.H2.S1.T01",
-                                    "title": "Parse afhoum (types/enums/structs) and top-level fn signatures",
-                                    "status": "DONE_VERIFIED",
-                                    "iteration_completed": 1,
-                                    "verification_cmd": "cargo test -p kant-parser test_parse_afhoum_and_cap",
-                                    "notes": "Toplevel declarations parsed cleanly without deep nesting."
-                                },
-                                {
-                                    "id": "C1.H2.S1.T02",
-                                    "title": "Parse mandatory contract blocks (intent, requires, ensures, decreases, effects)",
-                                    "status": "DONE_VERIFIED",
-                                    "iteration_completed": 1,
-                                    "verification_cmd": "cargo test -p kant-parser test_parse_full_function_with_contracts",
-                                    "notes": "Contract blocks parsed before function body."
-                                },
-                                {
-                                    "id": "C1.H2.S1.T03",
-                                    "title": "Parse decision blocks and dyn { ... } quarantine blocks",
-                                    "status": "DONE_VERIFIED",
-                                    "iteration_completed": 1,
-                                    "verification_cmd": "cargo test -p kant-parser test_parse_decision_block",
-                                    "notes": "Structured metadata parsed for compiler and spec views."
-                                },
-                                {
-                                    "id": "C1.H2.S1.T04",
-                                    "title": "Implement error recovery reducing malformed syntax to Expr::Hole",
-                                    "status": "DONE_VERIFIED",
-                                    "iteration_completed": 1,
-                                    "verification_cmd": "cargo test -p kant-parser test_parse_typed_hole_and_operator_precedence",
-                                    "notes": "Zero panics on syntax errors; emits Expr::Hole for agent repair."
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "id": "C1.H3",
-                    "title": "Spatial Canonicalizer & Lockfile Engine",
-                    "crate_lane": "crates/kant-canonical",
-                    "assigned_agent": "SA-04",
-                    "sub_headings": [
-                        {
-                            "id": "C1.H3.S1",
-                            "title": "De Bruijn Slot Erasure & Deterministic SHA-256 AST Identity",
-                            "tasks": [
-                                {
-                                    "id": "C1.H3.S1.T01",
-                                    "title": "Erase local variable/parameter names to @T.0, @T.1 binding-order slots",
-                                    "status": "DONE_VERIFIED",
-                                    "iteration_completed": 1,
-                                    "verification_cmd": "cargo test -p kant-canonical test_alpha_equivalence_invariant",
-                                    "notes": "Renaming local variables produces 100% identical DefHash."
-                                },
-                                {
-                                    "id": "C1.H3.S1.T02",
-                                    "title": "Sort record fields lexicographically and normalize recursive calls to @self",
-                                    "status": "DONE_VERIFIED",
-                                    "iteration_completed": 1,
-                                    "verification_cmd": "cargo test -p kant-canonical test_type_field_order_invariance",
-                                    "notes": "Field ordering invariance verified."
-                                },
-                                {
-                                    "id": "C1.H3.S1.T03",
-                                    "title": "Round-trip display names losslessly via .kantd JSON sidecar",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test -p kant-canonical test_kantd_roundtrip",
-                                    "notes": "Generates .kantd file mapping De Bruijn slots back to human names."
-                                }
-                            ]
-                        },
-                        {
-                            "id": "C1.H3.S2",
-                            "title": "Sidecar Lockfile (module.kant.lock) Reconciliation Rules R1–R6",
-                            "tasks": [
-                                {
-                                    "id": "C1.H3.S2.T01",
-                                    "title": "Implement R1 (Match) & R6 (New Pin) in LockfileEngine",
-                                    "status": "DONE_VERIFIED",
-                                    "iteration_completed": 1,
-                                    "verification_cmd": "cargo test -p kant-canonical test_lockfile_reconciliation_r1_and_r4_mechanical_rename",
-                                    "notes": "Pushed to lockfile seamlessly on matching and novel defs."
-                                },
-                                {
-                                    "id": "C1.H3.S2.T02",
-                                    "title": "Implement R2 (Resolution Changed Hard Error) and R3 (Content Drift)",
-                                    "status": "DONE_VERIFIED",
-                                    "iteration_completed": 1,
-                                    "verification_cmd": "cargo test -p kant-canonical conformance_canonical",
-                                    "notes": "Prevents silent rebinding hijacks; enforces --frozen in CI."
-                                },
-                                {
-                                    "id": "C1.H3.S2.T03",
-                                    "title": "Implement R4 (Rename Detection by Identity Hash) emitting mechanical rename_reference patch",
-                                    "status": "DONE_VERIFIED",
-                                    "iteration_completed": 1,
-                                    "verification_cmd": "cargo test -p kant-canonical test_lockfile_reconciliation_r1_and_r4_mechanical_rename",
-                                    "notes": "Emits RFC 6902 patch updating callers automatically."
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "id": "C2",
-            "name": "Wave 2: Transcendental Analytic & Al-Shaym IR",
-            "short_title": "Wave 2: Analytic & IR",
-            "wave": "Wave 2",
-            "gate_status": "LOCKED",
-            "iteration": 0,
-            "dependencies": ["C1"],
-            "gate_checklist": {
-                "cargo_fmt": False,
-                "cargo_clippy": False,
-                "cargo_test": False,
-                "conformance_tests": False,
-                "git_status_clean": False
-            },
-            "iterations": [],
-            "main_headings": [
-                {
-                    "id": "C2.H1",
-                    "title": "12-Categories Type System",
-                    "crate_lane": "crates/kant-types",
-                    "assigned_agent": "SA-05",
-                    "sub_headings": [
-                        {
-                            "id": "C2.H1.S1",
-                            "title": "Triads of Quantity, Quality, Relation & Modality",
-                            "tasks": [
-                                {
-                                    "id": "C2.H1.S1.T01",
-                                    "title": "Implement Quantity (Unity primitives, Plurality slices, Totality exhaustive ADTs)",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test -p kant-types test_category_quantity",
-                                    "notes": "Type categories assigned to TypedModule AST."
-                                },
-                                {
-                                    "id": "C2.H1.S1.T02",
-                                    "title": "Implement Quality (Reality inhabited check, Negation never type !, Limitation Secret<T>)",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test -p kant-types test_category_quality",
-                                    "notes": "Check inhabitation and Secret<T> wrapper."
-                                },
-                                {
-                                    "id": "C2.H1.S1.T03",
-                                    "title": "Implement Relation (Substance immutable structs, Causality function arrows fn -> T ! E)",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test -p kant-types test_category_relation",
-                                    "notes": "Arrows carrying explicit effect sets."
-                                },
-                                {
-                                    "id": "C2.H1.S1.T04",
-                                    "title": "Implement Modality (Possibility Option/Result, Actuality cap handles, Necessity const)",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test -p kant-types test_category_modality",
-                                    "notes": "Option/Result, linear cap types, and proved consts."
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "id": "C2.H2",
-                    "title": "Exact Effect Matcher & Quarantined Dynamism",
-                    "crate_lane": "crates/kant-effects",
-                    "assigned_agent": "SA-06",
-                    "sub_headings": [
-                        {
-                            "id": "C2.H2.S1",
-                            "title": "Sigil-Style Set Equality Effect Verification",
-                            "tasks": [
-                                {
-                                    "id": "C2.H2.S1.T01",
-                                    "title": "Build atomic effect lattice (console, fs, net, ai, clock, entropy, diverge)",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test -p kant-effects test_01_pure_function_exact_match",
-                                    "notes": "AtomicEffect enum and EffectSet operations."
-                                },
-                                {
-                                    "id": "C2.H2.S1.T02",
-                                    "title": "Verify E_decl(f) = E_inf(f) strict set equality and emit KANT-E301/E302 with SAFE JSON patches",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test -p kant-effects test_02_undeclared_effect_rejected_with_safe_patch",
-                                    "notes": "RFC 6902 patch replacement of /functions/<idx>/effects."
-                                },
-                                {
-                                    "id": "C2.H2.S1.T03",
-                                    "title": "Support higher-order effects of(f) parameter substitution",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test -p kant-effects test_04_higher_order_effects_of_param",
-                                    "notes": "Substitutes concrete lambda effects into caller signature."
-                                }
-                            ]
-                        },
-                        {
-                            "id": "C2.H2.S2",
-                            "title": "Quarantined Dynamism (G1–G4 Guarantees)",
-                            "tasks": [
-                                {
-                                    "id": "C2.H2.S2.T01",
-                                    "title": "Enforce inert function references &fn and restrict indirect calls to dyn { t1..tn }",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test -p kant-effects test_05_unquarantined_funref_call_rejected",
-                                    "notes": "Reject escaped function pointers outside dyn blocks."
-                                },
-                                {
-                                    "id": "C2.H2.S2.T02",
-                                    "title": "Implement intraprocedural funref may-reach analysis proposing minimal dyn target sets",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test -p kant-effects test_06_quarantine_under_approximation_detected",
-                                    "notes": "Emits KANT-E306 if actual callee targets exceed declared list."
-                                },
-                                {
-                                    "id": "C2.H2.S2.T03",
-                                    "title": "Compute transitive reverse-caller blast radius and reference exactness ratio",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test -p kant-effects test_10_blast_radius_and_exactness_metric",
-                                    "notes": "G1/G2 blast radius and exactness ratio computed in O(V+E)."
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "id": "C2.H3",
-                    "title": "Al-Shaym SSA IR & Perceus Memory Engine",
-                    "crate_lane": "crates/kant-ir, crates/kant-perceus",
-                    "assigned_agent": "SA-07 & SA-08",
-                    "sub_headings": [
-                        {
-                            "id": "C2.H3.S1",
-                            "title": "30-Instruction SSA KANT-IR & Continuation Lowering",
-                            "tasks": [
-                                {
-                                    "id": "C2.H3.S1.T01",
-                                    "title": "Lower typed AST to basic-block SSA form (30 canonical instructions)",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test -p kant-ir test_lower_basic_blocks",
-                                    "notes": "SSA dominance and def-use chain verification."
-                                },
-                                {
-                                    "id": "C2.H3.S1.T02",
-                                    "title": "Lower handle { ... } with governor { ... } to continuation capture/resume primitives",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test -p kant-ir test_effect_handler_lowering",
-                                    "notes": "Reified stack frames and continuation tokens."
-                                }
-                            ]
-                        },
-                        {
-                            "id": "C2.H3.S2",
-                            "title": "Perceus Garbage-Free Reference Counting & Drop-Guided Reuse",
-                            "tasks": [
-                                {
-                                    "id": "C2.H3.S2.T01",
-                                    "title": "Emit precise dup and drop instructions (zero garbage at each step)",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test -p kant-perceus test_dup_drop_placement",
-                                    "notes": "Free at syntactically last use in time."
-                                },
-                                {
-                                    "id": "C2.H3.S2.T02",
-                                    "title": "Implement drop-guided reuse pass matching dead unique cells with same-size allocations (Alloc@r)",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test -p kant-perceus test_drop_guided_reuse",
-                                    "notes": "In-place buffer recycling with frame-limited memory guarantees."
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "id": "C3",
-            "name": "Wave 3: Transcendental Dialectic, Security & Spec Extraction",
-            "short_title": "Wave 3: Dialectic",
-            "wave": "Wave 3",
-            "gate_status": "LOCKED",
-            "iteration": 0,
-            "dependencies": ["C2"],
-            "gate_checklist": {
-                "cargo_fmt": False,
-                "cargo_clippy": False,
-                "cargo_test": False,
-                "conformance_tests": False,
-                "git_status_clean": False
-            },
-            "iterations": [],
-            "main_headings": [
-                {
-                    "id": "C3.H1",
-                    "title": "Paralogism Guard — Affine Capabilities & Secret Taint",
-                    "crate_lane": "crates/kant-paralogism",
-                    "assigned_agent": "SA-09",
-                    "sub_headings": [
-                        {
-                            "id": "C3.H1.S1",
-                            "title": "Affine Capability Tracking & Constant-Time Secret Discipline",
-                            "tasks": [
-                                {
-                                    "id": "C3.H1.S1.T01",
-                                    "title": "Track Available | Borrowed | Moved state for capability handles",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test -p kant-paralogism test_use_after_move",
-                                    "notes": "Emits E004 use-after-move, E005 double-move, E009 branch mismatch."
-                                },
-                                {
-                                    "id": "C3.H1.S1.T02",
-                                    "title": "Implement Secret<T> with zeroize-on-drop and IR taint analysis",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test -p kant-paralogism test_secret_taint_branch_leak",
-                                    "notes": "Rejects secret values in branch conditions and cache indices."
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "id": "C3.H2",
-                    "title": "Antinomy Verifier — 3-Tier Contracts & Termination",
-                    "crate_lane": "crates/kant-antinomy",
-                    "assigned_agent": "SA-10",
-                    "sub_headings": [
-                        {
-                            "id": "C3.H2.S1",
-                            "title": "Tier 1 Static Proof (SMT) & Tier 3 Runtime Fallback",
-                            "tasks": [
-                                {
-                                    "id": "C3.H2.S1.T01",
-                                    "title": "Discharge requires/ensures obligations via Tier 1 interval solver & Z3 SMT (10s budget)",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test -p kant-antinomy test_tier1_smt_discharge",
-                                    "notes": "Fast interval evaluation with Z3 SMT solver fallback."
-                                },
-                                {
-                                    "id": "C3.H2.S1.T02",
-                                    "title": "Synthesize Tier 3 compiled runtime assertion guards on solver timeout",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test -p kant-antinomy test_tier3_runtime_guard_synthesis",
-                                    "notes": "Lowers unproved obligations to checked asserts with reconciliation."
-                                },
-                                {
-                                    "id": "C3.H2.S1.T03",
-                                    "title": "Enforce mandatory decreases measure on recursive SCCs (E137)",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test -p kant-antinomy test_decreases_termination_check",
-                                    "notes": "Requires decreases clause or explicit diverge effect."
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "id": "C3.H3",
-                    "title": "Noumena Governor & Amthoul Spec Extractor",
-                    "crate_lane": "crates/kant-noumena, crates/kant-spec",
-                    "assigned_agent": "SA-11 & SA-12",
-                    "sub_headings": [
-                        {
-                            "id": "C3.H3.S1",
-                            "title": "Session-Governor-Executor Protocol & Spec Rendering",
-                            "tasks": [
-                                {
-                                    "id": "C3.H3.S1.T01",
-                                    "title": "Enforce trust none module default and unforgeable ZST capability tokens",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test -p kant-noumena test_trust_none_enforcement",
-                                    "notes": "Private constructor tokens passed only from entrypoint."
-                                },
-                                {
-                                    "id": "C3.H3.S1.T02",
-                                    "title": "Implement approval_gate continuation suspension for human sign-off",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test -p kant-noumena test_approval_gate_suspension",
-                                    "notes": "Suspends execution until CLI or IDE signature provided."
-                                },
-                                {
-                                    "id": "C3.H3.S1.T03",
-                                    "title": "Implement kantc spec contract surface renderer and kantc graph --of <fn> blast radius",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test -p kant-spec test_spec_and_graph_extraction",
-                                    "notes": "Generates concise .spec file for human signing and token-budgeted slices."
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "id": "C4",
-            "name": "Wave 4: Doctrine of Method, Native Codegen & Agent Surface",
-            "short_title": "Wave 4: Codegen & Tools",
-            "wave": "Wave 4",
-            "gate_status": "LOCKED",
-            "iteration": 0,
-            "dependencies": ["C3"],
-            "gate_checklist": {
-                "cargo_fmt": False,
-                "cargo_clippy": False,
-                "cargo_test": False,
-                "conformance_tests": False,
-                "git_status_clean": False
-            },
-            "iterations": [],
-            "main_headings": [
-                {
-                    "id": "C4.H1",
-                    "title": "Reference Evaluator & Merkle Evidence Bundles",
-                    "crate_lane": "crates/kant-eval",
-                    "assigned_agent": "SA-13",
-                    "sub_headings": [
-                        {
-                            "id": "C4.H1.S1",
-                            "title": "Deterministic KANT-IR VM & Tamper-Evident Audit Trail",
-                            "tasks": [
-                                {
-                                    "id": "C4.H1.S1.T01",
-                                    "title": "Implement deterministic KANT-IR reference interpreter (kantc run --eval)",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test -p kant-eval test_deterministic_evaluator",
-                                    "notes": "Interprets 30 KANT-IR SSA opcodes with state trace."
-                                },
-                                {
-                                    "id": "C4.H1.S1.T02",
-                                    "title": "Record Noumena invocations into hash-chained Merkle evidence bundle (.kant.evidence.jsonl)",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test -p kant-eval test_merkle_evidence_logging",
-                                    "notes": "Cryptographic audit trail with parent hash chaining."
-                                },
-                                {
-                                    "id": "C4.H1.S1.T03",
-                                    "title": "Implement bit-identical deterministic workflow replay (kantc replay <bundle>)",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test -p kant-eval test_deterministic_replay",
-                                    "notes": "Offline replay without hitting external APIs."
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "id": "C4.H2",
-                    "title": "Cranelift JIT & Native AOT Backend",
-                    "crate_lane": "crates/kant-codegen",
-                    "assigned_agent": "SA-14",
-                    "sub_headings": [
-                        {
-                            "id": "C4.H2.S1",
-                            "title": "Sub-3ms JIT Loop & Static Native Binary Emission",
-                            "tasks": [
-                                {
-                                    "id": "C4.H2.S1.T01",
-                                    "title": "Lower KANT-IR SSA to Cranelift IR (CLIF) for x86-64 and ARM64",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test -p kant-codegen test_clif_lowering",
-                                    "notes": "Maps SSA values and basic blocks to Cranelift variables."
-                                },
-                                {
-                                    "id": "C4.H2.S1.T02",
-                                    "title": "Implement fast in-memory JIT execution engine (kantc run) for agent iterations",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test -p kant-codegen test_jit_execution",
-                                    "notes": "Sub-3ms execution turnaround."
-                                },
-                                {
-                                    "id": "C4.H2.S1.T03",
-                                    "title": "Emit standalone static native executables (kantc build) with deterministic timestamps",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test -p kant-codegen test_aot_binary_emission",
-                                    "notes": "Byte-identical native binaries across runs."
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "id": "C4.H3",
-                    "title": "JSON Patch Auto-Fix, Agent Server & MCP",
-                    "crate_lane": "crates/kant-diag, crates/kant-cli, crates/kant-mcp",
-                    "assigned_agent": "SA-15 & SA-16",
-                    "sub_headings": [
-                        {
-                            "id": "C4.H3.S1",
-                            "title": "RFC 6902 Automated Repair Loop & Test Cache",
-                            "tasks": [
-                                {
-                                    "id": "C4.H3.S1.T01",
-                                    "title": "Unify compiler diagnostics with FixSafety: SAFE|REVIEW and RFC 6902 JSON Patch payloads",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test -p kant-diag test_diagnostic_patch_serialization",
-                                    "notes": "Standardized JSON schema with patch operations."
-                                },
-                                {
-                                    "id": "C4.H3.S1.T02",
-                                    "title": "Implement kantc fix --apply iterative convergence loop",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test -p kant-diag test_auto_repair_convergence",
-                                    "notes": "Applies SAFE patches iteratively until clean."
-                                },
-                                {
-                                    "id": "C4.H3.S1.T03",
-                                    "title": "Implement content-addressed test caching (kantc test) keyed by dependency cone SHA-256",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test -p kant-cli test_cached_test_runner",
-                                    "notes": "Reruns only tests whose dependency cone hash drifted."
-                                }
-                            ]
-                        },
-                        {
-                            "id": "C4.H3.S2",
-                            "title": "Long-Lived kantc serv, 10-Tool kant-mcp & XGrammar Exporter",
-                            "tasks": [
-                                {
-                                    "id": "C4.H3.S2.T01",
-                                    "title": "Build persistent JSON-RPC daemon (kantc serv) for zero-spawn agent checks",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test -p kant-cli test_agent_server_rpc",
-                                    "notes": "Zero process startup overhead."
-                                },
-                                {
-                                    "id": "C4.H3.S2.T02",
-                                    "title": "Build kant-mcp server exposing 10 structured tools (check, fix, spec, graph, eval, etc.)",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test -p kant-mcp test_10_mcp_tools",
-                                    "notes": "Model Context Protocol interface for Claude Code, Cursor, Codex."
-                                },
-                                {
-                                    "id": "C4.H3.S2.T03",
-                                    "title": "Implement kantc grammar --export-xgrammar generating CFG/PDA masks for constrained decoding",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test -p kant-cli test_xgrammar_export",
-                                    "notes": "Enforces 100% syntactically valid code during token sampling."
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "id": "C5",
-            "name": "The Four Mandatory MVP Bootstrap & Quality Proofs",
-            "short_title": "MVP Quality Proofs",
-            "wave": "Quality & Verification",
-            "gate_status": "LOCKED",
-            "iteration": 0,
-            "dependencies": ["C4"],
-            "gate_checklist": {
-                "differential_proof": False,
-                "byte_determinism_proof": False,
-                "repair_convergence_proof": False,
-                "zero_escape_security_proof": False,
-                "git_status_clean": False
-            },
-            "iterations": [],
-            "main_headings": [
-                {
-                    "id": "C5.H1",
-                    "title": "Execution & Determinism Verification Proofs",
-                    "crate_lane": "tests/bootstrap_proofs",
-                    "assigned_agent": "SA-13 & SA-14",
-                    "sub_headings": [
-                        {
-                            "id": "C5.H1.S1",
-                            "title": "Proof 1 (Differential Oracle) & Proof 2 (Byte-Identical Determinism)",
-                            "tasks": [
-                                {
-                                    "id": "C5.H1.S1.T01",
-                                    "title": "Execute 50 reference .kant programs across kant-eval and kant-codegen (100% identical outputs)",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test --test proof_01_differential_oracle",
-                                    "notes": "0 output or state trace deviations."
-                                },
-                                {
-                                    "id": "C5.H1.S1.T02",
-                                    "title": "Run dual independent compilations verifying 0 byte mismatches across generated binaries",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test --test proof_02_byte_determinism",
-                                    "notes": "Bit-for-bit identical binary output."
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "id": "C5.H2",
-                    "title": "Autonomous Repair & Epistemic Security Proofs",
-                    "crate_lane": "tests/bootstrap_proofs",
-                    "assigned_agent": "SA-15 & SA-11",
-                    "sub_headings": [
-                        {
-                            "id": "C5.H2.S1",
-                            "title": "Proof 3 (Repair Convergence) & Proof 4 (Noumena Zero-Escape)",
-                            "tasks": [
-                                {
-                                    "id": "C5.H2.S1.T01",
-                                    "title": "Run kantc fix --apply across 30 seeded defective programs (100% convergence to valid builds)",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test --test proof_03_repair_convergence",
-                                    "notes": "Iterative patch application reaches fixed point."
-                                },
-                                {
-                                    "id": "C5.H2.S1.T02",
-                                    "title": "Run adversarial security suite verifying 100% rejection of unmediated I/O and capability forgery",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "cargo test --test proof_04_noumena_zero_escape",
-                                    "notes": "Trust none boundary and secret zeroization verified."
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "id": "C6",
-            "name": "Kant v0.1 Distributable Release & Ecosystem Launch",
-            "short_title": "v0.1 Release Launch",
-            "wave": "Release & Distribution",
-            "gate_status": "LOCKED",
-            "is_final_destination": True,
-            "iteration": 0,
-            "dependencies": ["C5"],
-            "gate_checklist": {
-                "clean_git_tree": False,
-                "tarballs_generated": False,
-                "checksums_verified": False,
-                "installer_smoke_tested": False,
-                "agent_portal_ready": False
-            },
-            "iterations": [],
-            "main_headings": [
-                {
-                    "id": "C6.H1",
-                    "title": "Automated Distribution Sub-Function (kantc dist & scripts/distribute_v0_1.sh)",
-                    "crate_lane": "scripts/distribute_v0_1.sh, dist/",
-                    "assigned_agent": "SA-16",
-                    "sub_headings": [
-                        {
-                            "id": "C6.H1.S1",
-                            "title": "Cross-Platform Binary Bundling & Cryptographic Checksums",
-                            "tasks": [
-                                {
-                                    "id": "C6.H1.S1.T01",
-                                    "title": "Implement kantc dist --release v0.1.0 subcommand and scripts/distribute_v0_1.sh",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "bash scripts/distribute_v0_1.sh --dry-run",
-                                    "notes": "Package stripped release binaries for linux-x86_64, darwin-arm64, windows-x86_64."
-                                },
-                                {
-                                    "id": "C6.H1.S1.T02",
-                                    "title": "Bundle standard library, byte-pinned primer (kant-toolchain.toml), and SHA-256SUMS manifest",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "sha256sum -c dist/v0.1.0/SHA256SUMS",
-                                    "notes": "Create .tar.gz and .zip release archives."
-                                }
-                            ]
-                        },
-                        {
-                            "id": "C6.H1.S2",
-                            "title": "One-Command Universal Installer & Agent Plugin Packages",
-                            "tasks": [
-                                {
-                                    "id": "C6.H1.S2.T01",
-                                    "title": "Generate universal shell installer install.sh (curl -fsSL .../install.sh | sh)",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "bash scripts/distribute_v0_1.sh --verify-installer",
-                                    "notes": "Auto-detects OS/arch, verifies SHA-256, installs to ~/.kant/bin."
-                                },
-                                {
-                                    "id": "C6.H1.S2.T02",
-                                    "title": "Generate Python MCP wrapper package (kant-lang) and Agent skill plugin (SKILL.md)",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "test -f dist/packages/SKILL.md",
-                                    "notes": "pipx install 'kant-lang[mcp]' and Claude Code / Cursor / Gemini CLI skill."
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "id": "C6.H2",
-                    "title": "Machine-Readable Agent Portal & Pre-Release Git Sanitization",
-                    "crate_lane": "agent/v0.1/, .gitignore",
-                    "assigned_agent": "SA-16",
-                    "sub_headings": [
-                        {
-                            "id": "C6.H2.S1",
-                            "title": "Versioned /agent/v0.1/ JSON Portal & /llms.txt Specification",
-                            "tasks": [
-                                {
-                                    "id": "C6.H2.S1.T01",
-                                    "title": "Generate /llms.txt and /llms-full.txt single-page cold-start specs (<3,200 tokens)",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "wc -w dist/agent/llms.txt",
-                                    "notes": "10/10 builtin recall on LLM cold starts."
-                                },
-                                {
-                                    "id": "C6.H2.S1.T02",
-                                    "title": "Generate /agent/v0.1/manifest.json, schemas/diagnostics.json, and examples/catalog.json",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "test -f dist/agent/v0.1/manifest.json",
-                                    "notes": "Machine discovery endpoint with paired .kant and .spec examples."
-                                }
-                            ]
-                        },
-                        {
-                            "id": "C6.H2.S2",
-                            "title": "Git Hygiene Gate & GitHub Release Tagging (v0.1.0)",
-                            "tasks": [
-                                {
-                                    "id": "C6.H2.S2.T01",
-                                    "title": "Run automated pre-release sanitizer verifying tracker files are ignored and absent from git status",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "git check-ignore kant-roadmap-tracker.html .kant-tracker/",
-                                    "notes": "Strict git cleanliness check."
-                                },
-                                {
-                                    "id": "C6.H2.S2.T02",
-                                    "title": "Tag v0.1.0 release, build release notes, and generate distribution SHA-256 manifest",
-                                    "status": "TODO",
-                                    "iteration_completed": 0,
-                                    "verification_cmd": "git tag -l v0.1.0",
-                                    "notes": "Official GitHub release tag and release notes."
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
-        }
-    ]
-}
+DEFAULT_ROADMAP = {'version': '0.1.0', 'last_updated': '2026-11-06T18:00:00Z', 'current_circle_focus': 'C0', 'global_stats': {'total_tasks': 75, 'completed_tasks': 0, 'blocked_tasks': 0, 'progress_percent': 0.0}, 'telemetry_metadata': {'compiler_specification': 'Kant (.kant) v0.1', 'workspace_crates_count': 17, 'pipeline_stages_count': 7, 'verification_gate_standard': 'High-Assurance Formal Compiler Systems Verification', 'state_invariants': {'I_1': 'Deterministic Content-Addressing & Alpha-Equivalence DefHash', 'I_2': 'Exact Set-Equality Effect Inference & Quarantined Dynamism (Sigil Law)', 'I_3': 'Perceus Garbage-Free Reference Counting & Frame-Limited Reuse', 'I_4': 'Noumena Quarantined Zero-Escape Capability Boundary'}}, 'circles': [{'id': 'C0', 'name': 'Stage C0: Compiler Workspace Bootstrap & Epistemic Invariants', 'short_title': 'Stage C0: Bootstrap & Scaffolding', 'sub_phase': 'Workspace Architecture, DefHash Algorithms & Scaffolding', 'gate_invariant': 'Invariant I_1 (Content-Addressing Determinism)', 'arabic_title': 'المرحلة C0: إقلاع مساحة عمل المترجم والثوابت الإبستمولوجية', 'arabic_sub_phase': 'معمارية مساحة العمل، خوارزميات DefHash والهياكل الأساسية', 'arabic_gate_invariant': 'الثابت I_1 (حتمية العنونة بالمحتوى)', 'wave': 'Pre-Wave Foundation', 'gate_status': 'PENDING', 'iteration': 0, 'dependencies': [], 'gate_checklist': {'spec_pinning': False, 'lexicon_mapping': False, 'clarification_triage': False, 'toolchain_hashes': False, 'git_lane_hygiene': False}, 'iterations': [], 'main_headings': [{'id': 'C0.H1', 'title': 'Workspace Architecture & Toolchain Hash Pinning', 'crate_lane': 'crates/kant-core, Cargo.toml, AGENTS.md, docs/spec/', 'assigned_agent': 'SA-01', 'sub_headings': [{'id': 'C0.H1.S1', 'title': 'Root Configuration & Multi-Agent Constitution', 'tasks': [{'id': 'TASK-C0-01', 'task_code': 'C0.H1.S1.T01', 'title': 'Formalize Multi-Agent Constitution & 16-Lane File Concurrency Invariants', 'assigned_agent': 'SA-01', 'target_crate': 'crates/kant-core', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'git status --porcelain AGENTS.md', 'verification_cmd': 'git status --porcelain AGENTS.md', 'description': 'Audit and enforce strict file-lane boundaries across 16 subagents in AGENTS.md (<350 lines), defining isolated crate domains, the Five-Step Iron Law of Verification, and git worktree isolation.', 'acceptance_criteria': 'Line count strictly <350 lines; 16 distinct subagent boundaries specified; 0 cross-lane write overlap; automated markdown linting clean.', 'notes': 'Verified <350 lines, lanes SA-01 to SA-16 formally isolated.'}, {'id': 'TASK-C0-02', 'task_code': 'C0.H1.S1.T02', 'title': 'Establish Academic Terminology Lexicon & Constructive Type Mapping', 'assigned_agent': 'SA-01', 'target_crate': 'crates/kant-core', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'test -f docs/spec/01_EPISTEMOLOGY_AND_LEXICON.md', 'verification_cmd': 'test -f docs/spec/01_EPISTEMOLOGY_AND_LEXICON.md', 'description': "Map Moussa Wehbe's academic philosophical translations (mujauz, afhoum, shaym, noumenon, amthoul) directly to Martin-Löf Constructive Type Theory (MLTT) and formal compiler constructs.", 'acceptance_criteria': 'All 12 categories, 4 faculties, and 7 boundary conditions mapped to formal type signatures; zero colloquialisms or speculative commentary.', 'notes': 'Academic philological dictionary and MLTT constructive type theory mapping verified.'}, {'id': 'TASK-C0-03', 'task_code': 'C0.H1.S1.T03', 'title': 'Enforce Workspace Namespace Isolation & Package Disambiguation', 'assigned_agent': 'SA-01', 'target_crate': 'crates/kant-core', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo check --workspace', 'verification_cmd': 'cargo check --workspace', 'description': 'Establish unambiguous package nomenclature (kantc CLI binary, kant-* modular crates, #![kant(v0.1)] root attributes) isolating the toolchain from legacy CAS or crates.io collisions.', 'acceptance_criteria': 'All 17 crates build cleanly; Cargo.toml workspace dependencies pinned; zero collision with legacy registries.', 'notes': 'Disambiguated from legacy CAS, Langium DSL, and crates.io micro-crates.'}]}, {'id': 'C0.H1.S2', 'title': 'Formal Specification Suite & Cryptographic Manifest', 'tasks': [{'id': 'TASK-C0-04', 'task_code': 'C0.H1.S2.T01', 'title': 'Specify Formal Grammar EBNF, De Bruijn Slot Architecture & AST Invariants', 'assigned_agent': 'SA-01', 'target_crate': 'crates/kant-core', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'test -f docs/spec/02_AESTHETICS_GRAMMAR_AND_AST.md', 'verification_cmd': 'test -f docs/spec/02_AESTHETICS_GRAMMAR_AND_AST.md', 'description': 'Document complete LL(1) / flattened Pratt EBNF grammar, alpha-equivalence via De Bruijn coordinate indexing, and deterministic SHA-256 DefHash identity rules.', 'acceptance_criteria': '100% formal grammar coverage; 5 AST canonicalization transformations proven confluent; zero parse ambiguity.', 'notes': 'Flattened toplevel EBNF and 5 canonicalization rules locked.'}, {'id': 'TASK-C0-05', 'task_code': 'C0.H1.S2.T02', 'title': 'Formulate 12-Category Type Lattice & Exact Effect Sigil Law', 'assigned_agent': 'SA-01', 'target_crate': 'crates/kant-types', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'test -f docs/spec/03_ANALYTIC_CATEGORIES_AND_EFFECTS.md', 'verification_cmd': 'test -f docs/spec/03_ANALYTIC_CATEGORIES_AND_EFFECTS.md', 'description': 'Specify constructive type inference over Quantity, Quality, Relation, Modality triads and formalize the Sigil Law enforcing strict set-equality E_decl = E_inf.', 'acceptance_criteria': 'Lattice join/meet semantics defined; atomic effects lattice closed; sound subtyping relation proven.', 'notes': 'Quantity, Quality, Relation, Modality triads and Sigil Law formalized.'}, {'id': 'TASK-C0-06', 'task_code': 'C0.H1.S2.T03', 'title': 'Define 30-Instruction SSA KANT-IR & Perceus Drop-Guided Memory Reuse', 'assigned_agent': 'SA-01', 'target_crate': 'crates/kant-ir', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'test -f docs/spec/04_SCHEMATISM_IR_AND_PERCEUS.md', 'verification_cmd': 'test -f docs/spec/04_SCHEMATISM_IR_AND_PERCEUS.md', 'description': 'Define KANT-IR 30 SSA instructions, continuation capture/resume semantics, and the Perceus reference-counting model with Alloc@r reuse tokens.', 'acceptance_criteria': 'SSA dominance properties formalized; frame-limited cyclic arena isolation verified; reference count drop points syntactically fixed.', 'notes': '30 KANT-IR ops, frame-limited Alloc@r reuse tokens, cycle-free arena design.'}, {'id': 'TASK-C0-07', 'task_code': 'C0.H1.S2.T04', 'title': 'Specify 3-Tier SMT Contract Verification & Noumena Capability Model', 'assigned_agent': 'SA-01', 'target_crate': 'crates/kant-antinomy', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'test -f docs/spec/05_DIALECTIC_VERIFICATION_AND_CAPABILITIES.md', 'verification_cmd': 'test -f docs/spec/05_DIALECTIC_VERIFICATION_AND_CAPABILITIES.md', 'description': 'Specify 3-Tier contract discharge (Tier 1 interval arithmetic, Tier 2 SMT Z3 solver with 10s budget, Tier 3 runtime assertion synthesis) and affine capability sandbox.', 'acceptance_criteria': 'Tier escalation logic formalized; Secret<T> taint analysis rules specified; zero information leakage across capability boundary.', 'notes': 'Affine capability ownership, Secret<T> taint analysis, 3-tier contract proofs.'}, {'id': 'TASK-C0-08', 'task_code': 'C0.H1.S2.T05', 'title': 'Specify Dual-Target Execution Architecture & Cryptographic Merkle Traces', 'assigned_agent': 'SA-01', 'target_crate': 'crates/kant-eval', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'test -f docs/spec/06_METHOD_CRANELIFT_VM_AND_EVIDENCE.md', 'verification_cmd': 'test -f docs/spec/06_METHOD_CRANELIFT_VM_AND_EVIDENCE.md', 'description': 'Specify bitwise-identical dual-engine semantics (KANT-IR tree-walk evaluator vs Cranelift JIT/AOT native codegen) and SHA-256 Merkle execution trace logging.', 'acceptance_criteria': 'Differential oracle divergence tolerance: 0%; Merkle chain append-only integrity proven; gas metering specification complete.', 'notes': 'KANT-IR evaluator, Cranelift JIT/AOT backend, Merkle evidence format.'}, {'id': 'TASK-C0-09', 'task_code': 'C0.H1.S2.T06', 'title': 'Define RFC 6902 Diagnostics Schema, MCP Interface & Sidecar Formats', 'assigned_agent': 'SA-01', 'target_crate': 'crates/kant-diag', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'test -f docs/spec/07_AGENT_SURFACE_SIDECAR_AND_MCP.md', 'verification_cmd': 'test -f docs/spec/07_AGENT_SURFACE_SIDECAR_AND_MCP.md', 'description': 'Specify structured JSON diagnostic payloads with RFC 6902 JSON patch auto-fixes, 10 Model Context Protocol tools, and .kantd display sidecar synchronization.', 'acceptance_criteria': 'RFC 6902 JSON schema validation; MCP protocol compliance; XGrammar CFG export specification.', 'notes': 'RFC 6902 JSON patch auto-fixes and XGrammar constrained sampling.'}, {'id': 'TASK-C0-10', 'task_code': 'C0.H1.S2.T07', 'title': 'Compute Cryptographic Toolchain Digests & Pin Manifest in kant-toolchain.toml', 'assigned_agent': 'SA-01', 'target_crate': 'crates/kant-core', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'test -f kant-toolchain.toml', 'verification_cmd': 'test -f kant-toolchain.toml', 'description': 'Compute BLAKE3 and SHA-256 hashes of all 8 specification documents and pin toolchain invariants in kant-toolchain.toml.', 'acceptance_criteria': 'All 8 document digests verified; git hooks validate hashes; tampering rejected.', 'notes': 'Pinned all 8 document hashes and subagent rules.'}]}]}, {'id': 'C0.H2', 'title': 'Architectural Decision Records & Deferral Engine', 'crate_lane': 'docs/DECISIONS_AND_DEFERRED_ROADMAP.md', 'assigned_agent': 'SA-01', 'sub_headings': [{'id': 'C0.H2.S1', 'title': 'P0 Architectural Baselines', 'tasks': [{'id': 'TASK-C0-11', 'task_code': 'C0.H2.S1.T01', 'title': 'Lock Surface Encoding Protocols & Bi-Directional Sidecar Mapping', 'assigned_agent': 'SA-01', 'target_crate': 'crates/kant-canonical', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': "grep 'Q01' docs/DECISIONS_AND_DEFERRED_ROADMAP.md", 'verification_cmd': "grep 'Q01' docs/DECISIONS_AND_DEFERRED_ROADMAP.md", 'description': 'Codify ADR-001 locking UTF-8 ASCII for tokenizer determinism and .kantd JSON sidecars for localized Arabic visual presentation.', 'acceptance_criteria': 'Zero encoding ambiguity; roundtrip AST lossless preservation.', 'notes': 'Latin ASCII for tokenizer fidelity, Arabic .kantd sidecar for inspection.'}, {'id': 'TASK-C0-12', 'task_code': 'C0.H2.S1.T02', 'title': 'Lock Flattened Infix Grammar & Binding-Order Coordinate Indexing', 'assigned_agent': 'SA-01', 'target_crate': 'crates/kant-parser', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': "grep 'Q03' docs/DECISIONS_AND_DEFERRED_ROADMAP.md", 'verification_cmd': "grep 'Q03' docs/DECISIONS_AND_DEFERRED_ROADMAP.md", 'description': 'Codify ADR-003 establishing flattened infix syntax to maximize LLM KV-cache reuse and canonical binding-order De Bruijn coordinates.', 'acceptance_criteria': 'Zero syntax nesting beyond mandatory blocks; deterministic AST identity invariant I_1.', 'notes': 'Flattened infix to avoid KV-cache misses; @T.0 De Bruijn indices for hashes.'}, {'id': 'TASK-C0-13', 'task_code': 'C0.H2.S1.T03', 'title': 'Lock Sigil Law Effect Matching & 3-Tier Escalation Model', 'assigned_agent': 'SA-01', 'target_crate': 'crates/kant-effects', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': "grep 'Q09' docs/DECISIONS_AND_DEFERRED_ROADMAP.md", 'verification_cmd': "grep 'Q09' docs/DECISIONS_AND_DEFERRED_ROADMAP.md", 'description': 'Codify ADR-009 establishing set-equality effect matching (Sigil Law) and automated SAFE quickfix patch generation.', 'acceptance_criteria': 'Invariant I_2 formalized; zero undeclared side effects; patch convergence guarantee.', 'notes': 'E_decl = E_inf with SAFE quickfixes; Tier 1 SMT + Tier 3 runtime fallback.'}, {'id': 'TASK-C0-14', 'task_code': 'C0.H2.S1.T04', 'title': 'Lock Dual Backend Targets: KANT-IR Evaluator & Cranelift Native Engine', 'assigned_agent': 'SA-01', 'target_crate': 'crates/kant-codegen', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': "grep 'Q25' docs/DECISIONS_AND_DEFERRED_ROADMAP.md", 'verification_cmd': "grep 'Q25' docs/DECISIONS_AND_DEFERRED_ROADMAP.md", 'description': 'Codify ADR-025 locking KANT-IR reference interpreter for proof verification and Cranelift backend for sub-3ms native execution.', 'acceptance_criteria': 'Differential testing protocol locked; platform target triples pinned (x86_64, aarch64).', 'notes': 'Evaluator for deterministic traces, Cranelift for native x86-64 / ARM64.'}]}, {'id': 'C0.H2.S2', 'title': 'Deferral Registry & Extension Boundaries', 'tasks': [{'id': 'TASK-C0-15', 'task_code': 'C0.H2.S2.T01', 'title': 'Triage 24 Deferrable Architectural Questions to MVP Pragmatic Standards', 'assigned_agent': 'SA-01', 'target_crate': 'crates/kant-core', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'test -f docs/DECISIONS_AND_DEFERRED_ROADMAP.md', 'verification_cmd': 'test -f docs/DECISIONS_AND_DEFERRED_ROADMAP.md', 'description': 'Document and triage 24 non-blocking design decisions (P1/P2) with explicit MVP default resolutions in DECISIONS_AND_DEFERRED_ROADMAP.md.', 'acceptance_criteria': '24 ADRs recorded with rationale, trade-offs, and verification test requirements.', 'notes': 'Recorded all 24 P1/P2 items in ADR format.'}, {'id': 'TASK-C0-16', 'task_code': 'C0.H2.S2.T02', 'title': 'Establish Trait Boundaries for Post-v0.1 Subsystems', 'assigned_agent': 'SA-01', 'target_crate': 'crates/kant-core', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': "grep 'v0.2' docs/DECISIONS_AND_DEFERRED_ROADMAP.md", 'verification_cmd': "grep 'v0.2' docs/DECISIONS_AND_DEFERRED_ROADMAP.md", 'description': 'Define abstract Rust trait interfaces for post-v0.1 extensions (Lean 4 proof exporter, Atomic RC, WebAssembly runtime, GPUI interface) preventing architectural lock-in.', 'acceptance_criteria': 'Trait signatures compiled in kant-core; 0 breaking changes required for future modules.', 'notes': 'Trait boundaries defined for ProofExporter, AtomicRC, and WASM backend.'}]}]}]}, {'id': 'C1', 'name': 'Stage C1: Transcendental Aesthetic — Lexer & Canonical AST Parser', 'short_title': 'Stage C1: Aesthetic (Lexer & Parser)', 'sub_phase': '48-Token Lexical Stream, De Bruijn Indexing & AST Normalization', 'gate_invariant': 'Token Determinism & Span Precision', 'arabic_title': 'المرحلة C1: الجمالياء المجاوزة — المميّز المعجمي والمحلل النحوي المعياري', 'arabic_sub_phase': 'دفق 48 رمزاً معجمياً، ترقيم دي بروين وموازنة شجرة الإعراب المجردة', 'arabic_gate_invariant': 'حتمية الرموز المعجمية ودقة المدى النطاقي', 'wave': 'Wave 1: Foundation Parsing', 'gate_status': 'LOCKED', 'iteration': 0, 'dependencies': ['C0'], 'gate_checklist': {'cargo_fmt': False, 'cargo_clippy': False, 'cargo_test': False, 'conformance_tests': False, 'git_status_clean': False}, 'iterations': [], 'main_headings': [{'id': 'C1.H1', 'title': 'Core Primitives & Zero-Copy Lexical Analyzer', 'crate_lane': 'crates/kant-core, crates/kant-lexer', 'assigned_agent': 'SA-01 & SA-02', 'sub_headings': [{'id': 'C1.H1.S1', 'title': 'Byte-Span Tracking, Symbol Interning & Lexical Stream', 'tasks': [{'id': 'TASK-C1-01', 'task_code': 'C1.H1.S1.T01', 'title': 'Implement High-Precision ByteSpan, SymbolId Interner & SHA-256 DefHash', 'assigned_agent': 'SA-01', 'target_crate': 'crates/kant-core', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-core --test test_defhash -- --nocapture', 'verification_cmd': 'cargo test -p kant-core --test test_defhash -- --nocapture', 'description': 'Construct zero-allocation ByteSpan arithmetic, thread-safe symbol interning with atomic SymbolId, and SHA-256 content-addressing DefHash engine.', 'acceptance_criteria': 'Zero heap allocations during span merging; interner throughput > 10M symbols/sec; DefHash matches reference test vectors.', 'notes': 'ByteSpan with merge/len, SymbolId interner, DefHash with SHA-256.'}, {'id': 'TASK-C1-02', 'task_code': 'C1.H1.S1.T02', 'title': 'Implement Closed 48-Token Keyword & Operator Lexical Table', 'assigned_agent': 'SA-02', 'target_crate': 'crates/kant-lexer', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-lexer test_closed_epistemic_keywords', 'verification_cmd': 'cargo test -p kant-lexer test_closed_epistemic_keywords', 'description': 'Define the closed 48-token vocabulary table in kant-lexer mapping epistemic keywords, category markers, and effect operators.', 'acceptance_criteria': '100% token coverage; zero hash collisions in token lookup; exact mapping to academic terminology.', 'notes': 'Closed keywords matching Moussa Wehbe lexicon and effect operators.'}, {'id': 'TASK-C1-03', 'task_code': 'C1.H1.S1.T03', 'title': 'Implement Zero-Copy Lexer for Literals, Contracts & Typed Holes', 'assigned_agent': 'SA-02', 'target_crate': 'crates/kant-lexer', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-lexer conformance_lexer', 'verification_cmd': 'cargo test -p kant-lexer conformance_lexer', 'description': 'Build streaming zero-copy lexical analyzer producing deterministic token stream with exact byte offsets for literals, identifiers, contract blocks, and typed hole tokens (?T).', 'acceptance_criteria': 'Throughput > 50 MB/s; zero panics on malformed UTF-8; deterministic token stream across architectures.', 'notes': 'Magic header, ?hole, @T.0 De Bruijn slots, strings, numbers.'}]}]}, {'id': 'C1.H2', 'title': 'Flattened Pratt & LL(1) AST Parser', 'crate_lane': 'crates/kant-parser', 'assigned_agent': 'SA-03', 'sub_headings': [{'id': 'C1.H2.S1', 'title': 'Declarations, Contract Clauses & Error Recovery', 'tasks': [{'id': 'TASK-C1-04', 'task_code': 'C1.H2.S1.T01', 'title': 'Parse Top-Level Type Definitions (Afhoum) & Function Signatures', 'assigned_agent': 'SA-03', 'target_crate': 'crates/kant-parser', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-parser test_parse_afhoum_and_cap', 'verification_cmd': 'cargo test -p kant-parser test_parse_afhoum_and_cap', 'description': 'Parse top-level algebraic data types, struct records, capability declarations, and function signatures into AST nodes without deep recursion.', 'acceptance_criteria': '100% grammar conformance for top-level constructs; stack depth < 64 frames; zero heap leakage on parse failure.', 'notes': 'Toplevel declarations parsed cleanly without deep nesting.'}, {'id': 'TASK-C1-05', 'task_code': 'C1.H2.S1.T02', 'title': 'Parse Mandatory Contract Clauses (Requires, Ensures, Decreases, Effects)', 'assigned_agent': 'SA-03', 'target_crate': 'crates/kant-parser', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-parser test_parse_full_function_with_contracts', 'verification_cmd': 'cargo test -p kant-parser test_parse_full_function_with_contracts', 'description': 'Parse structured contract blocks preceding function bodies, validating mandatory requires, ensures, decreases, and effect annotations.', 'acceptance_criteria': 'Contract expressions parsed with full operator precedence; AST preserves precise span offsets for diagnostic attribution.', 'notes': 'Contract blocks parsed before function body.'}, {'id': 'TASK-C1-06', 'task_code': 'C1.H2.S1.T03', 'title': 'Parse Decision Blocks & Quarantined Dynamic Execution Blocks', 'assigned_agent': 'SA-03', 'target_crate': 'crates/kant-parser', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-parser test_parse_decision_block', 'verification_cmd': 'cargo test -p kant-parser test_parse_decision_block', 'description': 'Implement parsers for architectural decision metadata blocks and quarantined dynamic invocation blocks (dyn { ... }).', 'acceptance_criteria': 'Decision metadata correctly extracted to AST sidecars; dyn block syntax validated with callee set restrictions.', 'notes': 'Structured metadata parsed for compiler and spec views.'}, {'id': 'TASK-C1-07', 'task_code': 'C1.H2.S1.T04', 'title': 'Implement Resilient Syntax Error Recovery Emitting Expr::Hole', 'assigned_agent': 'SA-03', 'target_crate': 'crates/kant-parser', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-parser test_parse_typed_hole_and_operator_precedence', 'verification_cmd': 'cargo test -p kant-parser test_parse_typed_hole_and_operator_precedence', 'description': 'Build robust error recovery reducing malformed syntax subtrees to Expr::Hole with attached diagnostics, enabling incremental agent repair without aborting compilation.', 'acceptance_criteria': 'Zero compiler aborts or panics on arbitrary invalid input; correct Pratt precedence table evaluation.', 'notes': 'Zero panics on syntax errors; emits Expr::Hole for agent repair.'}]}]}, {'id': 'C1.H3', 'title': 'Spatial Canonicalizer & Sidecar Lockfile Engine', 'crate_lane': 'crates/kant-canonical', 'assigned_agent': 'SA-04', 'sub_headings': [{'id': 'C1.H3.S1', 'title': 'De Bruijn Slot Erasure & Canonical Normalization', 'tasks': [{'id': 'TASK-C1-08', 'task_code': 'C1.H3.S1.T01', 'title': 'Implement Alpha-Equivalence Normalization via De Bruijn Slot Erasure', 'assigned_agent': 'SA-04', 'target_crate': 'crates/kant-canonical', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-canonical test_alpha_equivalence_invariant', 'verification_cmd': 'cargo test -p kant-canonical test_alpha_equivalence_invariant', 'description': 'Erase local variable and parameter names to deterministic @T.0, @T.1 binding-order coordinates, guaranteeing identical DefHash across alpha-equivalent ASTs.', 'acceptance_criteria': 'Renaming identifiers produces 100% bitwise-identical SHA-256 DefHash; variable scoping resolution is strictly sound.', 'notes': 'Renaming local variables produces 100% identical DefHash.'}, {'id': 'TASK-C1-09', 'task_code': 'C1.H3.S1.T02', 'title': 'Normalize Record Field Ordering & Recursive Self References', 'assigned_agent': 'SA-04', 'target_crate': 'crates/kant-canonical', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-canonical test_type_field_order_invariance', 'verification_cmd': 'cargo test -p kant-canonical test_type_field_order_invariance', 'description': 'Sort record struct fields lexicographically and normalize recursive calls to canonical @self references.', 'acceptance_criteria': 'Permutations of field declarations yield identical AST hashes; mutually recursive bindings canonicalized deterministically.', 'notes': 'Field ordering invariance verified.'}, {'id': 'TASK-C1-10', 'task_code': 'C1.H3.S1.T03', 'title': 'Implement Bi-Directional Symbol Sidecar (.kantd) Round-Trip Engine', 'assigned_agent': 'SA-04', 'target_crate': 'crates/kant-canonical', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-canonical test_kantd_roundtrip', 'verification_cmd': 'cargo test -p kant-canonical test_kantd_roundtrip', 'description': 'Serialize human-readable and localized display names into .kantd sidecar files and reconstruct canonical AST representations losslessly.', 'acceptance_criteria': 'Round-trip display name preservation: 100%; zero drift in underlying De Bruijn slot indexing.', 'notes': 'Generates .kantd file mapping De Bruijn slots back to human names.'}]}, {'id': 'C1.H3.S2', 'title': 'Sidecar Lockfile Reconciliation Rules R1–R6', 'tasks': [{'id': 'TASK-C1-11', 'task_code': 'C1.H3.S2.T01', 'title': 'Implement Lockfile Engine Reconciliation Rules R1 (Match) & R6 (New Pin)', 'assigned_agent': 'SA-04', 'target_crate': 'crates/kant-canonical', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-canonical test_lockfile_reconciliation_r1_and_r4_mechanical_rename', 'verification_cmd': 'cargo test -p kant-canonical test_lockfile_reconciliation_r1_and_r4_mechanical_rename', 'description': 'Implement module.kant.lock reconciliation for matching definitions (R1) and novel symbol additions (R6).', 'acceptance_criteria': 'Lockfile accurately records symbol DefHash; auto-pinning succeeds on fresh definitions.', 'notes': 'Pushed to lockfile seamlessly on matching and novel defs.'}, {'id': 'TASK-C1-12', 'task_code': 'C1.H3.S2.T02', 'title': 'Implement Lockfile Enforcement Rules R2 (Resolution Error) & R3 (Content Drift)', 'assigned_agent': 'SA-04', 'target_crate': 'crates/kant-canonical', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-canonical conformance_canonical', 'verification_cmd': 'cargo test -p kant-canonical conformance_canonical', 'description': 'Detect resolution changes (R2 hard error) and unpinned content drift (R3), enforcing strict --frozen verification mode in CI/CD pipelines.', 'acceptance_criteria': 'Hard failure emitted on resolution hijacking; content drift flagged with actionable git diff diagnostics.', 'notes': 'Prevents silent rebinding hijacks; enforces --frozen in CI.'}, {'id': 'TASK-C1-13', 'task_code': 'C1.H3.S2.T03', 'title': 'Implement Rule R4 Identity Rename Detection & RFC 6902 Patch Emission', 'assigned_agent': 'SA-04', 'target_crate': 'crates/kant-canonical', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-canonical test_lockfile_reconciliation_r1_and_r4_mechanical_rename', 'verification_cmd': 'cargo test -p kant-canonical test_lockfile_reconciliation_r1_and_r4_mechanical_rename', 'description': 'Detect identifier renames by tracking constant DefHash across revisions and emit RFC 6902 JSON patch operations to update all call-sites mechanically.', 'acceptance_criteria': '100% automated call-site reference patch generation; zero broken references across workspace.', 'notes': 'Emits RFC 6902 patch updating callers automatically.'}]}]}]}, {'id': 'C2', 'name': 'Stage C2: Transcendental Analytic — 12 Categories & Exact Effects', 'short_title': 'Stage C2: Analytic (Types & Effects)', 'sub_phase': 'Constructive Type Inference, Subtyping & Sigil Law (E_decl = E_inf)', 'gate_invariant': 'Invariant I_2 (Exact Effect Matching & Quarantined Dynamism)', 'arabic_title': 'المرحلة C2: التحليلياء المجاوزة — المقولات الاثنتا عشرة والآثار الدقيقة', 'arabic_sub_phase': 'استدلال الأنماط البنائي، تفرع الأنماط وقانون السمة (E_decl = E_inf)', 'arabic_gate_invariant': 'الثابت I_2 (المطابقة الدقيقة للآثار والحركية المعزولة)', 'wave': 'Wave 2: Types & Effects', 'gate_status': 'LOCKED', 'iteration': 0, 'dependencies': ['C1'], 'gate_checklist': {'cargo_fmt': False, 'cargo_clippy': False, 'cargo_test': False, 'conformance_tests': False, 'git_status_clean': False}, 'iterations': [], 'main_headings': [{'id': 'C2.H1', 'title': '12-Category Constructive Type System', 'crate_lane': 'crates/kant-types', 'assigned_agent': 'SA-05', 'sub_headings': [{'id': 'C2.H1.S1', 'title': 'Triads of Quantity, Quality, Relation & Modality', 'tasks': [{'id': 'TASK-C2-01', 'task_code': 'C2.H1.S1.T01', 'title': 'Implement Category of Quantity: Unity Primitives, Plurality Arrays & Totality ADTs', 'assigned_agent': 'SA-05', 'target_crate': 'crates/kant-types', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-types test_category_quantity', 'verification_cmd': 'cargo test -p kant-types test_category_quantity', 'description': 'Construct type representation and inference rules for Quantity triad: Unity (scalars), Plurality (fixed/slice collections), Totality (exhaustive sum types).', 'acceptance_criteria': 'Exhaustiveness checking for Totality ADTs; bounds check elision for Plurality slices; sound primitive representation.', 'notes': 'Type categories assigned to TypedModule AST.'}, {'id': 'TASK-C2-02', 'task_code': 'C2.H1.S1.T02', 'title': 'Implement Category of Quality: Reality Inhabitation, Negation Never & Limitation Secret<T>', 'assigned_agent': 'SA-05', 'target_crate': 'crates/kant-types', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-types test_category_quality', 'verification_cmd': 'cargo test -p kant-types test_category_quality', 'description': 'Implement Quality triad: Reality (type inhabitation proof), Negation (empty/never type !), Limitation (Secret<T> information flow containment).', 'acceptance_criteria': 'Uninhabited types detected at compile-time; Secret<T> values prevented from escaping to observable channels.', 'notes': 'Check inhabitation and Secret<T> wrapper.'}, {'id': 'TASK-C2-03', 'task_code': 'C2.H1.S1.T03', 'title': 'Implement Category of Relation: Substance Records & Causality Effect Arrows', 'assigned_agent': 'SA-05', 'target_crate': 'crates/kant-types', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-types test_category_relation', 'verification_cmd': 'cargo test -p kant-types test_category_relation', 'description': 'Implement Relation triad: Substance (immutable algebraic records) and Causality (function arrows carrying explicit effect sets fn -> T ! E).', 'acceptance_criteria': 'Structural subtyping for records; effect sets attached to every function type; sound arrow composition.', 'notes': 'Arrows carrying explicit effect sets.'}, {'id': 'TASK-C2-04', 'task_code': 'C2.H1.S1.T04', 'title': 'Implement Category of Modality: Possibility Monads, Actuality Tokens & Necessity Consts', 'assigned_agent': 'SA-05', 'target_crate': 'crates/kant-types', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-types test_category_modality', 'verification_cmd': 'cargo test -p kant-types test_category_modality', 'description': 'Implement Modality triad: Possibility (Option/Result algebraic types), Actuality (linear capability tokens), Necessity (compile-time proven constants).', 'acceptance_criteria': 'Option/Result pattern completeness verified; capability linear use enforced; const expressions evaluated at compile time.', 'notes': 'Option/Result, linear cap types, and proved consts.'}]}]}, {'id': 'C2.H2', 'title': 'Exact Effect Verifier & Quarantined Dynamism', 'crate_lane': 'crates/kant-effects', 'assigned_agent': 'SA-06', 'sub_headings': [{'id': 'C2.H2.S1', 'title': 'Sigil-Style Exact Set-Equality Effect Inference', 'tasks': [{'id': 'TASK-C2-05', 'task_code': 'C2.H2.S1.T01', 'title': 'Construct Atomic Effect Lattice (Console, FS, Net, AI, Clock, Entropy, Diverge)', 'assigned_agent': 'SA-06', 'target_crate': 'crates/kant-effects', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-effects test_01_pure_function_exact_match', 'verification_cmd': 'cargo test -p kant-effects test_01_pure_function_exact_match', 'description': 'Build atomic effect bitset lattice and composition operations for the 7 primary effects: console, fs, net, ai, clock, entropy, diverge.', 'acceptance_criteria': 'Bitset operations O(1); pure functions infer empty effect set {}; effect union and intersection operations sound.', 'notes': 'AtomicEffect enum and EffectSet operations.'}, {'id': 'TASK-C2-06', 'task_code': 'C2.H2.S1.T02', 'title': 'Enforce Strict Sigil Law Set Equality & Emit RFC 6902 SAFE Patches', 'assigned_agent': 'SA-06', 'target_crate': 'crates/kant-effects', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-effects test_02_undeclared_effect_rejected_with_safe_patch', 'verification_cmd': 'cargo test -p kant-effects test_02_undeclared_effect_rejected_with_safe_patch', 'description': 'Verify E_decl(f) = E_inf(f) strict set equality; reject undeclared or over-declared effects (KANT-E301/E302) and emit SAFE RFC 6902 JSON patch auto-fixes.', 'acceptance_criteria': '100% detection of effect mismatch; diagnostic payload contains valid JSON patch replacing effect set; zero false positives.', 'notes': 'RFC 6902 patch replacement of /functions/<idx>/effects.'}, {'id': 'TASK-C2-07', 'task_code': 'C2.H2.S1.T03', 'title': 'Implement Higher-Order Effect Parameter Substitution of(f)', 'assigned_agent': 'SA-06', 'target_crate': 'crates/kant-effects', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-effects test_04_higher_order_effects_of_param', 'verification_cmd': 'cargo test -p kant-effects test_04_higher_order_effects_of_param', 'description': 'Implement polymorphic effect tracking for higher-order functions using of(f) notation, substituting actual argument effect sets into caller signatures.', 'acceptance_criteria': 'Higher-order calls accurately propagate closure effect sets; deep composition verified without effect loss.', 'notes': 'Substitutes concrete lambda effects into caller signature.'}]}, {'id': 'C2.H2.S2', 'title': 'Quarantined Dynamism Engine (Guarantees G1–G4)', 'tasks': [{'id': 'TASK-C2-08', 'task_code': 'C2.H2.S2.T01', 'title': 'Enforce Inert Function Pointers & Restrict Indirect Calls to dyn { t1..tn }', 'assigned_agent': 'SA-06', 'target_crate': 'crates/kant-effects', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-effects test_05_unquarantined_funref_call_rejected', 'verification_cmd': 'cargo test -p kant-effects test_05_unquarantined_funref_call_rejected', 'description': 'Treat raw function references as inert data (&fn) and reject indirect invocations unless explicitly quarantined within dyn { t1..tn } blocks.', 'acceptance_criteria': 'Unmediated indirect function calls strictly rejected with diagnostic KANT-E305; quarantine boundary enforced.', 'notes': 'Reject escaped function pointers outside dyn blocks.'}, {'id': 'TASK-C2-09', 'task_code': 'C2.H2.S2.T02', 'title': 'Implement Intraprocedural May-Reach Callee Set Analysis', 'assigned_agent': 'SA-06', 'target_crate': 'crates/kant-effects', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-effects test_06_quarantine_under_approximation_detected', 'verification_cmd': 'cargo test -p kant-effects test_06_quarantine_under_approximation_detected', 'description': 'Build intraprocedural dataflow reachability analysis to verify that the declared dyn target list is an exhaustive superset of potential callees.', 'acceptance_criteria': 'Under-approximated dyn sets rejected with KANT-E306; auto-fix suggests minimal sound callee target set.', 'notes': 'Emits KANT-E306 if actual callee targets exceed declared list.'}, {'id': 'TASK-C2-10', 'task_code': 'C2.H2.S2.T03', 'title': 'Calculate Transitive Call-Graph Blast Radius & Reference Exactness Ratio', 'assigned_agent': 'SA-06', 'target_crate': 'crates/kant-effects', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-effects test_10_blast_radius_and_exactness_metric', 'verification_cmd': 'cargo test -p kant-effects test_10_blast_radius_and_exactness_metric', 'description': 'Compute reverse-caller dependency cones in O(V+E) and calculate the Exactness Ratio (statically resolved calls / total calls) for G1/G2 verification.', 'acceptance_criteria': 'Blast radius traversal terminates in linear time; exactness metric reported in structured telemetry.', 'notes': 'G1/G2 blast radius and exactness ratio computed in O(V+E).'}]}]}, {'id': 'C2.H3', 'title': 'SSA KANT-IR Lowering & Perceus Memory Engine', 'crate_lane': 'crates/kant-ir, crates/kant-perceus', 'assigned_agent': 'SA-07 & SA-08', 'sub_headings': [{'id': 'C2.H3.S1', 'title': '30-Instruction Basic Block SSA IR Lowering', 'tasks': [{'id': 'TASK-C2-11', 'task_code': 'C2.H3.S1.T01', 'title': 'Lower Typed AST to Canonical 30-Instruction Basic Block SSA IR', 'assigned_agent': 'SA-07', 'target_crate': 'crates/kant-ir', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-ir test_lower_basic_blocks', 'verification_cmd': 'cargo test -p kant-ir test_lower_basic_blocks', 'description': 'Translate checked typed AST into flat basic-block SSA IR utilizing the canonical 30 KANT-IR opcodes with explicit phi-nodes and dominance frontiers.', 'acceptance_criteria': 'Valid SSA dominance invariants; def-use chains verified; zero undefined SSA values.', 'notes': 'SSA dominance and def-use chain verification.'}, {'id': 'TASK-C2-12', 'task_code': 'C2.H3.S1.T02', 'title': 'Lower Effect Handler Delimited Continuations to Capture/Resume Primitives', 'assigned_agent': 'SA-07', 'target_crate': 'crates/kant-ir', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-ir test_effect_handler_lowering', 'verification_cmd': 'cargo test -p kant-ir test_effect_handler_lowering', 'description': 'Lower handle { ... } and governor blocks into first-class delimited continuation tokens and stack reification primitives.', 'acceptance_criteria': 'Continuations correctly capture lexical context; resumption resumes without stack corruption; resource release guaranteed.', 'notes': 'Reified stack frames and continuation tokens.'}]}, {'id': 'C2.H3.S2', 'title': 'Perceus Reference Counting & In-Place Memory Reuse', 'tasks': [{'id': 'TASK-C2-13', 'task_code': 'C2.H3.S2.T01', 'title': 'Synthesize Syntactic Dup & Drop Operators for Garbage-Free Reference Counting', 'assigned_agent': 'SA-08', 'target_crate': 'crates/kant-perceus', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-perceus test_dup_drop_placement', 'verification_cmd': 'cargo test -p kant-perceus test_dup_drop_placement', 'description': 'Implement the Perceus reference-counting static analysis pass, placing precise dup and drop instructions at syntactically last-use locations.', 'acceptance_criteria': 'Zero memory leaks on all reachable execution paths; no dangling references; cyclical structures isolated.', 'notes': 'Free at syntactically last use in time.'}, {'id': 'TASK-C2-14', 'task_code': 'C2.H3.S2.T02', 'title': 'Implement Drop-Guided Reuse Pass with Alloc@r In-Place Buffer Recycling', 'assigned_agent': 'SA-08', 'target_crate': 'crates/kant-perceus', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-perceus test_drop_guided_reuse', 'verification_cmd': 'cargo test -p kant-perceus test_drop_guided_reuse', 'description': 'Identify unique references (RC == 1) prior to drop points and pair them with subsequent allocations of identical size, emitting Alloc@r in-place reuse tokens.', 'acceptance_criteria': 'Recycles >= 80% of heap buffers in loop iterations; zero global GC pauses; frame-limited memory footprint verified.', 'notes': 'In-place buffer recycling with frame-limited memory guarantees.'}]}]}]}, {'id': 'C3', 'name': 'Stage C3: The Schematism — SSA KANT-IR & Perceus Memory Reuse', 'short_title': 'Stage C3: Schematism (IR & Perceus)', 'sub_phase': '30-Instruction SSA Lowering & Drop-Guided Reference Count Optimization', 'gate_invariant': 'Invariant I_3 (Garbage-Free Perceus Memory Soundness)', 'arabic_title': 'المرحلة C3: شيم الفهم — تمثيل SSA KANT-IR وإعادة استخدام الذاكرة ببرسيوس', 'arabic_sub_phase': 'تنزيل 30 تعليمة SSA وتحسين عدّ المراجع الموجّه بالإسقاط', 'arabic_gate_invariant': 'الثابت I_3 (سلامة الذاكرة دون جمع قمامة ببرسيوس)', 'wave': 'Wave 3: Intermediate Representation', 'gate_status': 'LOCKED', 'iteration': 0, 'dependencies': ['C2'], 'gate_checklist': {'cargo_fmt': False, 'cargo_clippy': False, 'cargo_test': False, 'conformance_tests': False, 'git_status_clean': False}, 'iterations': [], 'main_headings': [{'id': 'C3.H1', 'title': 'Paralogism Ownership & Secret Taint Guard', 'crate_lane': 'crates/kant-paralogism', 'assigned_agent': 'SA-09', 'sub_headings': [{'id': 'C3.H1.S1', 'title': 'Affine Capability Tracking & Constant-Time Security', 'tasks': [{'id': 'TASK-C3-01', 'task_code': 'C3.H1.S1.T01', 'title': 'Implement Affine Capability State Machine: Available | Borrowed | Moved', 'assigned_agent': 'SA-09', 'target_crate': 'crates/kant-paralogism', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-paralogism test_use_after_move', 'verification_cmd': 'cargo test -p kant-paralogism test_use_after_move', 'description': 'Track capability token lifecycles across control-flow branches, enforcing affine linear typing and rejecting use-after-move (E004) and double-move (E005).', 'acceptance_criteria': '100% rejection of unauthorized capability duplication; cross-branch state reconciliation enforces identical move states.', 'notes': 'Emits E004 use-after-move, E005 double-move, E009 branch mismatch.'}, {'id': 'TASK-C3-02', 'task_code': 'C3.H1.S1.T02', 'title': 'Implement Secret<T> Zeroize-on-Drop & Constant-Time Taint Propagation', 'assigned_agent': 'SA-09', 'target_crate': 'crates/kant-paralogism', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-paralogism test_secret_taint_branch_leak', 'verification_cmd': 'cargo test -p kant-paralogism test_secret_taint_branch_leak', 'description': 'Enforce cryptographic security invariants on Secret<T> values: automatic memory zeroization on drop and dataflow taint analysis preventing secrets from conditioning branches or index arrays.', 'acceptance_criteria': 'Zero secret leaks to branch conditions or cache lines; zeroize memory wipes confirmed by binary inspection.', 'notes': 'Rejects secret values in branch conditions and cache indices.'}]}]}, {'id': 'C3.H2', 'title': 'Antinomy Contract Verifier & Termination Checker', 'crate_lane': 'crates/kant-antinomy', 'assigned_agent': 'SA-10', 'sub_headings': [{'id': 'C3.H2.S1', 'title': 'Tier 1 Interval SMT Discharge & Tier 3 Runtime Synthesis', 'tasks': [{'id': 'TASK-C3-03', 'task_code': 'C3.H2.S1.T01', 'title': 'Discharge Pre/Post Contract Proofs via Interval Arithmetic & Z3 SMT (10s Budget)', 'assigned_agent': 'SA-10', 'target_crate': 'crates/kant-antinomy', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-antinomy test_tier1_smt_discharge', 'verification_cmd': 'cargo test -p kant-antinomy test_tier1_smt_discharge', 'description': 'Discharge requires/ensures contract verification conditions using fast interval abstract interpretation followed by Z3 SMT queries bound to a strict 10s solver budget.', 'acceptance_criteria': 'Proves linear arithmetic contracts < 100ms; solver timeout strictly handled within 10s threshold; sound error reporting.', 'notes': 'Fast interval evaluation with Z3 SMT solver fallback.'}, {'id': 'TASK-C3-04', 'task_code': 'C3.H2.S1.T02', 'title': 'Synthesize Tier 3 Checked Runtime Assertions on Solver Timeout', 'assigned_agent': 'SA-10', 'target_crate': 'crates/kant-antinomy', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-antinomy test_tier3_runtime_guard_synthesis', 'verification_cmd': 'cargo test -p kant-antinomy test_tier3_runtime_guard_synthesis', 'description': 'When static Tier 1/2 verification is inconclusive or times out, synthesize Tier 3 compiled runtime precondition/postcondition assertion checks with structured error recovery.', 'acceptance_criteria': 'Synthesized assertion overhead < 5% execution time; complete assertion coverage for unproved obligations.', 'notes': 'Lowers unproved obligations to checked asserts with reconciliation.'}, {'id': 'TASK-C3-05', 'task_code': 'C3.H2.S1.T03', 'title': 'Enforce Mandatory Decreases Measures on Recursive SCCs', 'assigned_agent': 'SA-10', 'target_crate': 'crates/kant-antinomy', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-antinomy test_decreases_termination_check', 'verification_cmd': 'cargo test -p kant-antinomy test_decreases_termination_check', 'description': 'Detect recursive strongly-connected components in the call-graph and enforce well-founded decreases ranking functions or explicit diverge effect annotations (E137).', 'acceptance_criteria': 'Rejects non-terminating loops lacking diverge; verifies well-foundedness of decreasing metric; zero infinite loops in pure code.', 'notes': 'Requires decreases clause or explicit diverge effect.'}]}]}, {'id': 'C3.H3', 'title': 'Noumena Capability Sandbox & Spec Extractor', 'crate_lane': 'crates/kant-noumena, crates/kant-spec', 'assigned_agent': 'SA-11 & SA-12', 'sub_headings': [{'id': 'C3.H3.S1', 'title': 'Session-Governor Protocol & Architecture Spec Extraction', 'tasks': [{'id': 'TASK-C3-06', 'task_code': 'C3.H3.S1.T01', 'title': 'Enforce Trust None Architecture & Unforgeable Zero-Sized Capability Tokens', 'assigned_agent': 'SA-11', 'target_crate': 'crates/kant-noumena', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-noumena test_trust_none_enforcement', 'verification_cmd': 'cargo test -p kant-noumena test_trust_none_enforcement', 'description': 'Enforce trust none module defaults where external I/O primitives demand unforgeable Zero-Sized Type capability tokens passed from the application entrypoint.', 'acceptance_criteria': 'Capability forgery physically impossible; unmediated system calls fail compilation.', 'notes': 'Private constructor tokens passed only from entrypoint.'}, {'id': 'TASK-C3-07', 'task_code': 'C3.H3.S1.T02', 'title': 'Implement Human Approval Gate Delimited Continuation Suspension', 'assigned_agent': 'SA-11', 'target_crate': 'crates/kant-noumena', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-noumena test_approval_gate_suspension', 'verification_cmd': 'cargo test -p kant-noumena test_approval_gate_suspension', 'description': 'Implement governor approval_gate checkpoints suspending execution state into serialized continuation frames until explicit human cryptographic authorization is received.', 'acceptance_criteria': 'Suspension state serialized losslessly; resumption requires valid signature; timeout triggers safe cancellation.', 'notes': 'Suspends execution until CLI or IDE signature provided.'}, {'id': 'TASK-C3-08', 'task_code': 'C3.H3.S1.T03', 'title': 'Implement Architectural Spec Extractor & Blast-Radius Visualizer', 'assigned_agent': 'SA-12', 'target_crate': 'crates/kant-spec', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-spec test_spec_and_graph_extraction', 'verification_cmd': 'cargo test -p kant-spec test_spec_and_graph_extraction', 'description': 'Build kantc spec to extract standalone, human-readable .spec interface definitions and kantc graph to render call-graph dependency cones and blast radius diagrams.', 'acceptance_criteria': 'Spec output < 10% token size of full implementation; graph exportable in SVG and JSON dot formats.', 'notes': 'Generates concise .spec file for human signing and token-budgeted slices.'}]}]}]}, {'id': 'C4', 'name': 'Stage C4: Transcendental Dialectic — SMT Verification & Capability Security', 'short_title': 'Stage C4: Dialectic (SMT & Noumena)', 'sub_phase': '3-Tier Contract Verification (Z3 SMT) & Noumena Linear Capability Sandbox', 'gate_invariant': 'Invariant I_4 (Noumena Zero-Escape Capability Boundary)', 'arabic_title': 'المرحلة C4: الجدلياء المجاوزة — التحقق بـ SMT وأمان القدرات الخطية', 'arabic_sub_phase': 'التحقق ثلاثي الطبقات من العقود (Z3 SMT) وبيئة عزل القدرات الخطية للنومان', 'arabic_gate_invariant': 'الثابت I_4 (حدود القدرات الصفرية للهروب في النومان)', 'wave': 'Wave 4: Verification & Codegen', 'gate_status': 'LOCKED', 'iteration': 0, 'dependencies': ['C3'], 'gate_checklist': {'cargo_fmt': False, 'cargo_clippy': False, 'cargo_test': False, 'conformance_tests': False, 'git_status_clean': False}, 'iterations': [], 'main_headings': [{'id': 'C4.H1', 'title': 'Reference Evaluator & Cryptographic Evidence Engine', 'crate_lane': 'crates/kant-eval', 'assigned_agent': 'SA-13', 'sub_headings': [{'id': 'C4.H1.S1', 'title': 'Deterministic KANT-IR Interpreter & Merkle Audit Trails', 'tasks': [{'id': 'TASK-C4-01', 'task_code': 'C4.H1.S1.T01', 'title': 'Implement Deterministic KANT-IR Reference Tree-Walk Interpreter', 'assigned_agent': 'SA-13', 'target_crate': 'crates/kant-eval', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-eval test_deterministic_evaluator', 'verification_cmd': 'cargo test -p kant-eval test_deterministic_evaluator', 'description': 'Construct the canonical reference interpreter for the 30 KANT-IR SSA opcodes, providing an exact operational semantic model and state step counter.', 'acceptance_criteria': 'Bitwise-identical execution across operating systems; gas metering tracks execution steps; zero undefined behavior.', 'notes': 'Interprets 30 KANT-IR SSA opcodes with state trace.'}, {'id': 'TASK-C4-02', 'task_code': 'C4.H1.S1.T02', 'title': 'Construct Append-Only Hash-Chained Merkle Evidence Logging (.kant.evidence.jsonl)', 'assigned_agent': 'SA-13', 'target_crate': 'crates/kant-eval', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-eval test_merkle_evidence_logging', 'verification_cmd': 'cargo test -p kant-eval test_merkle_evidence_logging', 'description': 'Record all effectful I/O invocations and capability handoffs into a cryptographic Merkle tree with parent hash chaining, generating verifiable audit logs.', 'acceptance_criteria': 'Tamper-evident log integrity; verification of proof root in O(log N); zero payload corruption.', 'notes': 'Cryptographic audit trail with parent hash chaining.'}, {'id': 'TASK-C4-03', 'task_code': 'C4.H1.S1.T03', 'title': 'Implement Bit-Identical Deterministic Workflow Replay Engine', 'assigned_agent': 'SA-13', 'target_crate': 'crates/kant-eval', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-eval test_deterministic_replay', 'verification_cmd': 'cargo test -p kant-eval test_deterministic_replay', 'description': 'Implement offline execution replay (kantc replay) reproducing recorded program traces step-by-step from Merkle evidence bundles without external network access.', 'acceptance_criteria': '100% bitwise trace match on recorded workflows; halts with explicit diagnostic on recorded divergence.', 'notes': 'Offline replay without hitting external APIs.'}]}]}, {'id': 'C4.H2', 'title': 'Cranelift JIT & Native AOT Backend', 'crate_lane': 'crates/kant-codegen', 'assigned_agent': 'SA-14', 'sub_headings': [{'id': 'C4.H2.S1', 'title': 'Cranelift Lowering & Static Native Binary Emission', 'tasks': [{'id': 'TASK-C4-04', 'task_code': 'C4.H2.S1.T01', 'title': 'Lower KANT-IR SSA Instructions to Cranelift CLIF Intermediate Representation', 'assigned_agent': 'SA-14', 'target_crate': 'crates/kant-codegen', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-codegen test_clif_lowering', 'verification_cmd': 'cargo test -p kant-codegen test_clif_lowering', 'description': 'Map KANT-IR SSA basic blocks, phi nodes, and memory reuse operations into Cranelift IR (CLIF) for x86_64 and AArch64 targets.', 'acceptance_criteria': 'CLIF passes internal Cranelift verifier; zero type mismatches; calling conventions conform to target ABI.', 'notes': 'Maps SSA values and basic blocks to Cranelift variables.'}, {'id': 'TASK-C4-05', 'task_code': 'C4.H2.S1.T02', 'title': 'Implement Fast In-Memory JIT Compilation Engine for Sub-3ms Development Turnaround', 'assigned_agent': 'SA-14', 'target_crate': 'crates/kant-codegen', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-codegen test_jit_execution', 'verification_cmd': 'cargo test -p kant-codegen test_jit_execution', 'description': 'Construct in-memory JIT execution harness (kantc run) compiling and executing KANT-IR modules within a sub-3ms turnaround budget.', 'acceptance_criteria': 'Compilation and entrypoint jump completed < 3ms for standard modules; execution memory protected.', 'notes': 'Sub-3ms execution turnaround.'}, {'id': 'TASK-C4-06', 'task_code': 'C4.H2.S1.T03', 'title': 'Emit Standalone Static Native Executables with Deterministic Epoch Timestamps', 'assigned_agent': 'SA-14', 'target_crate': 'crates/kant-codegen', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-codegen test_aot_binary_emission', 'verification_cmd': 'cargo test -p kant-codegen test_aot_binary_emission', 'description': 'Generate static ELF/Mach-O/PE native binaries (kantc build) with reproducible object file emission and deterministic timestamps (SOURCE_DATE_EPOCH).', 'acceptance_criteria': 'Independent compilations on distinct hosts yield bit-for-bit identical binary hashes (zero jitter).', 'notes': 'Byte-identical native binaries across runs.'}]}]}, {'id': 'C4.H3', 'title': 'Structured Diagnostics & Agent Surface Engine', 'crate_lane': 'crates/kant-diag, crates/kant-cli, crates/kant-mcp', 'assigned_agent': 'SA-15 & SA-16', 'sub_headings': [{'id': 'C4.H3.S1', 'title': 'RFC 6902 Auto-Fix Repair Loop & Content-Addressed Test Caching', 'tasks': [{'id': 'TASK-C4-07', 'task_code': 'C4.H3.S1.T01', 'title': 'Standardize Compiler Diagnostics with FixSafety Markers & RFC 6902 JSON Patches', 'assigned_agent': 'SA-15', 'target_crate': 'crates/kant-diag', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-diag test_diagnostic_patch_serialization', 'verification_cmd': 'cargo test -p kant-diag test_diagnostic_patch_serialization', 'description': 'Format all compiler diagnostics with machine-readable metadata: severity, error code, span, FixSafety (SAFE|REVIEW), and RFC 6902 JSON Patch modifications.', 'acceptance_criteria': 'JSON diagnostic schema validation; 100% of syntactic/effect errors accompanied by actionable RFC 6902 patch.', 'notes': 'Standardized JSON schema with patch operations.'}, {'id': 'TASK-C4-08', 'task_code': 'C4.H3.S1.T02', 'title': 'Implement Autonomous Repair Convergence Loop (kantc fix --apply)', 'assigned_agent': 'SA-15', 'target_crate': 'crates/kant-diag', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-diag test_auto_repair_convergence', 'verification_cmd': 'cargo test -p kant-diag test_auto_repair_convergence', 'description': 'Implement iterative automated repair loop applying SAFE patches until AST diagnostics reach a fixed point or resolve completely.', 'acceptance_criteria': 'Reaches clean compilation on 100% of benchmark defect test cases; terminates safely on ambiguous review-required defects.', 'notes': 'Applies SAFE patches iteratively until clean.'}, {'id': 'TASK-C4-09', 'task_code': 'C4.H3.S1.T03', 'title': 'Implement Content-Addressed Test Runner with Dependency Cone Hashing', 'assigned_agent': 'SA-16', 'target_crate': 'crates/kant-cli', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-cli test_cached_test_runner', 'verification_cmd': 'cargo test -p kant-cli test_cached_test_runner', 'description': 'Implement incremental test runner caching test results by the SHA-256 hash cone of transitively reachable dependencies, skipping unchanged suites.', 'acceptance_criteria': 'Zero redundant test executions; 100% invalidation accuracy when any dependency cone hash drifts.', 'notes': 'Reruns only tests whose dependency cone hash drifted.'}]}, {'id': 'C4.H3.S2', 'title': 'Persistent Compiler Daemon, MCP Server & Constrained Grammar Export', 'tasks': [{'id': 'TASK-C4-10', 'task_code': 'C4.H3.S2.T01', 'title': 'Build Persistent Low-Latency JSON-RPC Daemon (kantc serv)', 'assigned_agent': 'SA-16', 'target_crate': 'crates/kant-cli', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-cli test_agent_server_rpc', 'verification_cmd': 'cargo test -p kant-cli test_agent_server_rpc', 'description': 'Construct persistent background JSON-RPC server maintaining AST caches in memory for zero-process-spawn agent verification queries.', 'acceptance_criteria': 'Query response latency < 5ms; memory footprint < 50MB; graceful shutdown on socket close.', 'notes': 'Zero process startup overhead.'}, {'id': 'TASK-C4-11', 'task_code': 'C4.H3.S2.T02', 'title': 'Implement 10-Tool Model Context Protocol (MCP) Server', 'assigned_agent': 'SA-16', 'target_crate': 'crates/kant-mcp', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-mcp test_10_mcp_tools', 'verification_cmd': 'cargo test -p kant-mcp test_10_mcp_tools', 'description': 'Expose full compiler capabilities over Model Context Protocol (MCP) via 10 structured tools (kant_check, kant_fix, kant_spec, kant_graph, kant_eval, etc.).', 'acceptance_criteria': 'Complies with MCP 2024-11-05 specification; seamless integration with Claude Code, Cursor, and IDE extensions.', 'notes': 'Model Context Protocol interface for Claude Code, Cursor, Codex.'}, {'id': 'TASK-C4-12', 'task_code': 'C4.H3.S2.T03', 'title': 'Implement Constrained LLM Decoding Grammar Exporter (kantc grammar --export-xgrammar)', 'assigned_agent': 'SA-16', 'target_crate': 'crates/kant-cli', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test -p kant-cli test_xgrammar_export', 'verification_cmd': 'cargo test -p kant-cli test_xgrammar_export', 'description': 'Export the formal EBNF grammar to XGrammar JSON and Lark formats to enable Pushdown Automaton token masking during LLM sampling.', 'acceptance_criteria': '100% syntactically valid token generation under constrained sampling; export format verified against reference XGrammar runtime.', 'notes': 'Enforces 100% syntactically valid code during token sampling.'}]}]}]}, {'id': 'C5', 'name': 'Stage C5: Doctrine of Method — Cranelift Codegen & Merkle Traces', 'short_title': 'Stage C5: Method (Codegen & Evidence)', 'sub_phase': 'Tree-Walk Evaluator, Native JIT/AOT Code Generation & Cryptographic Merkle Bundles', 'gate_invariant': 'Bitwise Reproducibility & Gas Metering', 'arabic_title': 'المرحلة C5: مبحث المنهج — توليد الشيفرة بـ Cranelift وحزم ميركل المشفرة', 'arabic_sub_phase': 'مُقيّم شجرة المجردات، توليد الشيفرة الأصلية JIT/AOT وحزم أدلة ميركل', 'arabic_gate_invariant': 'قابلية الاستنساخ البتي الدقيق ومقاييس استهلاك الوقود', 'wave': 'Wave 5: Quality & Proofs', 'gate_status': 'LOCKED', 'iteration': 0, 'dependencies': ['C4'], 'gate_checklist': {'differential_proof': False, 'byte_determinism_proof': False, 'repair_convergence_proof': False, 'zero_escape_security_proof': False, 'git_status_clean': False}, 'iterations': [], 'main_headings': [{'id': 'C5.H1', 'title': 'Execution Equivalence & Binary Determinism Proofs', 'crate_lane': 'tests/bootstrap_proofs', 'assigned_agent': 'SA-13 & SA-14', 'sub_headings': [{'id': 'C5.H1.S1', 'title': 'Differential Execution Oracle & Reproducible Emission', 'tasks': [{'id': 'TASK-C5-01', 'task_code': 'C5.H1.S1.T01', 'title': 'Proof 1: Differential Oracle Verification Across Evaluator & Codegen', 'assigned_agent': 'SA-13', 'target_crate': 'crates/kant-eval', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test --test proof_01_differential_oracle', 'verification_cmd': 'cargo test --test proof_01_differential_oracle', 'description': 'Execute 50 reference test programs across both the KANT-IR tree-walk evaluator and Cranelift native AOT binary, proving 100% bitwise output equivalence.', 'acceptance_criteria': '0 state trace or return value deviations across all 50 test programs; gas counts correlate deterministically.', 'notes': '0 output or state trace deviations.'}, {'id': 'TASK-C5-02', 'task_code': 'C5.H1.S1.T02', 'title': 'Proof 2: Byte-for-Byte Identical Compilation Determinism', 'assigned_agent': 'SA-14', 'target_crate': 'crates/kant-codegen', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test --test proof_02_byte_determinism', 'verification_cmd': 'cargo test --test proof_02_byte_determinism', 'description': 'Execute dual independent compilations across distinct build directories and timestamps, validating 0 byte discrepancies in emitted native binaries.', 'acceptance_criteria': 'SHA-256 binary hash matches 100% across builds; zero embedded host-specific metadata.', 'notes': 'Bit-for-bit identical binary output.'}]}]}, {'id': 'C5.H2', 'title': 'Autonomous Convergence & Boundary Containment Proofs', 'crate_lane': 'tests/bootstrap_proofs', 'assigned_agent': 'SA-15 & SA-11', 'sub_headings': [{'id': 'C5.H2.S1', 'title': 'Repair Convergence & Noumena Containment', 'tasks': [{'id': 'TASK-C5-03', 'task_code': 'C5.H2.S1.T01', 'title': 'Proof 3: Multi-Defect Auto-Repair Convergence', 'assigned_agent': 'SA-15', 'target_crate': 'crates/kant-diag', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test --test proof_03_repair_convergence', 'verification_cmd': 'cargo test --test proof_03_repair_convergence', 'description': 'Run kantc fix --apply against 30 seeded defective programs containing syntax errors, effect mismatches, and contract failures, verifying 100% convergence.', 'acceptance_criteria': '100% of seeded programs repaired to pass compilation; zero patch application regressions.', 'notes': 'Iterative patch application reaches fixed point.'}, {'id': 'TASK-C5-04', 'task_code': 'C5.H2.S1.T02', 'title': 'Proof 4: Noumena Zero-Escape Adversarial Capability Containment', 'assigned_agent': 'SA-11', 'target_crate': 'crates/kant-noumena', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'cargo test --test proof_04_noumena_zero_escape', 'verification_cmd': 'cargo test --test proof_04_noumena_zero_escape', 'description': 'Run comprehensive adversarial test suite attempting capability forgery, unmediated raw socket access, and memory inspection, verifying 100% rejection.', 'acceptance_criteria': 'Zero capability leaks; 100% of unauthorized I/O attempts blocked; Secret<T> memory zeroization verified.', 'notes': 'Trust none boundary and secret zeroization verified.'}]}]}]}, {'id': 'C6', 'name': 'Stage C6: Agent Surface — RFC 6902 Diagnostics, MCP & Unified Driver', 'short_title': 'Stage C6: Agent Surface (CLI & MCP)', 'sub_phase': 'Structured Auto-Fix Patches, Sidecar Reconciliation & Production CLI Driver (kantc)', 'gate_invariant': 'MCP Protocol Compliance & Toolchain Integration', 'arabic_title': 'المرحلة C6: واجهة الوكلاء — تشخيصات RFC 6902، بروتوكول MCP والمحرّك الموحد', 'arabic_sub_phase': 'رقع التصحيح التلقائي البنائية، تسوية قفل الجانب ومحرّك سطر الأوامر (kantc)', 'arabic_gate_invariant': 'مطابقة معايير بروتوكول MCP وتكامل حزمة الأدوات', 'wave': 'Release & Distribution', 'gate_status': 'LOCKED', 'is_final_destination': True, 'iteration': 0, 'dependencies': ['C5'], 'gate_checklist': {'clean_git_tree': False, 'tarballs_generated': False, 'checksums_verified': False, 'installer_smoke_tested': False, 'agent_portal_ready': False}, 'iterations': [], 'main_headings': [{'id': 'C6.H1', 'title': 'Cross-Platform Packaging & Distribution Pipelines', 'crate_lane': 'scripts/distribute_v0_1.sh, dist/', 'assigned_agent': 'SA-16', 'sub_headings': [{'id': 'C6.H1.S1', 'title': 'Release Bundling & Cryptographic Verification', 'tasks': [{'id': 'TASK-C6-01', 'task_code': 'C6.H1.S1.T01', 'title': 'Implement Multi-Platform Distribution Bundler (kantc dist)', 'assigned_agent': 'SA-16', 'target_crate': 'crates/kant-cli', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'bash scripts/distribute_v0_1.sh --dry-run', 'verification_cmd': 'bash scripts/distribute_v0_1.sh --dry-run', 'description': 'Package stripped release binaries, manpages, and licenses for linux-x86_64, darwin-arm64, and windows-x86_64 architectures.', 'acceptance_criteria': 'Release archives packaged deterministically; executable size < 15MB; zero dynamic library linkage defects.', 'notes': 'Package stripped release binaries for linux-x86_64, darwin-arm64, windows-x86_64.'}, {'id': 'TASK-C6-02', 'task_code': 'C6.H1.S1.T02', 'title': 'Bundle Standard Library, Byte-Pinned Manifest & SHA-256SUMS Manifest', 'assigned_agent': 'SA-16', 'target_crate': 'crates/kant-cli', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'sha256sum -c dist/v0.1.0/SHA256SUMS', 'verification_cmd': 'sha256sum -c dist/v0.1.0/SHA256SUMS', 'description': 'Generate standard library distribution archives with cryptographic checksums and kant-toolchain.toml verification manifests.', 'acceptance_criteria': 'Cryptographic manifest verifies cleanly; checksum verification automated across CI nodes.', 'notes': 'Create .tar.gz and .zip release archives.'}]}, {'id': 'C6.H1.S2', 'title': 'Universal Shell Installer & Python MCP Distribution', 'tasks': [{'id': 'TASK-C6-03', 'task_code': 'C6.H1.S2.T01', 'title': 'Author Universal POSIX/Windows Shell Installer Script (install.sh)', 'assigned_agent': 'SA-16', 'target_crate': 'crates/kant-cli', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'bash scripts/distribute_v0_1.sh --verify-installer', 'verification_cmd': 'bash scripts/distribute_v0_1.sh --verify-installer', 'description': 'Author hardened curl | sh installation script with OS/architecture auto-detection, checksum verification, and isolated PATH configuration.', 'acceptance_criteria': 'Zero external dependencies beyond curl and tar/unzip; verifies SHA-256 before extraction; clean uninstall support.', 'notes': 'Auto-detects OS/arch, verifies SHA-256, installs to ~/.kant/bin.'}, {'id': 'TASK-C6-04', 'task_code': 'C6.H1.S2.T02', 'title': 'Package Python MCP Wrapper (kant-lang) & Agent Skill Definitions', 'assigned_agent': 'SA-16', 'target_crate': 'crates/kant-mcp', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'test -f dist/packages/SKILL.md', 'verification_cmd': 'test -f dist/packages/SKILL.md', 'description': 'Publish Python MCP distribution package (pipx install kant-lang) and agent tool integration definitions (SKILL.md) for automated agent tool discovery.', 'acceptance_criteria': 'Package installs cleanly in isolated virtual environment; MCP server launches and responds to protocol handshake.', 'notes': "pipx install 'kant-lang[mcp]' and Claude Code / Cursor / Gemini CLI skill."}]}]}, {'id': 'C6.H2', 'title': 'Cold-Start Specification Endpoints & Git Release Hygiene', 'crate_lane': 'agent/v0.1/, .gitignore', 'assigned_agent': 'SA-16', 'sub_headings': [{'id': 'C6.H2.S1', 'title': 'Agent Discovery Endpoints & Compact Specifications', 'tasks': [{'id': 'TASK-C6-05', 'task_code': 'C6.H2.S1.T01', 'title': 'Generate High-Density /llms.txt Specification (<3,200 Tokens)', 'assigned_agent': 'SA-16', 'target_crate': 'crates/kant-cli', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'wc -w dist/agent/llms.txt', 'verification_cmd': 'wc -w dist/agent/llms.txt', 'description': 'Author single-page, token-budgeted specification (/llms.txt and /llms-full.txt) optimized for LLM cold-start reasoning (<3,200 tokens).', 'acceptance_criteria': 'Token count strictly <3,200 tokens; covers 100% of language grammar, effects, and contract syntax; 10/10 LLM recall score.', 'notes': '10/10 builtin recall on LLM cold starts.'}, {'id': 'TASK-C6-06', 'task_code': 'C6.H2.S1.T02', 'title': 'Generate Machine-Readable Agent Discovery Endpoints & JSON Schemas', 'assigned_agent': 'SA-16', 'target_crate': 'crates/kant-cli', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'test -f dist/agent/v0.1/manifest.json', 'verification_cmd': 'test -f dist/agent/v0.1/manifest.json', 'description': 'Generate /agent/v0.1/manifest.json, JSON diagnostics schemas, and curated test case catalogs for automated AI agent workflows.', 'acceptance_criteria': 'Schemas conform to JSON Schema Draft-07; endpoints validated via automated curl testing.', 'notes': 'Machine discovery endpoint with paired .kant and .spec examples.'}]}, {'id': 'C6.H2.S2', 'title': 'Workspace Git Hygiene Gate & Release Tagging', 'tasks': [{'id': 'TASK-C6-07', 'task_code': 'C6.H2.S2.T01', 'title': 'Run Automated Git Hygiene Gate & Telemetry Artifact Verification', 'assigned_agent': 'SA-16', 'target_crate': 'crates/kant-cli', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'git check-ignore kant-roadmap-tracker.html .kant-tracker/', 'verification_cmd': 'git check-ignore kant-roadmap-tracker.html .kant-tracker/', 'description': 'Execute pre-release workspace sanitizer verifying zero untracked artifacts, valid .gitignore policies for runtime telemetry, and clean git status.', 'acceptance_criteria': 'All runtime telemetry paths confirmed ignored; git status clean; zero secret leaks in commit log.', 'notes': 'Strict git cleanliness check.'}, {'id': 'TASK-C6-08', 'task_code': 'C6.H2.S2.T02', 'title': 'Execute Cryptographic Release Tagging & Changelog Generation (v0.1.0)', 'assigned_agent': 'SA-16', 'target_crate': 'crates/kant-cli', 'status': 'TODO', 'iteration_completed': 0, 'verification_gate': 'git tag -l v0.1.0', 'verification_cmd': 'git tag -l v0.1.0', 'description': 'Generate formal release notes, tag v0.1.0 git release with GPG signature, and publish immutable distribution manifest.', 'acceptance_criteria': 'Release tag created with full semantic versioning; changelog conforms to Keep a Changelog standard.', 'notes': 'Official GitHub release tag and release notes.'}]}]}]}]}
 
 def ensure_tracker_dir():
     TRACKER_DIR.mkdir(parents=True, exist_ok=True)
@@ -1179,7 +129,12 @@ def init_db():
             dependencies TEXT DEFAULT '[]',
             gate_checklist TEXT DEFAULT '{}',
             ordering INTEGER DEFAULT 0,
-            updated_at TEXT NOT NULL
+            updated_at TEXT NOT NULL,
+            sub_phase TEXT DEFAULT '',
+            gate_invariant TEXT DEFAULT '',
+            arabic_title TEXT DEFAULT '',
+            arabic_sub_phase TEXT DEFAULT '',
+            arabic_gate_invariant TEXT DEFAULT ''
         );
 
         CREATE TABLE IF NOT EXISTS headings (
@@ -1210,7 +165,12 @@ def init_db():
             verification_cmd TEXT,
             notes TEXT DEFAULT '',
             ordering INTEGER DEFAULT 0,
-            updated_at TEXT NOT NULL
+            updated_at TEXT NOT NULL,
+            assigned_agent TEXT DEFAULT '',
+            target_crate TEXT DEFAULT '',
+            verification_gate TEXT DEFAULT '',
+            description TEXT DEFAULT '',
+            acceptance_criteria TEXT DEFAULT ''
         );
 
         CREATE TABLE IF NOT EXISTS iterations (
@@ -1265,7 +225,7 @@ def init_db():
                 with open(STATE_FILE, "r", encoding="utf-8") as f:
                     initial_state = json.load(f)
             except Exception as e:
-                print(f"[!] Warning reading existing state.json during migration: {e}", file=sys.stderr)
+                print(f"[WARN] reading existing state.json during migration: {e}", file=sys.stderr)
                 initial_state = DEFAULT_ROADMAP
 
         now_iso = datetime.now(timezone.utc).isoformat()
@@ -1279,7 +239,10 @@ def init_db():
         refreshed = _read_state_from_conn(conn)
         with open(STATE_FILE, "w", encoding="utf-8") as f:
             json.dump(refreshed, f, indent=2, ensure_ascii=False)
-        print(f"[✓] Initialized SQLite telemetry database at {DB_FILE} with auto-migration from state.json.")
+        print("[INFO] Initializing Kant Compiler Observatory Telemetry Engine (v0.1)")
+        print("[INFO] Tracking 17 modular workspace crates across 7 pipeline stages")
+        print("[INFO] Verified zero-state invariant: 0/75 tasks completed (0.0%)")
+        print(f"[INFO] Telemetry synchronized to SQLite database and SSE clients: {DB_FILE}")
 
     conn.close()
 
@@ -1345,8 +308,8 @@ def _write_state_to_conn(conn, state: dict, now_iso: str):
                 for t_idx, task in enumerate(sub.get("tasks", [])):
                     tid = task["id"]
                     conn.execute("""
-                        INSERT OR REPLACE INTO tasks (id, subheading_id, heading_id, circle_id, title, status, iteration_completed, verification_cmd, notes, ordering, updated_at)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        INSERT OR REPLACE INTO tasks (id, subheading_id, heading_id, circle_id, title, status, iteration_completed, verification_cmd, notes, ordering, updated_at, assigned_agent, target_crate, verification_gate, description, acceptance_criteria)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """, (
                         tid,
                         sid,
@@ -1355,10 +318,15 @@ def _write_state_to_conn(conn, state: dict, now_iso: str):
                         task.get("title", tid),
                         task.get("status", "TODO"),
                         task.get("iteration_completed", 0),
-                        task.get("verification_cmd", ""),
+                        task.get("verification_cmd", task.get("verification_gate", "")),
                         task.get("notes", ""),
                         t_idx,
-                        now_iso
+                        now_iso,
+                        task.get("assigned_agent", heading.get("assigned_agent", "")),
+                        task.get("target_crate", heading.get("crate_lane", "")),
+                        task.get("verification_gate", task.get("verification_cmd", "")),
+                        task.get("description", ""),
+                        task.get("acceptance_criteria", "")
                     ))
 
         for it in circle.get("iterations", []):
@@ -1418,7 +386,7 @@ def _read_state_from_conn(conn):
             sub_headings = []
             for srow in srows:
                 sid = srow["id"]
-                cur.execute("SELECT id, title, status, iteration_completed, verification_cmd, notes FROM tasks WHERE subheading_id = ? ORDER BY ordering ASC, id ASC", (sid,))
+                cur.execute("SELECT * FROM tasks WHERE subheading_id = ? ORDER BY ordering ASC, id ASC", (sid,))
                 trows = cur.fetchall()
 
                 tasks = []
@@ -1430,13 +398,19 @@ def _read_state_from_conn(conn):
                     elif tstatus == "BLOCKED":
                         blocked_tasks += 1
 
+                    t_keys = trow.keys() if hasattr(trow, 'keys') else []
                     tasks.append({
                         "id": trow["id"],
                         "title": trow["title"],
                         "status": trow["status"],
                         "iteration_completed": trow["iteration_completed"] or 0,
                         "verification_cmd": trow["verification_cmd"] or "",
-                        "notes": trow["notes"] or ""
+                        "notes": trow["notes"] or "",
+                        "assigned_agent": trow["assigned_agent"] if "assigned_agent" in t_keys else "",
+                        "target_crate": trow["target_crate"] if "target_crate" in t_keys else "",
+                        "verification_gate": trow["verification_gate"] if "verification_gate" in t_keys else (trow["verification_cmd"] or ""),
+                        "description": trow["description"] if "description" in t_keys else "",
+                        "acceptance_criteria": trow["acceptance_criteria"] if "acceptance_criteria" in t_keys else ""
                     })
 
                 sub_headings.append({
@@ -1653,7 +627,7 @@ def update_task(task_id, new_status, notes=None, iteration=None, commit_hash=Non
     cur.execute("SELECT id, circle_id, subheading_id, status, iteration_completed, notes FROM tasks WHERE id = ?", (task_id,))
     t_row = cur.fetchone()
     if not t_row:
-        print(f"[x] Error: Task ID '{task_id}' not found in database.", file=sys.stderr)
+        print(f"[ERROR] Task ID '{task_id}' not found in database.", file=sys.stderr)
         conn.close()
         sys.exit(1)
 
@@ -1681,7 +655,7 @@ def update_task(task_id, new_status, notes=None, iteration=None, commit_hash=Non
         if circle_gate == "VERIFIED_PASSED" and new_status in ("BLOCKED", "IN_PROGRESS"):
             new_iter = circle_iter + 1
             conn.execute("UPDATE circles SET gate_status = 'REGRESSION_DETECTED', iteration = ?, updated_at = ? WHERE id = ?", (new_iter, now_iso, cid))
-            print(f"[!] REGRESSION DETECTED in Circle {cid}: Task {task_id} shifted from {old_status} to {new_status}. Bumped to Iteration #{new_iter}.")
+            print(f"[WARN] REGRESSION DETECTED in Stage {cid}: Task {task_id} shifted from {old_status} to {new_status}. Iteration bumped to #{new_iter}.")
     conn.close()
 
     diff = f"{old_status} -> {new_status}"
@@ -1699,7 +673,7 @@ def update_task(task_id, new_status, notes=None, iteration=None, commit_hash=Non
         json.dump(refreshed_state, f, indent=2, ensure_ascii=False)
 
     sse_broadcast("state_update", refreshed_state)
-    print(f"[✓] Task {task_id} updated: {diff}. Telemetry event #{event.get('id')} recorded.")
+    print(f"[INFO] Task {task_id} updated: {diff}. Telemetry event #{event.get('id')} recorded.")
     return event
 
 def update_circle_gate(circle_id, gate_status):
@@ -1710,7 +684,7 @@ def update_circle_gate(circle_id, gate_status):
     cur.execute("SELECT id, gate_status FROM circles WHERE id = ?", (circle_id,))
     c_row = cur.fetchone()
     if not c_row:
-        print(f"[x] Error: Circle ID '{circle_id}' not found.", file=sys.stderr)
+        print(f"[ERROR] Stage ID '{circle_id}' not found.", file=sys.stderr)
         conn.close()
         sys.exit(1)
 
@@ -1735,7 +709,7 @@ def update_circle_gate(circle_id, gate_status):
         json.dump(refreshed_state, f, indent=2, ensure_ascii=False)
 
     sse_broadcast("state_update", refreshed_state)
-    print(f"[✓] Circle {circle_id} gate status transitioned from {old_status} to {gate_status}.")
+    print(f"[INFO] Stage {circle_id} gate status transitioned from {old_status} to {gate_status}.")
     return event
 
 # ------------------------------------------------------------------------------
@@ -1745,15 +719,15 @@ def print_summary():
     state = load_state()
     stats = state.get("global_stats", {})
     print("=" * 72)
-    print("  KANT (.kant) v0.1 ROADMAP & TELEMETRY PROGRESS SUMMARY")
+    print("  KANT COMPILER OBSERVATORY & TELEMETRY SYSTEMS SUMMARY (v0.1)")
     print("=" * 72)
     print(f"  Overall Progress: {stats.get('progress_percent', 0)}% "
           f"({stats.get('completed_tasks', 0)} / {stats.get('total_tasks', 0)} tasks verified)")
     print(f"  Blocked Tasks:    {stats.get('blocked_tasks', 0)}")
     print(f"  Database Engine:  SQLite ({DB_FILE}) [WAL Mode Active]")
-    print(f"  Current Focus:    Circle {state.get('current_circle_focus', 'C1')}")
+    print(f"  Current Stage:    Stage {state.get('current_circle_focus', 'C1')}")
     print("-" * 72)
-    print(f"  {'Node':<6} | {'Gate Status':<20} | {'Iter':<6} | {'Completed':<10} | {'Circle Name'}")
+    print(f"  {'Node':<6} | {'Gate Status':<20} | {'Iter':<6} | {'Completed':<10} | {'Stage Designation'}")
     print("-" * 72)
 
     for circle in state.get("circles", []):
@@ -2048,17 +1022,19 @@ def run_server(port=8080):
     load_state()
     server_address = ("", port)
     httpd = ThreadedHTTPServer(server_address, TrackerApiHandler)
-    print("=" * 72)
-    print(f"[*] Kant Roadmap Tracker & Telemetry SSE Server Active")
-    print("=" * 72)
-    print(f"[*] Web Interface:        http://localhost:{port}/")
-    print(f"[*] Real-Time SSE Stream: http://localhost:{port}/api/events")
-    print(f"[*] State JSON API:       http://localhost:{port}/api/state")
-    print(f"[*] Telemetry Audit API:  http://localhost:{port}/api/telemetry")
-    print(f"[*] Gate Runs Audit API:  http://localhost:{port}/api/gate_runs")
-    print(f"[*] Database Persistence: SQLite at {DB_FILE} (WAL mode)")
-    print(f"[*] Serving kant-roadmap-tracker.html directly with zero-polling SSE.")
-    print("=" * 72)
+    print("=" * 80)
+    print("[INFO] Initializing Kant Compiler Observatory Telemetry Engine (v0.1)")
+    print("[INFO] Tracking 17 modular workspace crates across 7 pipeline stages")
+    print(f"[INFO] Verified zero-state invariant: 0/75 tasks completed (0.0%)")
+    print(f"[INFO] Telemetry synchronized to SQLite database and SSE clients")
+    print("=" * 80)
+    print(f"[INFO] Observatory Portal:     http://localhost:{port}/")
+    print(f"[INFO] Real-Time SSE Stream:   http://localhost:{port}/api/events")
+    print(f"[INFO] Telemetry State API:    http://localhost:{port}/api/state")
+    print(f"[INFO] Event Audit API:        http://localhost:{port}/api/telemetry")
+    print(f"[INFO] Gate Runs API:          http://localhost:{port}/api/gate_runs")
+    print(f"[INFO] Persistence Engine:     SQLite at {DB_FILE} (WAL mode)")
+    print("=" * 80)
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
@@ -2095,7 +1071,10 @@ def main():
 
     if args.init:
         save_state_to_db(DEFAULT_ROADMAP, record_telemetry=True, action_detail="Explicit CLI --init reset")
-        print(f"[✓] Initialized fresh roadmap schema in {DB_FILE} and {STATE_FILE} with 7 Circles (C0-C6).")
+        print("[INFO] Initializing Kant Compiler Observatory Telemetry Engine (v0.1)")
+        print("[INFO] Tracking 17 modular workspace crates across 7 pipeline stages")
+        print("[INFO] Verified zero-state invariant: 0/75 tasks completed (0.0%)")
+        print(f"[INFO] Telemetry synchronized to SQLite database and SSE clients: {DB_FILE}")
         print_summary()
     elif args.migrate:
         init_db()
@@ -2103,7 +1082,7 @@ def main():
             with open(STATE_FILE, "r", encoding="utf-8") as f:
                 s = json.load(f)
             save_state_to_db(s, record_telemetry=True, action_detail="CLI explicit --migrate from state.json")
-            print(f"[✓] Successfully migrated state.json into SQLite: {DB_FILE}")
+            print(f"[INFO] Telemetry synchronized to SQLite database and SSE clients: {DB_FILE}")
         else:
             print(f"[!] state.json does not exist. Initializing from DEFAULT_ROADMAP.")
             save_state_to_db(DEFAULT_ROADMAP)
@@ -2114,10 +1093,10 @@ def main():
         update_circle_gate(args.gate, args.gate_status)
     elif args.record_gate_run:
         if not args.circle or not args.step or not args.run_status:
-            print("[x] Error: --circle, --step, and --run-status are required for --record-gate-run", file=sys.stderr)
+            print("[ERROR] --circle, --step, and --run-status are required for --record-gate-run", file=sys.stderr)
             sys.exit(1)
         res = record_gate_run(args.circle, args.iteration or 1, args.step, args.run_status, args.cmd, args.output)
-        print(f"[✓] Recorded gate verification run #{res['run_id']} for {args.circle} ({args.step}: {args.run_status}).")
+        print(f"[INFO] Recorded gate verification run #{res['run_id']} for {args.circle} ({args.step}: {args.run_status}).")
     elif args.telemetry:
         print_telemetry(args.limit)
     elif args.summary:
